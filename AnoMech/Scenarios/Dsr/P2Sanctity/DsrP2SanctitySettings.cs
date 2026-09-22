@@ -14,17 +14,6 @@ namespace AnoMech.Scenarios.Dsr.P2Sanctity;
 
 public sealed partial class DsrP2SanctityScenario
 {
-    private string poseDiagnostics = "請先開始練習，等候衝鋒騎士出現。";
-
-    private void CapturePoseDiagnostics()
-    {
-        var report = new System.Text.StringBuilder("AnoMech DSR pose diagnostics\n");
-        foreach (var enemy in new[] { boss, darkKnight, knights[0], knights[1] })
-            if (enemy != null) report.AppendLine(enemy.DescribePose());
-        poseDiagnostics = report.ToString();
-        Plugin.Log.Information(poseDiagnostics);
-    }
-
     public void DrawSettings()
     {
         ImGui.TextUnformatted("打法：tuuf／Elemental　同職能換組、南北隕石");
@@ -43,7 +32,6 @@ public sealed partial class DsrP2SanctityScenario
         ImGui.Checkbox("顯示站位提示", ref showHints);
         ImGui.SameLine(); ImGui.Checkbox("顯示戰術圖", ref showMap);
         ImGui.Checkbox("固定隨機種子（重複同一組點名）", ref fixedSeed);
-        if (ImGui.Button("複製騎士動作診斷")) ImGui.SetClipboardText(poseDiagnostics);
         if (fixedSeed) { ImGui.SetNextItemWidth(150); ImGui.InputInt("種子", ref seed); }
         ImGui.SetNextItemWidth(180);
         ImGui.Combo("騎士方向", ref direction, ["隨機", "順時針", "逆時針"], 3);

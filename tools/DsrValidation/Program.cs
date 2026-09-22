@@ -3,6 +3,7 @@ using AnoMech.Scenarios.Dsr.P2Sanctity;
 using System.Numerics;
 
 var failures = new List<string>();
+LogTimingValidation.Run();
 var peak = 0;
 for (var seed = 0; seed < 1000; seed++)
 {
@@ -112,7 +113,7 @@ void ExpectFailure(string expected, Action<SimWorld, DsrP2SanctityState, float> 
     if (!SimCharacter.Failures.Any(f => f.Contains(expected)))
         throw new Exception($"Missing failure detection: {expected}");
 }
-ExpectFailure("龍眼視線", (w, s, t) => { if (t > 20.8f && t < 21) w.Party.Get(0)!.Face(s.EyePosition); });
+ExpectFailure("龍眼視線", (w, s, t) => { if (t > 20.7f && t < 20.85f) w.Party.Get(0)!.Face(s.EyePosition); });
 ExpectFailure("輪塔需要一人", (w, s, t) => { if (t > 43 && t < 43.2f) w.Party.Get(0)!.SetPosition(Vector3.Zero); });
 ExpectFailure("隕石間距不足", (w, s, t) =>
 {
@@ -155,7 +156,7 @@ foreach (var leaveBeforeDamage in new[] { true, false })
     }
     if (leaveBeforeDamage && firstIceHit != null)
         throw new Exception("Ice damaged a player who left during grace");
-    if (!leaveBeforeDamage && (firstIceHit == null || firstIceHit < 41.35f || firstIceHit > 41.5f))
+    if (!leaveBeforeDamage && (firstIceHit == null || firstIceHit < 41.25f || firstIceHit > 41.4f))
         throw new Exception($"Ice damage did not start after grace: {firstIceHit}");
 }
 Console.WriteLine("Ice grace: leaving before 2.5s is safe; remaining inside triggers damage after grace.");
@@ -274,7 +275,7 @@ Console.WriteLine("All eight player roles: 4000 angle selections honor player ro
                 throw new Exception("Grinnaux must wait at center after first towers, before casting");
         }
     }
-    if (waitingKnight == null || !waitingKnight.Casts.Any(c => c.Action == 25308 && MathF.Abs(c.Time - 49.5f) < .05f))
+    if (waitingKnight == null || !waitingKnight.Casts.Any(c => c.Action == 25308 && MathF.Abs(c.Time - 49.428f) < .05f))
         throw new Exception("Knockback cast timing changed");
     foreach (var enemy in world.Enemies)
     {
@@ -327,7 +328,6 @@ namespace AnoMech.Scenarios.Dsr.P2Sanctity
 {
     public sealed partial class DsrP2SanctityScenario
     {
-        private void CapturePoseDiagnostics() { }
         internal void UseSeed(int value, int angle = 0)
         {
             fixedSeed = true; seed = value; direction = 0; meteorPreference = 0;

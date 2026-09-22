@@ -58,7 +58,7 @@ public sealed partial class DsrP2SanctityScenario : IScenario
             BossAction(DsrConstants.Action.Reappear);
         });
         world.Events.Add(2.5f, SummonOpeningKnights);
-        world.Events.Add(3f, () => boss?.Cast(DsrConstants.Action.Sanctity, castSeconds: 4, targetId: boss.GameObjectId));
+        world.Events.Add(3f, () => boss?.Cast(DsrConstants.Action.Sanctity, castSeconds: 3.7f, targetId: boss.GameObjectId, fireDelay: .280f));
         world.Events.Add(7.1f, () =>
         {
             foreach (var knight in openingKnights) knight.PlayDeparture(DsrConstants.Timeline.KnightDeparture);
@@ -75,30 +75,32 @@ public sealed partial class DsrP2SanctityScenario : IScenario
             boss?.SetVisible(false);
         });
         world.Events.Add(11.5f, RevealSwords);
-        world.Events.Add(14f, CapturePoseDiagnostics);
         world.Events.Add(14.5f, () => state!.SwordGroupsMoving = true);
-        world.Events.Add(15.7f, () => boss?.Cast(DsrConstants.Action.Gaze, castSeconds: 4, targetId: boss.GameObjectId));
-        world.Events.Add(20.7f, () => Sever(0));
-        world.Events.Add(20.9f, ResolveGaze);
-        world.Events.Add(21f, () => Charge(0));
+        world.Events.Add(15.656f, () => boss?.Cast(DsrConstants.Action.Gaze, castSeconds: 3.7f, targetId: boss.GameObjectId, fireDelay: .280f));
+        world.Events.Add(20.574f, () => Sever(0));
+        world.Events.Add(20.709f, () => Charge(0));
+        world.Events.Add(20.798f, ResolveGaze);
         world.Events.Add(21.2f, () => WarnFlare(0));
         world.Events.Add(21.9f, () => WarnFlare(1));
         world.Events.Add(22.2f, () => Explode(0));
-        world.Events.Add(22.5f, () => Sever(1));
+        world.Events.Add(22.275f, () => Charge(1));
+        world.Events.Add(22.365f, () => Sever(1));
         world.Events.Add(22.6f, () => WarnFlare(2));
-        world.Events.Add(22.7f, () => Charge(1));
         world.Events.Add(22.9f, () => Explode(1));
         world.Events.Add(23.3f, () => WarnFlare(3));
         world.Events.Add(23.6f, () => Explode(2));
+        world.Events.Add(23.844f, () => Charge(2));
         world.Events.Add(24f, () => WarnFlare(4));
-        world.Events.Add(24.3f, () => { Explode(3); Sever(0); });
-        world.Events.Add(24.4f, () => Charge(2));
+        world.Events.Add(24.158f, () => Sever(0));
+        world.Events.Add(24.3f, () => Explode(3));
         world.Events.Add(24.7f, () => WarnFlare(5));
         world.Events.Add(25f, () => Explode(4));
         world.Events.Add(25.4f, () => WarnFlare(6));
         world.Events.Add(25.7f, () => Explode(5));
-        world.Events.Add(26.1f, () => { WarnFlare(7); Sever(1); });
+        world.Events.Add(25.946f, () => Sever(1));
+        world.Events.Add(26.1f, () => WarnFlare(7));
         world.Events.Add(26.4f, () => Explode(6));
+        world.Events.Add(26.797f, () => BossAction(DsrConstants.Action.Teleport));
         world.Events.Add(26.8f, () => WarnFlare(8));
         world.Events.Add(27.1f, () => Explode(7));
         world.Events.Add(27.8f, () => Explode(8));
@@ -109,47 +111,48 @@ public sealed partial class DsrP2SanctityScenario : IScenario
             foreach (var knight in knights) knight?.Despawn();
             darkKnight?.Despawn();
         });
-        world.Events.Add(31.1f, () => { ShowTowers(false, 12); MarkMeteors(); });
-        world.Events.Add(31.4f, () =>
+        world.Events.Add(31.047f, () => { ShowTowers(false, 11.7f, .284f); MarkMeteors(); });
+        world.Events.Add(31.136f, () =>
         {
             state.FireVisible = true;
             for (var q = 0; q < 4; q++)
-                Spawn(DsrConstants.Npc.Helper, DsrP2SanctityState.Polar(q * 90 + 45, DsrConstants.Geometry.FireCenterRadius), false)?.Cast(DsrConstants.Action.Fire, castSeconds: 7.5f);
-            Spawn(DsrConstants.Npc.Helper, Vector3.Zero, false)?.Cast(DsrConstants.Action.Donut, castSeconds: 7.5f);
+                Spawn(DsrConstants.Npc.Helper, DsrP2SanctityState.Polar(q * 90 + 45, DsrConstants.Geometry.FireCenterRadius), false)?.Cast(DsrConstants.Action.Fire, castSeconds: 7.2f, fireDelay: .270f);
+            Spawn(DsrConstants.Npc.Helper, Vector3.Zero, false)?.Cast(DsrConstants.Action.Donut, castSeconds: 7.2f, fireDelay: .270f);
         });
-        world.Events.Add(31.9f, () => haumeric?.Cast(DsrConstants.Action.HiemalStorm, castSeconds: 7,
+        world.Events.Add(31.784f, () => haumeric?.Cast(DsrConstants.Action.HiemalStorm, castSeconds: 7,
             targetId: haumeric.GameObjectId));
-        world.Events.Add(38.9f, ResolveIce);
+        world.Events.Add(38.606f, ResolveFire);
+        world.Events.Add(38.784f, ResolveIce);
         world.Events.Add(40.4f, () => haumeric?.SetVisible(false));
-        world.Events.Add(43.1f, () =>
+        world.Events.Add(43.031f, () =>
         {
             ResolveTowers(false);
             grinnaux = Spawn(DsrConstants.Npc.Grinnaux, Vector3.Zero);
             state.Stage = SanctityStage.Meteors;
             state.MeteorElapsed = 0;
         });
-        world.Events.Add(44.53f, SnapshotMeteors);
-        world.Events.Add(45.25f, () => LandMeteors(0));
-        world.Events.Add(45.5f, () => ShowTowers(true, 11));
-        world.Events.Add(45.96f, SnapshotMeteors);
-        world.Events.Add(46.68f, () => LandMeteors(1));
-        world.Events.Add(47.39f, SnapshotMeteors);
-        world.Events.Add(48.11f, () => LandMeteors(2));
-        world.Events.Add(48.82f, SnapshotMeteors);
-        world.Events.Add(49.5f, () =>
+        world.Events.Add(44.462f, SnapshotMeteors);
+        world.Events.Add(45.176f, () => LandMeteors(0));
+        world.Events.Add(45.355f, () => ShowTowers(true, 10.7f, .266f));
+        world.Events.Add(45.894f, SnapshotMeteors);
+        world.Events.Add(46.610f, () => LandMeteors(1));
+        world.Events.Add(47.325f, SnapshotMeteors);
+        world.Events.Add(48.041f, () => LandMeteors(2));
+        world.Events.Add(48.756f, SnapshotMeteors);
+        world.Events.Add(49.428f, () =>
         {
-            grinnaux?.Cast(DsrConstants.Action.Knockback, castSeconds: 4);
+            grinnaux?.Cast(DsrConstants.Action.Knockback, castSeconds: 3.7f, fireDelay: .283f);
         });
-        world.Events.Add(49.54f, () => LandMeteors(3));
-        world.Events.Add(50.26f, SnapshotMeteors);
-        world.Events.Add(50.98f, () => LandMeteors(4));
-        world.Events.Add(51.69f, SnapshotMeteors);
-        world.Events.Add(52.41f, () => LandMeteors(5));
-        world.Events.Add(53.12f, SnapshotMeteors);
-        world.Events.Add(53.5f, ResolveKnockback);
-        world.Events.Add(53.84f, () => LandMeteors(6));
-        world.Events.Add(56.5f, () => { ResolveTowers(true); state.Stage = SanctityStage.SecondTowers; });
-        world.Events.Add(61f, () =>
+        world.Events.Add(49.472f, () => LandMeteors(3));
+        world.Events.Add(50.189f, SnapshotMeteors);
+        world.Events.Add(50.905f, () => LandMeteors(4));
+        world.Events.Add(51.621f, SnapshotMeteors);
+        world.Events.Add(52.336f, () => LandMeteors(5));
+        world.Events.Add(53.052f, SnapshotMeteors);
+        world.Events.Add(53.411f, ResolveKnockback);
+        world.Events.Add(53.767f, () => LandMeteors(6));
+        world.Events.Add(56.321f, () => { ResolveTowers(true); state.Stage = SanctityStage.SecondTowers; });
+        world.Events.Add(60.888f, () =>
         {
             state.Stage = SanctityStage.Complete;
             boss?.SetPosition(new Vector3(0, 0, -15));
@@ -309,7 +312,7 @@ public sealed partial class DsrP2SanctityScenario : IScenario
         }
     }
 
-    private void ShowTowers(bool second, float duration)
+    private void ShowTowers(bool second, float castSeconds, float fireDelay)
     {
         if (second) state!.SecondTowersVisible = true;
         else state!.FirstTowersVisible = true;
@@ -318,10 +321,25 @@ public sealed partial class DsrP2SanctityScenario : IScenario
         foreach (var position in positions)
         {
             var helper = Spawn(DsrConstants.Npc.Helper, position, false);
-            helper?.Cast(second ? DsrConstants.Action.Tower2 : DsrConstants.Action.Tower1, position, duration);
+            helper?.Cast(second ? DsrConstants.Action.Tower2 : DsrConstants.Action.Tower1, position, castSeconds, fireDelay: fireDelay);
             if (helper != null) towerCasters.Add(helper);
-            world!.SpawnOmen("vfx/omen/eff/general01f.avfx", new(position, 0), new(3, 1, 3), duration);
+            world!.SpawnOmen("vfx/omen/eff/general01f.avfx", new(position, 0), new(3, 1, 3), castSeconds + fireDelay);
         }
+    }
+
+    private void ResolveFire()
+    {
+        foreach (var member in world!.Party.ActiveMembers())
+        {
+            if (member.Position.Length() > 15) Fail(member, "外圈甜甜圈範圍");
+            for (var q = 0; q < 4; q++)
+                if (Vector3.DistanceSquared(member.Position, DsrP2SanctityState.Polar(q * 90 + 45, DsrConstants.Geometry.FireCenterRadius)) < 49)
+                    Fail(member, "碰到四角火圈");
+        }
+        for (var q = 0; q < 4; q++)
+            world.SpawnGroundEffect(DsrConstants.Vfx.Fire,
+                new(DsrP2SanctityState.Polar(q * 90 + 45, DsrConstants.Geometry.FireCenterRadius), 0), 14.805f, 1.4f);
+        puddleGrace = 1.3f;
     }
 
     private void ResolveIce()
@@ -338,23 +356,15 @@ public sealed partial class DsrP2SanctityScenario : IScenario
                 member.AddStatus(2903, 3f);
             if (targets.Count(t => Vector3.DistanceSquared(t.Position, member.Position) < 49) != 1)
                 Fail(member, "未正確參與兩人冰圈分攤");
-            if (member.Position.Length() > 15) Fail(member, "外圈甜甜圈範圍");
-            for (var q = 0; q < 4; q++)
-                if (Vector3.DistanceSquared(member.Position, DsrP2SanctityState.Polar(q * 90 + 45, DsrConstants.Geometry.FireCenterRadius)) < 49)
-                    Fail(member, "碰到四角火圈");
         }
         foreach (var target in targets)
         {
             ice.Add(target.Position);
             Spawn(DsrConstants.Npc.Helper, target.Position, false)?.Cast(DsrConstants.Action.Ice, target.Position, 0);
-            world.SpawnGroundEffect(DsrConstants.Vfx.Ice, new(target.Position, 0), 14.6f, 1.3f);
+            world.SpawnGroundEffect(DsrConstants.Vfx.Ice, new(target.Position, 0), 14.627f, 1.3f);
         }
         state!.Stage = SanctityStage.FirstTowers;
-        for (var q = 0; q < 4; q++)
-            world.SpawnGroundEffect(DsrConstants.Vfx.Fire,
-                new(DsrP2SanctityState.Polar(q * 90 + 45, DsrConstants.Geometry.FireCenterRadius), 0), 14.6f, 1.4f);
         // The puddle is snapshotted on the pair; allow the exit animation before checking lingering damage.
-        puddleGrace = 1.3f;
         iceGrace = DsrConstants.Geometry.IceGraceSeconds;
     }
 

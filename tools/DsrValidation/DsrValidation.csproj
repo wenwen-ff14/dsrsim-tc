@@ -7,6 +7,7 @@
     <NoWarn>CS0414</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <None Update="Fixtures/p2-fight42.json" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="../../AnoMech/Scenarios/Dsr/P2Sanctity/DsrP2SanctityState.cs" Link="State.cs" />
     <Compile Include="../../AnoMech/Scenarios/Dsr/P2Sanctity/DsrP2SanctityAi.cs" Link="Ai.cs" />
     <Compile Include="../../AnoMech/Scenarios/Dsr/P2Sanctity/DsrP2SanctityScenario.cs" Link="Scenario.cs" />

@@ -1,0 +1,33 @@
+{
+  "source": "https://www.fflogs.com/reports/V4F6z9GCthdf2Ppq?fight=42&type=casts&hostility=1&phase=2&view=events",
+  "originP2Seconds": 90.683,
+  "casts": [
+    { "action": 25569, "begin": 93.683, "release": 97.663, "castSeconds": 3.7, "count": 1 },
+    { "action": 25552, "begin": 106.339, "release": 110.319, "castSeconds": 3.7, "count": 1 },
+    { "action": 25571, "begin": 111.257, "release": 111.257, "castSeconds": 0, "count": 1 },
+    { "action": 25570, "begin": 111.392, "release": 111.392, "castSeconds": 0, "count": 2 },
+    { "action": 25570, "begin": 112.958, "release": 112.958, "castSeconds": 0, "count": 2 },
+    { "action": 25571, "begin": 113.048, "release": 113.048, "castSeconds": 0, "count": 1 },
+    { "action": 25570, "begin": 114.527, "release": 114.527, "castSeconds": 0, "count": 2 },
+    { "action": 25571, "begin": 114.841, "release": 114.841, "castSeconds": 0, "count": 1 },
+    { "action": 25571, "begin": 116.629, "release": 116.629, "castSeconds": 0, "count": 1 },
+    { "action": 25540, "begin": 117.480, "release": 117.480, "castSeconds": 0, "count": 1 },
+    { "action": 29564, "begin": 121.730, "release": 133.714, "castSeconds": 11.7, "count": 8 },
+    { "action": 28591, "begin": 121.819, "release": 129.289, "castSeconds": 7.2, "count": 4 },
+    { "action": 28592, "begin": 121.819, "release": 129.289, "castSeconds": 7.2, "count": 1 },
+    { "action": 25575, "begin": 129.467, "release": 129.467, "castSeconds": 0, "count": 4 },
+    { "action": 25577, "begin": 135.145, "release": 135.145, "castSeconds": 0, "count": 2 },
+    { "action": 28651, "begin": 136.038, "release": 147.004, "castSeconds": 10.7, "count": 8 },
+    { "action": 25577, "begin": 136.577, "release": 136.577, "castSeconds": 0, "count": 2 },
+    { "action": 25577, "begin": 138.008, "release": 138.008, "castSeconds": 0, "count": 2 },
+    { "action": 25577, "begin": 139.439, "release": 139.439, "castSeconds": 0, "count": 2 },
+    { "action": 25308, "begin": 140.111, "release": 144.094, "castSeconds": 3.7, "count": 1 },
+    { "action": 25577, "begin": 140.872, "release": 140.872, "castSeconds": 0, "count": 2 },
+    { "action": 25577, "begin": 142.304, "release": 142.304, "castSeconds": 0, "count": 2 },
+    { "action": 25577, "begin": 143.735, "release": 143.735, "castSeconds": 0, "count": 2 },
+    { "action": 25532, "begin": 151.571, "release": 151.571, "castSeconds": 0, "count": 1 }
+  ],
+  "gazeSnapshot": 111.481,
+  "meteorImpacts": [135.859, 137.293, 138.724, 140.155, 141.588, 143.019, 144.450],
+  "limits": "The tower count is the simulator's eight assigned towers; FFLogs includes extra canceled helper casts. White flare explosions, headmarker appearance and knight entrances are not measured by this fixture. Prepare/cast events are snapshots, not delayed HP application."
+}

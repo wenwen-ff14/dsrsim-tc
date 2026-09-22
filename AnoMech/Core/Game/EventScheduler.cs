@@ -11,7 +11,7 @@ namespace AnoMech.Core.Game;
 public sealed class EventScheduler
 {
     private readonly List<Entry> entries = new();
-    private float elapsed;
+    private double elapsed;
 
     // No more scheduled work. A scenario's whole timeline lives in this queue, so this
     // doubles as a generic "reached its declared end" signal for whoever's watching (Game
@@ -45,5 +45,5 @@ public sealed class EventScheduler
         elapsed = 0f;
     }
 
-    private readonly record struct Entry(float Time, Action Action);
+    private readonly record struct Entry(double Time, Action Action);
 }

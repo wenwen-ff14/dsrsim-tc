@@ -83,7 +83,7 @@ namespace AnoMech.Core.SimObjects
         public uint NameId;
         public EnemyListMode ListMode;
         public bool Visible;
-        public readonly List<(float Time, uint Action, float? Duration)> Casts = [];
+        public readonly List<(float Time, uint Action, float? Duration, float FireDelay)> Casts = [];
         public readonly List<uint> Dialogue = [];
         public void ShowDialogue(uint id, float duration) => Dialogue.Add(id);
         public void HoldFacing(float? rotation) { if (rotation.HasValue) SetRotation(rotation.Value); }
@@ -92,9 +92,9 @@ namespace AnoMech.Core.SimObjects
         public void SetWeaponsVisible(bool b) => WeaponsVisible = b;
         public bool Targetable;
         public void SetTargetable(bool b) => Targetable = b;
-        public bool Cast(uint action, Vector3? location = null, float? castSeconds = null, uint? targetId = null)
+        public bool Cast(uint action, Vector3? location = null, float? castSeconds = null, uint? targetId = null, float? fireDelay = null)
         {
-            Casts.Add((Time, action, castSeconds));
+            Casts.Add((Time, action, castSeconds, fireDelay ?? 0));
             return true;
         }
     }
