@@ -8,7 +8,7 @@ namespace AnoMech.Scenarios
 }
 namespace AnoMech.Scenarios.Dsr
 {
-    public static class DsrZone { public static IPhase P2 => null!; public static IPhase P3 => null!; }
+    public static class DsrZone { public static IPhase P2 => null!; public static IPhase P3 => null!; public static IPhase P4 => null!; }
 }
 namespace AnoMech.Core.Game.Ai
 {
@@ -82,6 +82,8 @@ namespace AnoMech.Core.SimObjects
     public class SimPlayer : SimCharacter { }
     public class SimEnemy : SimCharacter
     {
+        public float Scale = 1;
+        public void SetScale(float scale) => Scale = scale;
         public uint BNpcBaseId;
         public readonly List<(ushort Timeline, float Duration)> Entrances = [];
         public readonly List<(float Time, ushort Timeline)> Departures = [];
@@ -139,5 +141,3 @@ namespace AnoMech.Core.SimObjects
         public void SpawnGroundEffect(string path, Game.Placement p, float duration, float scale = 1) { }
     }
 }
-
-

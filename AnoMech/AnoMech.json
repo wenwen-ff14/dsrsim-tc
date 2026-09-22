@@ -1,8 +1,8 @@
 {
   "Author": "Anomek / wenwen-ff14",
   "Name": "絕龍詩模擬器",
-  "Punchline": "DSR P2 聖仗與 P3 數字龍練習，使用 tuuf／Elemental 打法。",
-  "Description": "API 13 繁中版。於旅館內模擬七名隊友，練習 P2 聖仗與 P3 Easthogg 數字龍。P3 目前包含三輪跳躍、分攤、內外圈、踩塔、直線、兩次普攻、隨機龍槍與最後四座人數塔；四塔後包含坦克接線、五次普攻與固定 C 點騰龍槍。使用 /anomech 或 /ano 開啟；視窗可收合。",
+  "Punchline": "DSR P2 聖仗、P3 尼德霍格、P4 雙眼練習，使用 tuuf／Elemental 打法。",
+  "Description": "API 13 繁中版。於旅館內模擬七名隊友，練習 P2 聖仗、P3 尼德霍格與 P4 雙眼。P3 可指定自己的麻將與箭頭，包含最後四塔、坦克接線、五次普攻及固定 C 點騰龍槍。P4 包含思念增益、紅藍換線、黃球與藍球、四輪幻象俯衝；雙眼擊破自動推進。使用 /anomech 或 /ano 開啟；視窗可收合。",
   "RepoUrl": "https://github.com/wenwen-ff14/test",
   "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/test/main/images/icon.png",
   "Tags": [

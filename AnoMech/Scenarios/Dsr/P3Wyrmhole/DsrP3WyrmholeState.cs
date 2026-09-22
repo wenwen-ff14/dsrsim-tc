@@ -82,6 +82,32 @@ internal sealed class DsrP3WyrmholeState
 
     public static int FinalTowerHome(int role) => role switch { 0 or 6 => 0, 1 or 7 => 1, 3 or 5 => 2, _ => 3 };
 
+    public void SetPlayerAssignment(int player, int number, int arrows)
+    {
+        if (number == 0 && arrows == 0) return;
+        var wave = number == 0 ? Order[player] : number - 1;
+        if (arrows >= 2)
+        {
+            Arrows[wave] = true;
+            if (Arrows.All(a => a)) Arrows[(wave + 1) % 3] = false;
+        }
+        else if (arrows == 1 && Towers[wave].Length == 2)
+        {
+            Arrows[wave] = false;
+            if (!Arrows.Any(a => a)) Arrows[(wave + 1) % 3] = true;
+        }
+        for (var role = 0; role < 8; role++)
+            Direction[role] = !Arrows[Order[role]] ? 0 : Lane[role] == 0 ? 1 : Lane[role] == Towers[Order[role]].Length - 1 ? -1 : 0;
+        var candidates = Enumerable.Range(0, 8).Where(role => Order[role] == wave && (arrows switch
+        {
+            1 => Direction[role] == 0, 2 => Direction[role] != 0,
+            3 => Direction[role] == 1, 4 => Direction[role] == -1, _ => true
+        })).ToArray();
+        var candidate = candidates[new Random(Seed ^ (player << 8) ^ (number << 4) ^ arrows).Next(candidates.Length)];
+        foreach (var values in new[] { Order, Lane, NumberLane, Direction })
+            (values[player], values[candidate]) = (values[candidate], values[player]);
+    }
+
     public static Vector3 FinalTowerPosition(int tower) => tower switch
     {
         0 => new(-10, 0, -10), 1 => new(10, 0, -10),

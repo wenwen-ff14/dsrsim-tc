@@ -11,6 +11,9 @@ public sealed partial class DsrP3WyrmholeScenario
     public void DrawSettings()
     {
         ImGui.TextUnformatted("tuuf／Elemental：Easthogg（箭頭朝東）");
+        ImGui.Combo("自己的麻將", ref playerNumber, ["隨機", "一號", "二號", "三號"], 4);
+        ImGui.Combo("自己的箭頭", ref playerArrows, ["隨機", "無箭頭", "有箭頭（隨機方向）", "上箭頭", "下箭頭"], 5);
+        ImGui.TextDisabled("選項於下一次開始或重置時生效。");
         var playMusic = !Plugin.Config.SuppressBgm;
         if (ImGui.Checkbox("背景音樂：邪龍急襲", ref playMusic))
         {
@@ -23,7 +26,7 @@ public sealed partial class DsrP3WyrmholeScenario
             if (ImGui.Button("重新播放音樂")) Plugin.GameInstance.Bgm.Restart();
         }
         ImGui.TextDisabled("配樂使用遊戲的背景音樂音量設定。");
-        ImGui.TextDisabled("本關練習數字龍、兩次普攻、隨機龍槍與最後四座人數塔。");
+        ImGui.TextDisabled("本關練習尼德霍格麻將、兩次普攻、隨機龍槍與最後四座人數塔。");
         ImGui.TextDisabled("四塔：坦近戰依順時針 → 逆時針 → 對角補位；補遠留原塔。");
         ImGui.TextDisabled("西北 MT＋D3／東北 ST＋D4／西南 D1＋H1／東南 D2＋H2");
         ImGui.TextDisabled("時間軸依 FFLogs 第 42 場校正；四塔後包含坦克接線、五次普攻與固定 C 點騰龍槍。");
@@ -34,7 +37,7 @@ public sealed partial class DsrP3WyrmholeScenario
         if (fixedSeed) { ImGui.SetNextItemWidth(150); ImGui.InputInt("種子", ref seed); }
         if (state == null || world == null) return;
         ImGui.Separator();
-        ImGui.TextUnformatted($"數字龍　{state.Time:F1} 秒　種子 {state.Seed}");
+        ImGui.TextUnformatted($"P3-尼德霍格　{state.Time:F1} 秒　種子 {state.Seed}");
         if (state.Complete) ImGui.TextUnformatted(state.Failed ? "本輪有失誤，可重置重練。" : "本輪完成！");
         if (showHints && !state.Complete)
         {

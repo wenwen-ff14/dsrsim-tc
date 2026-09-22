@@ -12,6 +12,7 @@ public sealed class DsrZone : IZone
     public static readonly Phase P2 = new(Instance, "P2", 45, 312);
     // Weather 3 enables the e00 Nidhogg arena through obset_r1fz_bg_05.
     public static readonly Phase P3 = new(Instance, "P3", 3, 922);
+    public static readonly Phase P4 = new(Instance, "P4", 66, 923);
     public string Name => "絕龍詩戰爭";
     public uint TerritoryId => 968;
     public Vector3 Origin => new(100, 0, 100);

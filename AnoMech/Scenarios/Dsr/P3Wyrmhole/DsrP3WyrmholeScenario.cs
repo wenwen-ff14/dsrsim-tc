@@ -10,7 +10,7 @@ namespace AnoMech.Scenarios.Dsr.P3Wyrmhole;
 
 public sealed partial class DsrP3WyrmholeScenario : IScenario
 {
-    public string Name => "數字龍（Easthogg）";
+    public string Name => "尼德霍格";
     public IPhase Phase => DsrZone.P3;
     public IReadOnlyList<IScenarioAi> AiStrats { get; } = [new DsrP3WyrmholeAi()];
     private DsrP3WyrmholeState? state;
@@ -21,11 +21,13 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
     private readonly List<(int Wave, Vector3 Source, Vector3 Direction)> lines = [];
     private bool fixedSeed, showHints = true, showMap = true;
     private int seed = 1;
+    private int playerNumber, playerArrows;
 
     public void Run(SimWorld simWorld, int? selectedAi)
     {
         world = simWorld;
         state = new(fixedSeed ? seed : Random.Shared.Next());
+        state.SetPlayerAssignment((int)world.Party.PlayerRole, playerNumber, playerArrows);
         for (var role = 0; role < 8; role++)
             if (world.Party.Get(role) is SimPartyNpc npc)
             {
@@ -156,14 +158,14 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         {
             if (state!.Order[role] != wave) continue;
             var member = world!.Party.Get(role);
-            if (!member.IsAlive()) { Fail("數字龍跳躍點名者已倒下"); continue; }
+            if (!member.IsAlive()) { Fail("尼德霍格跳躍點名者已倒下"); continue; }
             var landing = DsrP3WyrmholeState.Landing(member!.Position, member.Rotation, state.Direction[role]);
             var lane = state.LandingLane(role);
             state.Towers[wave][lane] = landing;
-            if (landing.Length() > 20) Fail("數字龍：塔落在場外，請檢查站位與面向");
+            if (landing.Length() > 20) Fail("尼德霍格：塔落在場外，請檢查站位與面向");
             foreach (var other in world.Party.ActiveMembers())
                 if (other != member && Vector3.DistanceSquared(other.Position, member.Position) < 25)
-                    Hit(other, "數字龍：被其他人的跳躍範圍命中");
+                    Hit(other, "尼德霍格：被其他人的跳躍範圍命中");
             var clone = drakes[wave][lane];
             clone?.SetPosition(landing);
             clone?.SetVisible(true);
@@ -180,13 +182,13 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
     private void ResolveStack(int jumpWave)
     {
         var targets = world!.Party.ActiveMembers().Where(m => m.Position.Z < 0).ToArray();
-        if (targets.Length == 0) { Fail("數字龍：北側沒有分攤目標"); return; }
+        if (targets.Length == 0) { Fail("尼德霍格：北側沒有分攤目標"); return; }
         var target = targets.OrderBy(m => Vector3.DistanceSquared(m.Position, new Vector3(0, 0, -7))).First();
         var stack = world.Party.ActiveMembers().Where(m => Vector3.DistanceSquared(m.Position, target.Position) <= 36).ToArray();
-        if (stack.Length != 5) Fail($"數字龍：北側分攤需要五人，目前 {stack.Length} 人");
+        if (stack.Length != 5) Fail($"尼德霍格：北側分攤需要五人，目前 {stack.Length} 人");
         for (var role = 0; role < 8; role++)
             if (state!.Order[role] == jumpWave && stack.Contains(world.Party.Get(role)))
-                Fail("數字龍：本輪跳躍點名者不能參與分攤");
+                Fail("尼德霍格：本輪跳躍點名者不能參與分攤");
         // The release timeline resolves mon_sp/[SKL_ID]/mon_sp004 on Nidhogg's skeleton.
         boss?.Cast(DsrP3WyrmholeConstants.Stack, target.Position, 0, target.GameObjectId);
     }
@@ -197,7 +199,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         boss?.Cast(gnash ? DsrP3WyrmholeConstants.Gnash : DsrP3WyrmholeConstants.Lash, castSeconds: 0);
         foreach (var member in world!.Party.ActiveMembers())
             if (gnash ? member.Position.LengthSquared() < 64 : member.Position.LengthSquared() > 64)
-                Hit(member, gnash ? "數字龍：未躲開鋼鐵（離開八公尺內圈）" : "數字龍：未躲開月環（進入八公尺內圈）");
+                Hit(member, gnash ? "尼德霍格：未躲開鋼鐵（離開八公尺內圈）" : "尼德霍格：未躲開月環（進入八公尺內圈）");
     }
 
     private void ShowTowers(int wave, float fireDelay)
@@ -216,10 +218,10 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         foreach (var tower in state.Towers[wave])
         {
             var inside = world!.Party.FilledSlots().Where(pair => Vector3.DistanceSquared(pair.Item2.Position, tower) <= 25).ToArray();
-            if (inside.Length != 1) { Fail($"數字龍第 {wave + 1} 輪塔需要一人，目前 {inside.Length} 人"); continue; }
+            if (inside.Length != 1) { Fail($"尼德霍格第 {wave + 1} 輪塔需要一人，目前 {inside.Length} 人"); continue; }
             var role = (int)inside[0].Item1;
             var eligible = wave switch { 0 => state.Order[role] == 2, 1 => state.Order[role] == 0, _ => state.Order[role] != 2 };
-            if (!eligible) Hit(inside[0].Item2, "數字龍：本輪不應由你的數字組踩塔");
+            if (!eligible) Hit(inside[0].Item2, "尼德霍格：本輪不應由你的數字組踩塔");
         }
     }
 
@@ -231,7 +233,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
             if (clone == null) continue;
             var target = world!.Party.ActiveMembers().Where(m => m.IsAlive())
                 .OrderBy(m => Vector3.DistanceSquared(m.Position, clone.Position)).FirstOrDefault();
-            if (target == null) { Fail("數字龍：直線沒有引導目標"); continue; }
+            if (target == null) { Fail("尼德霍格：直線沒有引導目標"); continue; }
             var direction = DsrP3WyrmholeState.AtRadius(target.Position - clone.Position, 1);
             var rotation = MathF.Atan2(direction.X, direction.Z);
             clone.HoldFacing(rotation);
@@ -269,7 +271,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
     {
         foreach (var line in lines.Where(line => line.Wave == wave))
             foreach (var member in world!.Party.ActiveMembers())
-                if (InLine(member.Position, line.Source, line.Direction)) Hit(member, "數字龍：未躲開分身直線");
+                if (InLine(member.Position, line.Source, line.Direction)) Hit(member, "尼德霍格：未躲開分身直線");
         lines.RemoveAll(line => line.Wave == wave);
         foreach (var clone in drakes[wave]) { clone?.SetVisible(false); clone?.SetVisibleInEnemyList(false); }
     }
@@ -360,7 +362,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         foreach (var member in world!.Party.ActiveMembers())
             if (member.Position.LengthSquared() < 169 && (member.Position.LengthSquared() < .001f ||
                 Vector3.Dot(Vector3.Normalize(member.Position), forward) > .7071068f))
-                Hit(member, "數字龍：被龍槍扇形命中");
+                Hit(member, "尼德霍格：被龍槍扇形命中");
     }
 
     private void Hit(SimCharacter member, string reason) { state!.Failed = true; member.Die(reason); }

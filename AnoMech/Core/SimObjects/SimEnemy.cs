@@ -110,6 +110,15 @@ public sealed unsafe class SimEnemy : SimNpc
 
     public uint BNpcBaseId { get; }
 
+    public void SetScale(float scale)
+    {
+        var obj = BattleCharaPtr;
+        if (obj == null || !float.IsFinite(scale) || scale <= 0) return;
+        obj->Scale = scale;
+        obj->HitboxRadius = obj->ModelContainer.UnscaledRadius * scale;
+        if (obj->DrawObject != null) obj->DrawObject->Object.Scale = new(scale);
+    }
+
 
     // Live-read via GameObject::GetName() (vfunc 6, resolves NameId -> BNpcName) —
     // same path the target bar uses, so engine-driven renames mid-fight propagate

@@ -3,6 +3,7 @@ using AnoMech.Core.SimObjects;
 using AnoMech.Scenarios.Dsr.P3Wyrmhole;
 
 void Check(bool condition, string message) { if (!condition) throw new Exception(message); }
+AssignmentValidation.Run();
 LogTimingValidation.Run();
 foreach (var fps in new[] { 30, 60, 144 })
 for (var seed = 0; seed < 300; seed++)

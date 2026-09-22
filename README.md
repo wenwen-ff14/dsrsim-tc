@@ -4,9 +4,10 @@
 *Another FFXIV mechanics simulator*
 
 本分支目標為繁中 Dalamud API 13（.NET 9 / C# 13），目前以本機
-Dalamud 13.0.0.16 的函式庫編譯。主選單提供絕龍詩 P2 聖仗與 P3 數字龍，
-使用 tuuf／Elemental 的 [P2 打法](https://ffxiv.tuufless.com/elemental/dsr/02_thordan/)
-及 [P3 Easthogg 打法](https://ffxiv.tuufless.com/elemental/dsr/03_nidhogg/)。
+Dalamud 13.0.0.16 的函式庫編譯。主選單提供絕龍詩 P2 聖仗、P3 尼德霍格與 P4 雙眼，
+使用 tuuf／Elemental 的 [P2 打法](https://ffxiv.tuufless.com/elemental/dsr/02_thordan/)、
+[P3 Easthogg 打法](https://ffxiv.tuufless.com/elemental/dsr/03_nidhogg/)
+及 [P4 雙眼打法](https://ffxiv.tuufless.com/elemental/dsr/04_eyes/)。
 其他關卡保留原始碼，暫時從選單隱藏。
 
 ## 使用本分支
@@ -33,9 +34,11 @@ https://raw.githubusercontent.com/wenwen-ff14/test/main/pluginmaster.json
 目前是可建置的練習實作，尚未完成繁中遊戲內驗收；精確時間與部分地面幾何仍需校正。
 詳細設定與驗證限制見 [DSR-P2.md](DSR-P2.md)。
 
-P3 第一版提供「數字龍（Easthogg）」獨立練習，涵蓋三輪數字跳躍、箭頭面向、五人分攤、
+P3「尼德霍格」可選自己的麻將（一／二／三號）及箭頭（無／有／上／下，皆可隨機），選項於下一輪生效。涵蓋三輪數字跳躍、箭頭面向、五人分攤、
 內外圈、踩塔、分身直線、兩次普攻、隨機龍槍與最後四座人數塔。四塔依 tuuf 坦近戰順時針、逆時針、對角補位，補遠留原塔；接著練習 MT 接本體線、ST 接分身線、五次普攻及固定朝 C 點的騰龍槍。
 P3 原生動畫、特效和精確時序尚待遊戲內確認，詳見 [DSR-P3.md](DSR-P3.md)。
+
+P4「雙眼」包含南側取得思念增益、紅藍換線、坦補雙人撞黃球、DPS 單人撞藍球，以及四輪幻象俯衝換線。使用雙眼場地設定與 Contention 配樂；模擬器自動推進雙眼擊破，尚未包含接續的救奧爾什方。詳見 [DSR-P4.md](DSR-P4.md)。
 
 ## 建置
 

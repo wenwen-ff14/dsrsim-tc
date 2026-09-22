@@ -3,8 +3,8 @@
     "Author": "Anomek / wenwen-ff14",
     "Name": "絕龍詩模擬器",
     "InternalName": "AnoMech",
-    "AssemblyVersion": "0.4.0.33",
-    "Description": "API 13 繁中版。於旅館內模擬七名隊友，練習 P2 聖仗與 P3 Easthogg 數字龍。P3 目前包含三輪跳躍、分攤、內外圈、踩塔、直線、兩次普攻、隨機龍槍與最後四座人數塔；四塔後包含坦克接線、五次普攻與固定 C 點騰龍槍。使用 /anomech 或 /ano 開啟；視窗可收合。",
+    "AssemblyVersion": "0.4.0.34",
+    "Description": "API 13 繁中版。於旅館內模擬七名隊友，練習 P2 聖仗、P3 尼德霍格與 P4 雙眼。P3 可指定自己的麻將與箭頭，包含最後四塔、坦克接線、五次普攻及固定 C 點騰龍槍。P4 包含思念增益、紅藍換線、黃球與藍球、四輪幻象俯衝；雙眼擊破自動推進。使用 /anomech 或 /ano 開啟；視窗可收合。",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/wenwen-ff14/test",
     "Tags": [
@@ -21,14 +21,14 @@
     "CanUnloadAsync": false,
     "LoadPriority": 0,
     "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/test/main/images/icon.png",
-    "Punchline": "DSR P2 聖仗與 P3 數字龍練習，使用 tuuf／Elemental 打法。",
+    "Punchline": "DSR P2 聖仗、P3 尼德霍格、P4 雙眼練習，使用 tuuf／Elemental 打法。",
     "AcceptsFeedback": true,
-    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.33.zip",
-    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.33.zip",
-    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.33.zip",
+    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.34.zip",
+    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.34.zip",
+    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.34.zip",
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": 1790110907,
-    "Changelog": "P3：新增四塔後 MT 接本體線、ST 接分身線、三道引導槍與接線判定。之後對 MT 普攻五次，再平滑轉向固定 C 點施放騰龍槍。落塔分身加入敵對列表顯示讀條，退場時移除。"
+    "LastUpdate": 1790112608,
+    "Changelog": "P3 更名為尼德霍格，可選自己的麻將與箭頭。新增 tuuf P4 雙眼：獨立場地與 Contention 配樂、思念增益、紅藍換線、雙人黃球、單人藍球及四輪幻象俯衝。NPC 全程移動；雙眼擊破自動推進。P4 原生特效與時間軸尚待遊戲內驗收。"
   }
 ]
