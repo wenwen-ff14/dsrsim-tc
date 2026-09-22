@@ -65,5 +65,24 @@ internal static class PresentationBehaviorValidation
             if (DsrP3WyrmholeAi.Destination(state, state.Soaker(1, lane)) != state.Towers[1][lane])
                 throw new Exception("Second-wave soaker did not enter after the towers appeared");
         Console.WriteLine("Stack caster, nearest-player tracking/lock and second-wave tower entry passed.");
+        var walkingWorld = new SimWorld();
+        var walkingState = new DsrP3WyrmholeState(0) { NumbersAssigned = true, ArrowsAssigned = true, Time = 53 };
+        for (var frame = 0; frame < 300; frame++)
+        {
+            DsrP3WyrmholeAi.Tick(walkingState, walkingWorld);
+            foreach (var member in walkingWorld.Party.ActiveMembers()) member.Advance(1f / 60);
+        }
+        foreach (var (role, member) in walkingWorld.Party.FilledSlots())
+        {
+            var expected = DsrP3WyrmholeState.AtRadius(DsrP3WyrmholeState.FinalTowerPosition(DsrP3WyrmholeState.FinalTowerHome(role)), 16);
+            if (member.MoveCommands != 1 || Vector3.Distance(member.Position, expected) > .001f)
+                throw new Exception("NPC must walk directly to its lance-safe preposition without restarting movement every frame");
+        }
+        walkingState.Time = 60;
+        walkingState.FinalTowersVisible = true;
+        DsrP3WyrmholeAi.Tick(walkingState, walkingWorld);
+        foreach (var member in walkingWorld.Party.ActiveMembers())
+            if (member.MoveCommands != 2) throw new Exception("New tower destination must start movement immediately");
+        Console.WriteLine("P3 movement commands persist until arrival; final tower preparation avoids in/out detours.");
     }
 }

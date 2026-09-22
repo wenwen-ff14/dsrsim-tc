@@ -78,8 +78,7 @@ public sealed partial class DsrP2SanctityScenario : IScenario
         world.Events.Add(14.5f, () => state!.SwordGroupsMoving = true);
         world.Events.Add(15.656f, () => boss?.Cast(DsrConstants.Action.Gaze, castSeconds: 3.7f, targetId: boss.GameObjectId, fireDelay: .280f));
         world.Events.Add(20.574f, () => Sever(0));
-        world.Events.Add(20.709f, () => Charge(0));
-        world.Events.Add(20.798f, ResolveGaze);
+        world.Events.Add(20.709f, () => { ResolveGaze(); Charge(0); });
         world.Events.Add(21.2f, () => WarnFlare(0));
         world.Events.Add(21.9f, () => WarnFlare(1));
         world.Events.Add(22.2f, () => Explode(0));
@@ -330,7 +329,6 @@ public sealed partial class DsrP2SanctityScenario : IScenario
             var helper = Spawn(DsrConstants.Npc.Helper, position, false);
             helper?.Cast(second ? DsrConstants.Action.Tower2 : DsrConstants.Action.Tower1, position, castSeconds, fireDelay: fireDelay);
             if (helper != null) towerCasters.Add(helper);
-            world!.SpawnOmen("vfx/omen/eff/general01f.avfx", new(position, 0), new(3, 1, 3), castSeconds + fireDelay);
         }
     }
 

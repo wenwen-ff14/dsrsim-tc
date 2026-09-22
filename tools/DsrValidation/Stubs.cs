@@ -41,8 +41,10 @@ namespace AnoMech.Core.SimObjects
         public bool IsActive => Active;
         public void SetPosition(Vector3 p) { Position = p; }
         public void SetRotation(float r) { Rotation = r; }
+        public int MoveCommands;
         public void MoveTo(Vector3 p, float s = 6, float? finalRotation = null)
         {
+            MoveCommands++;
             if (knockbackRemaining > 0) return;
             destination = p; speed = s; facing = finalRotation; moving = true;
         }

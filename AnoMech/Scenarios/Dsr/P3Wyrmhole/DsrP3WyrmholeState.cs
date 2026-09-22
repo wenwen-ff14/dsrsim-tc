@@ -29,6 +29,8 @@ internal sealed class DsrP3WyrmholeState
     public readonly int[] FinalTowerCounts = new int[4];
     public bool FinalTowersVisible;
     public bool FinalTowersResolved;
+    public readonly Vector3?[] MovementTargets = new Vector3?[8];
+    public readonly float?[] MovementFacings = new float?[8];
 
     public DsrP3WyrmholeState(int seed)
     {

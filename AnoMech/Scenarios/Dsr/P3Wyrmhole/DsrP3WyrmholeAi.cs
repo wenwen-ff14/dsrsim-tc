@@ -35,7 +35,6 @@ internal sealed class DsrP3WyrmholeAi : IScenarioAi
         if (t < 46.001f) return WheelPosition(s, role, 2, t < 42.870f);
         if (t < 48.013f) return s.SoakLane(2, role) >= 0 ? Bait(s, 2, role) : North(7);
         if (t < 52.480f) return s.SoakLane(2, role) >= 0 ? Dodge(s, 2, role) : role == 0 ? new(7, 0, 0) : North(7);
-        if (t < 54.583f) return DsrP3WyrmholeState.FinalTowerPosition(DsrP3WyrmholeState.FinalTowerHome(role));
         if (t < 58.115f) return DsrP3WyrmholeState.AtRadius(DsrP3WyrmholeState.FinalTowerPosition(DsrP3WyrmholeState.FinalTowerHome(role)), 16);
         return DsrP3WyrmholeState.FinalTowerPosition(s.FinalTowersVisible || s.FinalTowersResolved
             ? s.FinalTowerAssignment(role) : DsrP3WyrmholeState.FinalTowerHome(role));
@@ -71,6 +70,13 @@ internal sealed class DsrP3WyrmholeAi : IScenarioAi
         if (state.Complete) return;
         for (var role = 0; role < 8; role++)
             if (world.Party.Get(role) is SimPartyNpc npc && npc.IsAlive())
-                npc.MoveTo(Destination(state, role), 6, MathF.PI / 2);
+            {
+                var destination = Destination(state, role);
+                float? facing = state.Time < 38.803f ? MathF.PI / 2 : null;
+                if (state.MovementTargets[role] == destination && state.MovementFacings[role] == facing) continue;
+                state.MovementTargets[role] = destination;
+                state.MovementFacings[role] = facing;
+                npc.MoveTo(destination, 6, facing);
+            }
     }
 }

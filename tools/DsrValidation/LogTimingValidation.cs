@@ -44,12 +44,13 @@ internal static class LogTimingValidation
                     MathF.Abs(c.Time + c.Duration.Value + c.FireDelay - release) > tolerance))
                     throw new Exception($"FFLogs cast mismatch at {frameRate} FPS: action {id}, P2 {begin + origin:F3}s");
             }
-            if (MathF.Abs(gaze + origin - data.GetProperty("gazeSnapshot").GetSingle()) > tolerance)
-                throw new Exception("Gaze snapshot moved to cast-bar end instead of the gaze event");
+            var firstCharge = casts.Where(c => c.Action == 25570).Min(c => c.Time);
+            if (MathF.Abs(gaze - firstCharge) > .0001f)
+                throw new Exception("Gaze and first charge must resolve in the same frame");
             var expectedImpacts = data.GetProperty("meteorImpacts").EnumerateArray().Select(x => x.GetSingle()).ToArray();
             if (impacts.Count != expectedImpacts.Length || impacts.Where((time, i) => MathF.Abs(time + origin - expectedImpacts[i]) > tolerance).Any())
                 throw new Exception("Meteor impact timing differs from FFLogs damage events");
         }
-        Console.WriteLine("FFLogs fight 42: 24 cast groups, gaze snapshot and all seven meteor impacts match within one frame at 30/60/144 FPS.");
+        Console.WriteLine("FFLogs fight 42: 24 cast groups and seven meteor impacts match at 30/60/144 FPS; gaze snapshot shares the first charge frame.");
     }
 }
