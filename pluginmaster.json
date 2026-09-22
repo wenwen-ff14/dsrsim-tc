@@ -1,0 +1,34 @@
+[
+  {
+    "Author": "Anomek / wenwen-ff14",
+    "Name": "絕龍詩模擬器",
+    "InternalName": "AnoMech",
+    "AssemblyVersion": "0.4.0.19",
+    "Description": "API 13 繁中版。於旅館內模擬七名隊友與聖杖機制，練習分攤、視線、騎士衝鋒、隕石與雙輪塔。使用 /anomech 或 /ano 開啟。",
+    "ApplicableVersion": "any",
+    "RepoUrl": "https://github.com/wenwen-ff14/test",
+    "Tags": [
+      "dsr",
+      "thordan",
+      "sanctity",
+      "ultimate",
+      "practice",
+      "simulator"
+    ],
+    "DalamudApiLevel": 13,
+    "LoadRequiredState": 0,
+    "LoadSync": false,
+    "CanUnloadAsync": false,
+    "LoadPriority": 0,
+    "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/test/main/images/icon.png",
+    "Punchline": "DSR P2 聖杖練習，使用 tuuf／Elemental 打法。",
+    "AcceptsFeedback": true,
+    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.19.zip",
+    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.19.zip",
+    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.19.zip",
+    "IsHide": false,
+    "IsTestingExclusive": false,
+    "LastUpdate": 1790086008,
+    "Changelog": "修正托爾丹上天時本體顯隱控制與武器提前隱藏；原生演出仍待遊戲內驗證。"
+  }
+]

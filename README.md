@@ -4,13 +4,22 @@
 *Another FFXIV mechanics simulator*
 
 本分支目標為繁中 Dalamud API 13（.NET 9 / C# 13），目前以本機
-Dalamud 13.0.0.16 的函式庫編譯。主選單目前只顯示絕龍詩 P2 聖杖（勝仗），
+Dalamud 13.0.0.16 的函式庫編譯。主選單目前只顯示絕龍詩 P2 聖杖，
 使用 [tuuf／Elemental 打法](https://ffxiv.tuufless.com/elemental/dsr/02_thordan/)。
 其他關卡保留原始碼，暫時從選單隱藏。
 
 ## 使用本分支
 
-1. 依下方指令建置，在 Dalamud 設定的 Dev Plugins 新增輸出的 `AnoMech.dll` 並載入。
+在繁中版 Dalamud 的設定中，找到「自訂插件庫／Custom Plugin Repositories」，新增並啟用：
+
+```text
+https://raw.githubusercontent.com/wenwen-ff14/test/main/pluginmaster.json
+```
+
+儲存設定後，在插件安裝器搜尋「絕龍詩模擬器」並安裝。此插件庫適用於 **Dalamud API 13**。
+如果曾透過 Dev Plugins 載入本機 AnoMech，請先停用該項目，避免同時載入兩份。
+
+1. 確認「絕龍詩模擬器」已安裝並啟用。
 2. 進入旅館房間，輸入 `/ano` 或 `/anomech`。
 3. 選擇職責後按「開始」。七名模擬隊友會依 tuuf 分工行動，玩家自行走位。
 4. 初次練習可開啟「無敵練習」、「顯示站位提示」與「顯示戰術圖」。
@@ -38,6 +47,18 @@ dotnet build AnoMech.sln -c Release -p:RestoreLockedMode=true
 GitHub Actions 使用指定的繁中 API 13 SDK 壓縮檔，不下載國際服 `latest.zip`。
 PR 建置需設定 repository variable `DALAMUD_API13_SDK_URL`；手動建置需輸入 SDK URL。
 工作流程只產出 artifact，不再呼叫原作者的自動發布工作流程。
+
+## 更新自訂插件庫
+
+提高 `AnoMech/AnoMech.csproj` 的四段版本號後，用 PowerShell 7 執行：
+
+```powershell
+pwsh -File tools/Prepare-PluginRepository.ps1
+```
+
+腳本會編譯、核對 DLL 與清單版本，產生 `packages/AnoMech/<版本>.zip` 和 `pluginmaster.json`。
+將原始碼、這兩個發布檔案一併提交並推送到 `main`，使用者便能沿用同一插件庫網址更新。
+已發布版本的 ZIP 保留不覆寫；`bin/`、`obj/` 和本機 SDK 不需上傳。
 
 API 13 移植包含原生函式相容層。編譯與離線簽章匹配不代表遊戲內驗證完成。
 可用 PowerShell 7 執行 `tools/Check-NativeSignatures.ps1 -GameExe <繁中ffxiv_dx11.exe路徑>`
