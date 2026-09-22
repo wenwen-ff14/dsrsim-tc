@@ -25,36 +25,49 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
     {
         world = simWorld;
         state = new(fixedSeed ? seed : Random.Shared.Next());
+        for (var role = 0; role < 8; role++)
+            if (world.Party.Get(role) is SimPartyNpc npc)
+            {
+                npc.SetPosition(DsrP3WyrmholeAi.OpeningPosition(role));
+                npc.SetRotation(MathF.PI / 2);
+            }
         lines.Clear();
         foreach (var wave in drakes) Array.Clear(wave);
         boss = Spawn(DsrP3WyrmholeConstants.Nidhogg, Vector3.Zero, true);
         boss?.SetTargetable(true);
-        world.Events.Add(3f, () => boss?.Cast(DsrP3WyrmholeConstants.DiveFromGrace, castSeconds: 5));
-        world.Events.Add(8f, AssignNumbers);
-        world.Events.Add(10f, AssignArrows);
-        world.Events.Add(10.1f, () => StartWheels(0));
-        world.Events.Add(17.7f, () => { Jump(0); ResolveStack(0); });
-        world.Events.Add(21.4f, () => ResolveWheel(0, true));
-        world.Events.Add(21.9f, () => ShowTowers(0));
-        world.Events.Add(24.4f, () => ResolveTowers(0));
-        world.Events.Add(24.5f, () => ResolveWheel(0, false));
-        world.Events.Add(27f, () => BaitLines(0));
-        world.Events.Add(27.8f, () => Jump(1));
-        world.Events.Add(31.5f, () => ResolveLines(0));
-        world.Events.Add(31.6f, () => StartWheels(1));
-        world.Events.Add(31.9f, () => ShowTowers(1));
-        world.Events.Add(34.4f, () => ResolveTowers(1));
-        world.Events.Add(37f, () => BaitLines(1));
-        world.Events.Add(38.8f, () => { Jump(2); ResolveStack(2); });
-        world.Events.Add(41.5f, () => ResolveLines(1));
-        world.Events.Add(42.9f, () => ResolveWheel(1, true));
-        world.Events.Add(42.9f, () => ShowTowers(2));
-        world.Events.Add(45.4f, () => ResolveTowers(2));
-        world.Events.Add(46f, () => ResolveWheel(1, false));
-        world.Events.Add(48f, () => BaitLines(2));
-        world.Events.Add(52.5f, () => ResolveLines(2));
-        world.Events.Add(54.6f, StartLance);
-        world.Events.Add(58.2f, ResolveLance);
+        // FFLogs V4F6z9GCthdf2Ppq / fight 42: 03:13.037 is this fragment's time zero.
+        world.Events.Add(3f, () => boss?.Cast(DsrP3WyrmholeConstants.DiveFromGrace, castSeconds: 4.7f, fireDelay: .262f));
+        world.Events.Add(3f, AssignNumbers);
+        world.Events.Add(8.721f, AssignArrows);
+        world.Events.Add(10.105f, () => StartWheels(0, .259f));
+        world.Events.Add(17.708f, () => ClearJumpStatuses(0));
+        world.Events.Add(17.797f, () => Jump(0));
+        world.Events.Add(17.930f, () => ResolveStack(0));
+        world.Events.Add(21.330f, () => ResolveWheel(0, true));
+        world.Events.Add(21.910f, () => ShowTowers(0, .300f));
+        world.Events.Add(24.410f, () => ResolveTowers(0));
+        world.Events.Add(24.455f, () => ResolveWheel(0, false));
+        world.Events.Add(27.047f, () => BaitLines(0, .271f));
+        world.Events.Add(27.717f, () => ClearJumpStatuses(1));
+        world.Events.Add(27.807f, () => Jump(1));
+        world.Events.Add(31.518f, () => ResolveLines(0));
+        world.Events.Add(31.606f, () => StartWheels(1, .298f));
+        world.Events.Add(31.920f, () => ShowTowers(1, .257f));
+        world.Events.Add(34.377f, () => ResolveTowers(1));
+        world.Events.Add(37.013f, () => BaitLines(1, .270f));
+        world.Events.Add(38.712f, () => ClearJumpStatuses(2));
+        world.Events.Add(38.802f, () => Jump(2));
+        world.Events.Add(39.471f, () => ResolveStack(2));
+        world.Events.Add(41.483f, () => ResolveLines(1));
+        world.Events.Add(42.869f, () => ResolveWheel(1, true));
+        world.Events.Add(42.914f, () => ShowTowers(2, .259f));
+        world.Events.Add(45.373f, () => ResolveTowers(2));
+        world.Events.Add(46.000f, () => ResolveWheel(1, false));
+        world.Events.Add(48.012f, () => BaitLines(2, .267f));
+        world.Events.Add(52.479f, () => ResolveLines(2));
+        world.Events.Add(54.582f, StartLance);
+        world.Events.Add(54.627f, StartLanceAoe);
+        world.Events.Add(58.114f, ResolveLance);
         world.Events.Add(59f, () => state.Complete = true);
     }
 
@@ -67,14 +80,27 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
 
     private void AssignNumbers()
     {
+        state!.NumbersAssigned = true;
         for (var role = 0; role < 8; role++)
-            world!.Party.Get(role)?.AddStatus((ushort)(DsrP3WyrmholeConstants.First + state!.Order[role]), 31);
+            world!.Party.Get(role)?.AddStatus((ushort)(DsrP3WyrmholeConstants.First + state.Order[role]), 9999);
     }
 
     private void AssignArrows()
     {
+        state!.ArrowsAssigned = true;
         for (var role = 0; role < 8; role++)
-            world!.Party.Get(role)?.AddStatus(DirectionStatus(role), 29);
+            world!.Party.Get(role)?.AddStatus(DirectionStatus(role), state.Order[role] switch { 0 => 9, 1 => 19, _ => 30 });
+    }
+
+    private void ClearJumpStatuses(int wave)
+    {
+        for (var role = 0; role < 8; role++)
+            if (state!.Order[role] == wave)
+            {
+                var member = world!.Party.Get(role);
+                member?.RemoveStatus((ushort)(DsrP3WyrmholeConstants.First + wave));
+                member?.RemoveStatus(DirectionStatus(role));
+            }
     }
 
     private ushort DirectionStatus(int role) => state!.Direction[role] switch
@@ -84,9 +110,9 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         _ => DsrP3WyrmholeConstants.Center
     };
 
-    private void StartWheels(int round)
+    private void StartWheels(int round, float fireDelay)
         => boss?.Cast(state!.OutFirst[round] ? DsrP3WyrmholeConstants.GnashAndLash : DsrP3WyrmholeConstants.LashAndGnash,
-            castSeconds: 7.6f);
+            castSeconds: 7.3f, fireDelay: fireDelay);
 
     private void Jump(int wave)
     {
@@ -110,8 +136,6 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
                 _ => DsrP3WyrmholeConstants.HighJump
             };
             clone?.Cast(action, landing, 0, clone.GameObjectId);
-            member.RemoveStatus((ushort)(DsrP3WyrmholeConstants.First + wave));
-            member.RemoveStatus(DirectionStatus(role));
         }
     }
 
@@ -137,13 +161,13 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
                 Hit(member, gnash ? "數字龍：未躲開鋼鐵（離開八公尺內圈）" : "數字龍：未躲開月環（進入八公尺內圈）");
     }
 
-    private void ShowTowers(int wave)
+    private void ShowTowers(int wave, float fireDelay)
     {
         state!.TowersVisible[wave] = true;
         for (var lane = 0; lane < drakes[wave].Length; lane++)
         {
-            drakes[wave][lane]?.Cast(DsrP3WyrmholeConstants.Tower, castSeconds: 2.5f);
-            world!.SpawnOmen("vfx/omen/eff/general01f.avfx", new(state.Towers[wave][lane], 0), new(5, 1, 5), 2.5f);
+            drakes[wave][lane]?.Cast(DsrP3WyrmholeConstants.Tower, castSeconds: 2.2f, fireDelay: fireDelay);
+            world!.SpawnOmen("vfx/omen/eff/general01f.avfx", new(state.Towers[wave][lane], 0), new(5, 1, 5), 2.2f + fireDelay);
         }
     }
 
@@ -160,7 +184,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         }
     }
 
-    private void BaitLines(int wave)
+    private void BaitLines(int wave, float fireDelay)
     {
         foreach (var clone in drakes[wave])
         {
@@ -170,7 +194,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
             var direction = DsrP3WyrmholeState.AtRadius(target.Position - clone.Position, 1);
             var rotation = MathF.Atan2(direction.X, direction.Z);
             clone.HoldFacing(rotation);
-            clone.Cast(DsrP3WyrmholeConstants.Geirskogul, castSeconds: 4.5f);
+            clone.Cast(DsrP3WyrmholeConstants.Geirskogul, castSeconds: 4.2f, fireDelay: fireDelay);
             lines.Add((wave, clone.Position, direction));
         }
     }
@@ -197,10 +221,14 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         if (target == null) return;
         state.LanceRotation = MathF.Atan2(target.Position.X, target.Position.Z);
         boss?.HoldFacing(state.LanceRotation);
-        boss?.Cast(DsrP3WyrmholeConstants.Drachenlance, castSeconds: 2.9f);
+        boss?.Cast(DsrP3WyrmholeConstants.Drachenlance, castSeconds: 2.6f, fireDelay: .263f);
+    }
+
+    private void StartLanceAoe()
+    {
         var helper = Spawn(DsrConstants.Npc.Helper, Vector3.Zero, false);
-        helper?.HoldFacing(state.LanceRotation);
-        helper?.Cast(DsrP3WyrmholeConstants.DrachenlanceAoe, castSeconds: 3.5f);
+        helper?.HoldFacing(state!.LanceRotation);
+        helper?.Cast(DsrP3WyrmholeConstants.DrachenlanceAoe, castSeconds: 3.2f, fireDelay: .287f);
     }
 
     private void ResolveLance()

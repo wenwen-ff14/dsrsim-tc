@@ -7,6 +7,7 @@
     <NoWarn>CS0414</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <None Update="Fixtures/*.json" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="../DsrValidation/Stubs.cs" Link="Stubs.cs" />
     <Compile Include="../../AnoMech/Core/Game/EventScheduler.cs" Link="EventScheduler.cs" />
     <Compile Include="../../AnoMech/Scenarios/Dsr/DsrConstants.cs" Link="DsrConstants.cs" />

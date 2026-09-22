@@ -1,0 +1,30 @@
+{
+  "source": "https://www.fflogs.com/reports/V4F6z9GCthdf2Ppq?fight=42&type=casts&hostility=1&phase=3&view=events",
+  "statusSource": "https://www.fflogs.com/reports/V4F6z9GCthdf2Ppq?fight=42&type=debuffs&phase=3&view=events",
+  "originFightSeconds": 193.037,
+  "numbersApplied": 196.037,
+  "arrowsApplied": 201.758,
+  "statusesRemoved": [210.745, 220.754, 231.749],
+  "casts": [
+    { "actions": [26381], "begin": 196.037, "release": 200.999, "castSeconds": 4.7, "count": 1 },
+    { "actions": [26387], "begin": 203.142, "release": 210.701, "castSeconds": 7.3, "count": 1 },
+    { "actions": [26382, 26383, 26384], "begin": 210.834, "release": 210.834, "castSeconds": 0, "count": 3 },
+    { "actions": [26388], "begin": 210.967, "release": 210.967, "castSeconds": 0, "count": 1 },
+    { "actions": [26390], "begin": 214.367, "release": 214.367, "castSeconds": 0, "count": 1 },
+    { "actions": [26385], "begin": 214.947, "release": 217.447, "castSeconds": 2.2, "count": 3 },
+    { "actions": [26389], "begin": 217.492, "release": 217.492, "castSeconds": 0, "count": 1 },
+    { "actions": [26378], "begin": 220.084, "release": 224.555, "castSeconds": 4.2, "count": 3 },
+    { "actions": [26382, 26383, 26384], "begin": 220.844, "release": 220.844, "castSeconds": 0, "count": 2 },
+    { "actions": [26387], "begin": 224.643, "release": 232.241, "castSeconds": 7.3, "count": 1 },
+    { "actions": [26385], "begin": 224.957, "release": 227.414, "castSeconds": 2.2, "count": 2 },
+    { "actions": [26378], "begin": 230.050, "release": 234.520, "castSeconds": 4.2, "count": 2 },
+    { "actions": [26382, 26383, 26384], "begin": 231.839, "release": 231.839, "castSeconds": 0, "count": 3 },
+    { "actions": [26388], "begin": 232.508, "release": 232.508, "castSeconds": 0, "count": 1 },
+    { "actions": [26390], "begin": 235.906, "release": 235.906, "castSeconds": 0, "count": 1 },
+    { "actions": [26385], "begin": 235.951, "release": 238.410, "castSeconds": 2.2, "count": 3 },
+    { "actions": [26389], "begin": 239.037, "release": 239.037, "castSeconds": 0, "count": 1 },
+    { "actions": [26378], "begin": 241.049, "release": 245.516, "castSeconds": 4.2, "count": 3 },
+    { "actions": [26379], "begin": 247.619, "release": 250.482, "castSeconds": 2.6, "count": 1 },
+    { "actions": [26380], "begin": 247.664, "release": 251.151, "castSeconds": 3.2, "count": 1 }
+  ]
+}

@@ -3,6 +3,8 @@ using AnoMech.Core.SimObjects;
 using AnoMech.Scenarios.Dsr.P3Wyrmhole;
 
 void Check(bool condition, string message) { if (!condition) throw new Exception(message); }
+LogTimingValidation.Run();
+foreach (var fps in new[] { 30, 60, 144 })
 for (var seed = 0; seed < 300; seed++)
 {
     var state = new DsrP3WyrmholeState(seed);
@@ -18,20 +20,24 @@ for (var seed = 0; seed < 300; seed++)
     var world = new SimWorld();
     SimCharacter.Failures.Clear();
     scenario.Run(world, 0);
-    for (var frame = 1; frame <= 60 * 60; frame++)
+    Check(world.Party.ActiveMembers().Select(m => m.Position).Distinct().Count() == 8, "eight distinct opening positions");
+    Check(!scenario.State.NumbersAssigned && !scenario.State.ArrowsAssigned, "opening does not reveal assignments");
+    for (var role = 0; role < 8; role++)
+        Check(DsrP3WyrmholeAi.Destination(scenario.State, role) == DsrP3WyrmholeAi.OpeningPosition(role), "hold opening position until numbers");
+    for (var frame = 1; frame <= 60 * fps; frame++)
     {
-        SimCharacter.Time = frame / 60f;
-        world.Events.Tick(1f / 60);
-        foreach (var member in world.Party.ActiveMembers()) member.Advance(1f / 60);
-        scenario.Tick(1f / 60, frame / 60f);
+        SimCharacter.Time = frame / (float)fps;
+        world.Events.Tick(1f / fps);
+        foreach (var member in world.Party.ActiveMembers()) member.Advance(1f / fps);
+        scenario.Tick(1f / fps, SimCharacter.Time);
     }
-    Check(SimCharacter.Failures.Count == 0, $"Seed {seed}: {string.Join("; ", SimCharacter.Failures.Distinct())}");
+    Check(SimCharacter.Failures.Count == 0, $"Seed {seed}, {fps} FPS: {string.Join("; ", SimCharacter.Failures.Distinct())}");
     Check(world.Events.IsEmpty && scenario.State.Complete, "scenario completes");
     Check(world.Enemies.Count(e => e.BNpcBaseId == DsrP3WyrmholeConstants.Drake) == 8, "eight jump actors");
     Check(world.Enemies.Where(e => e.BNpcBaseId is DsrP3WyrmholeConstants.Nidhogg or DsrP3WyrmholeConstants.Drake)
         .All(e => e.NameId == 3458), "boss and jump actors resolve the localized Nidhogg name");
 }
-Console.WriteLine("300 seeds: assignments, facing offsets, all AI routes and scenario completion passed.");
+Console.WriteLine("300 seeds at 30/60/144 FPS: opening positions, assignments, facing offsets, all AI routes and scenario completion passed.");
 
 void ExpectFailure(int seed, float start, float end, Action<SimWorld, DsrP3WyrmholeState> disturb, string expected)
 {
@@ -54,7 +60,7 @@ void ExpectFailure(int seed, float start, float end, Action<SimWorld, DsrP3Wyrmh
 var arrowSeed = Enumerable.Range(0, 100).First(seed => new DsrP3WyrmholeState(seed).Arrows[0]);
 ExpectFailure(arrowSeed, 17.6f, 17.8f, (world, state) => world.Party.Get(state.RoleAt(0, 0))!.SetRotation(-MathF.PI / 2), "塔落在場外");
 ExpectFailure(0, 24.3f, 24.5f, (world, state) => world.Party.Get(state.Soaker(0, 0))!.SetPosition(new(0, 0, -19)), "輪塔需要一人");
-ExpectFailure(0, 17.6f, 17.8f, (world, state) => world.Party.Get(state.RoleAt(1, 0))!.SetPosition(new(0, 0, -19)), "分攤需要五人");
+ExpectFailure(0, 17.8f, 18f, (world, state) => world.Party.Get(state.RoleAt(1, 0))!.SetPosition(new(0, 0, -19)), "分攤需要五人");
 ExpectFailure(0, 21.3f, 21.5f, (world, state) => world.Party.Get(0)!.SetPosition(new(0, 0, state.OutFirst[0] ? 0 : 18)), "未躲開");
 Console.WriteLine("Wrong facing, missed towers, missing stack members and in/out failures detected.");
 
@@ -65,6 +71,7 @@ for (var role = 0; role < 8; role++)
     var world = new SimWorld();
     world.Party.Slots[role] = new SimPlayer { Role = role, Position = new(0, 0, 16) };
     scenario.Run(world, 0);
+    Check(world.Party.Get(role)!.Position == new Vector3(0, 0, 16), "opening placement does not teleport player");
     SimCharacter.Failures.Clear();
     for (var frame = 1; frame <= 3600; frame++)
     {
@@ -84,7 +91,7 @@ Check(!DsrP3WyrmholeScenario.InLine(new(5, 0, 5), Vector3.Zero, Vector3.UnitZ), 
 Check(!DsrP3WyrmholeScenario.InLine(new(0, 0, -5), Vector3.Zero, Vector3.UnitZ), "behind line origin");
 var playerWorld = new SimWorld();
 playerWorld.Party.Slots[0] = new SimPlayer { Position = new(3, 0, 4) };
-var playerState = new DsrP3WyrmholeState(42) { Time = 20 };
+var playerState = new DsrP3WyrmholeState(42) { Time = 20, NumbersAssigned = true, ArrowsAssigned = true };
 DsrP3WyrmholeAi.Tick(playerState, playerWorld);
 playerWorld.Party.Slots[0].Advance(10);
 Check(playerWorld.Party.Slots[0].Position == new Vector3(3, 0, 4), "AI does not move player");

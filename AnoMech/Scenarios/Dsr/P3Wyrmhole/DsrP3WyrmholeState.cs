@@ -9,12 +9,15 @@ internal sealed class DsrP3WyrmholeState
     public readonly int Seed;
     public readonly int[] Order = new int[8];
     public readonly int[] Lane = new int[8];
+    public readonly int[] NumberLane = new int[8];
     public readonly int[] Direction = new int[8];
     public readonly bool[] Arrows = new bool[3];
     public readonly bool[] OutFirst = new bool[2];
     public readonly Vector3[][] Towers = [new Vector3[3], new Vector3[2], new Vector3[3]];
     public readonly bool[] TowersVisible = new bool[3];
     public float Time;
+    public bool NumbersAssigned;
+    public bool ArrowsAssigned;
     public bool Failed;
     public bool Complete;
     public float LanceRotation;
@@ -43,6 +46,13 @@ internal sealed class DsrP3WyrmholeState
         }
         OutFirst[0] = random.Next(2) == 0;
         OutFirst[1] = random.Next(2) == 0;
+        for (var order = 0; order < 3; order++)
+        {
+            var lanes = Enumerable.Range(0, Towers[order].Length).ToArray();
+            if (Arrows[order]) random.Shuffle(lanes);
+            for (var lane = 0; lane < lanes.Length; lane++)
+                NumberLane[RoleAt(order, lane)] = lanes[lane];
+        }
     }
 
     public static Vector3 LanePosition(int order, int lane) => order == 1
@@ -50,6 +60,11 @@ internal sealed class DsrP3WyrmholeState
         : lane switch { 0 => new(-7.5f, 0, 0), 1 => new(0, 0, 7.5f), _ => new(7.5f, 0, 0) };
 
     public Vector3 JumpPosition(int role) => LanePosition(Order[role], Lane[role]);
+    public Vector3 NumberPosition(int role)
+    {
+        var position = LanePosition(Order[role], NumberLane[role]);
+        return Order[role] == 2 ? AtRadius(position, 10) : position;
+    }
     public int LandingLane(int role) => Direction[role] == 0 ? Lane[role] : Towers[Order[role]].Length - 1 - Lane[role];
     public static Vector3 Landing(Vector3 position, float facing, int direction)
         => position + new Vector3(MathF.Sin(facing), 0, MathF.Cos(facing)) * (direction * DsrP3WyrmholeConstants.JumpOffset);

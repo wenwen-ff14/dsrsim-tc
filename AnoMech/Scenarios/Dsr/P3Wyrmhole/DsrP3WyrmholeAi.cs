@@ -8,25 +8,33 @@ namespace AnoMech.Scenarios.Dsr.P3Wyrmhole;
 internal sealed class DsrP3WyrmholeAi : IScenarioAi
 {
     public string Name => "tuuf／Elemental Easthogg";
+    private static readonly float[] OpeningAngles = [0, 180, 270, 90, 225, 135, 315, 45];
+
+    public static Vector3 OpeningPosition(int role)
+    {
+        var angle = OpeningAngles[role] * MathF.PI / 180;
+        return new Vector3(MathF.Sin(angle), 0, -MathF.Cos(angle)) * 10;
+    }
 
     public static Vector3 Destination(DsrP3WyrmholeState s, int role)
     {
         var t = s.Time;
         var order = s.Order[role];
-        if (t < 10) return s.JumpPosition(role);
-        if (t < 17.7f) return order == 0 ? s.JumpPosition(role) : North(7);
-        if (t < 24.5f) return WheelPosition(s, role, 0, t < 21.45f);
-        if (t < 27) return order == 2 ? Bait(s, 0, role) : order == 1 ? s.JumpPosition(role) : North(7);
-        if (t < 27.8f) return order == 2 ? Dodge(s, 0, role) : order == 1 ? s.JumpPosition(role) : North(7);
-        if (t < 31.6f) return order == 2 ? Dodge(s, 0, role) : SoakOrNorth(s, 1, role);
-        if (t < 34.4f) return SoakOrNorth(s, 1, role);
-        if (t < 37) return s.SoakLane(1, role) >= 0 ? Bait(s, 1, role) : order == 2 ? s.JumpPosition(role) : North(7);
-        if (t < 38.8f) return s.SoakLane(1, role) >= 0 ? Dodge(s, 1, role) : order == 2 ? s.JumpPosition(role) : North(7);
-        if (t < 39.2f) return North(7);
-        if (t < 46) return WheelPosition(s, role, 2, t < 42.95f);
-        if (t < 48) return s.SoakLane(2, role) >= 0 ? Bait(s, 2, role) : North(7);
-        if (t < 52.6f) return s.SoakLane(2, role) >= 0 ? Dodge(s, 2, role) : North(7);
-        if (t < 54.6f) return North(7);
+        if (!s.NumbersAssigned) return OpeningPosition(role);
+        if (!s.ArrowsAssigned) return s.NumberPosition(role);
+        if (t < 10.105f) return s.JumpPosition(role);
+        if (t < 17.931f) return order == 0 ? s.JumpPosition(role) : North(7);
+        if (t < 24.456f) return WheelPosition(s, role, 0, t < 21.331f);
+        if (t < 27.048f) return order == 2 ? Bait(s, 0, role) : order == 1 ? s.JumpPosition(role) : North(7);
+        if (t < 27.808f) return order == 2 ? Dodge(s, 0, role) : order == 1 ? s.JumpPosition(role) : North(7);
+        if (t < 31.519f) return order == 2 ? Dodge(s, 0, role) : SoakOrNorth(s, 1, role);
+        if (t < 34.378f) return SoakOrNorth(s, 1, role);
+        if (t < 37.014f) return s.SoakLane(1, role) >= 0 ? Bait(s, 1, role) : order == 2 ? s.JumpPosition(role) : North(7);
+        if (t < 39.472f) return s.SoakLane(1, role) >= 0 ? Dodge(s, 1, role) : order == 2 ? s.JumpPosition(role) : North(7);
+        if (t < 46.001f) return WheelPosition(s, role, 2, t < 42.870f);
+        if (t < 48.013f) return s.SoakLane(2, role) >= 0 ? Bait(s, 2, role) : North(7);
+        if (t < 52.480f) return s.SoakLane(2, role) >= 0 ? Dodge(s, 2, role) : North(7);
+        if (t < 54.583f) return North(7);
         return new Vector3(-MathF.Sin(s.LanceRotation), 0, -MathF.Cos(s.LanceRotation)) * 15;
     }
 

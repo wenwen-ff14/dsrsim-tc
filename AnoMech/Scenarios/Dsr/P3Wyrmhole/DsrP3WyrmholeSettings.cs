@@ -24,7 +24,7 @@ public sealed partial class DsrP3WyrmholeScenario
         }
         ImGui.TextDisabled("配樂使用遊戲的背景音樂音量設定。");
         ImGui.TextDisabled("本關練習三輪數字跳躍、踩塔、內外圈、分攤、直線與龍槍。");
-        ImGui.TextDisabled("四人數塔與雙連線尚未加入；時間軸及原生演出待實機校正。");
+        ImGui.TextDisabled("時間軸依 FFLogs 第 42 場校正；四人數塔與雙連線尚未加入。");
         ImGui.Checkbox("顯示站位提示", ref showHints);
         ImGui.SameLine();
         ImGui.Checkbox("顯示戰術圖", ref showMap);
@@ -37,17 +37,18 @@ public sealed partial class DsrP3WyrmholeScenario
         if (showHints && !state.Complete)
         {
             var role = (int)world.Party.PlayerRole;
-            if (state.Time >= 8)
-                ImGui.TextUnformatted($"你是 {state.Order[role] + 1} 號；位置：{LaneName(state.Order[role], state.Lane[role])}");
-            if (state.Time >= 10)
+            if (!state.NumbersAssigned) ImGui.TextUnformatted("準備：八方預站位，等待數字點名。");
+            if (state.NumbersAssigned)
+                ImGui.TextUnformatted($"你是 {state.Order[role] + 1} 號；位置：{LaneName(state.Order[role], state.ArrowsAssigned ? state.Lane[role] : state.NumberLane[role])}");
+            if (state.ArrowsAssigned)
                 ImGui.TextUnformatted(state.Direction[role] switch
                 {
                     1 => "上箭頭：朝東，塔落在面前 15 公尺。",
                     -1 => "下箭頭：朝東，塔落在身後 15 公尺。",
                     _ => "無箭頭：塔落在原地。"
                 });
-            if (state.Time is >= 10.1f and < 24.5f or >= 31.6f and < 46f)
-                ImGui.TextUnformatted(state.OutFirst[state.Time < 24.5f ? 0 : 1] ? "本輪：先外後內" : "本輪：先內後外");
+            if (state.Time is >= 10.105f and < 24.455f or >= 31.606f and < 46f)
+                ImGui.TextUnformatted(state.OutFirst[state.Time < 24.455f ? 0 : 1] ? "本輪：先外後內" : "本輪：先內後外");
         }
         if (showMap) DrawMap();
     }
