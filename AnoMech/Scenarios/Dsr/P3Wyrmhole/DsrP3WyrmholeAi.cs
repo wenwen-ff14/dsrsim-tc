@@ -34,9 +34,11 @@ internal sealed class DsrP3WyrmholeAi : IScenarioAi
         if (t < 39.472f) return s.SoakLane(1, role) >= 0 ? Dodge(s, 1, role) : order == 2 ? s.JumpPosition(role) : North(7);
         if (t < 46.001f) return WheelPosition(s, role, 2, t < 42.870f);
         if (t < 48.013f) return s.SoakLane(2, role) >= 0 ? Bait(s, 2, role) : North(7);
-        if (t < 52.480f) return s.SoakLane(2, role) >= 0 ? Dodge(s, 2, role) : North(7);
-        if (t < 54.583f) return North(7);
-        return new Vector3(-MathF.Sin(s.LanceRotation), 0, -MathF.Cos(s.LanceRotation)) * 15;
+        if (t < 52.480f) return s.SoakLane(2, role) >= 0 ? Dodge(s, 2, role) : role == 0 ? new(7, 0, 0) : North(7);
+        if (t < 54.583f) return DsrP3WyrmholeState.FinalTowerPosition(DsrP3WyrmholeState.FinalTowerHome(role));
+        if (t < 58.115f) return DsrP3WyrmholeState.AtRadius(DsrP3WyrmholeState.FinalTowerPosition(DsrP3WyrmholeState.FinalTowerHome(role)), 16);
+        return DsrP3WyrmholeState.FinalTowerPosition(s.FinalTowersVisible || s.FinalTowersResolved
+            ? s.FinalTowerAssignment(role) : DsrP3WyrmholeState.FinalTowerHome(role));
     }
 
     private static Vector3 North(float radius) => new(0, 0, -radius);

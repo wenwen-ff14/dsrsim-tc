@@ -23,8 +23,9 @@ public sealed partial class DsrP3WyrmholeScenario
             if (ImGui.Button("重新播放音樂")) Plugin.GameInstance.Bgm.Restart();
         }
         ImGui.TextDisabled("配樂使用遊戲的背景音樂音量設定。");
-        ImGui.TextDisabled("本關練習三輪數字跳躍、踩塔、內外圈、分攤、直線與龍槍。");
-        ImGui.TextDisabled("時間軸依 FFLogs 第 42 場校正；四人數塔與雙連線尚未加入。");
+        ImGui.TextDisabled("本關練習數字龍、兩次普攻、隨機龍槍與最後四座人數塔。");
+        ImGui.TextDisabled("四塔：坦近戰依順時針 → 逆時針 → 對角補位；補遠留原塔。");
+        ImGui.TextDisabled("時間軸依 FFLogs 第 42 場校正；四塔後的雙連線尚未加入。");
         ImGui.Checkbox("顯示站位提示", ref showHints);
         ImGui.SameLine();
         ImGui.Checkbox("顯示戰術圖", ref showMap);
@@ -38,9 +39,18 @@ public sealed partial class DsrP3WyrmholeScenario
         {
             var role = (int)world.Party.PlayerRole;
             if (!state.NumbersAssigned) ImGui.TextUnformatted("準備：八方預站位，等待數字點名。");
-            if (state.NumbersAssigned)
+            if (state.Time >= 58.115f)
+            {
+                string[] names = ["西北", "東北", "東南", "西南"];
+                var tower = state.FinalTowersVisible || state.FinalTowersResolved
+                    ? state.FinalTowerAssignment(role) : DsrP3WyrmholeState.FinalTowerHome(role);
+                ImGui.TextUnformatted(state.FinalTowersResolved ? "最後四塔已結算。" : state.FinalTowersVisible
+                    ? $"最後四塔：前往{names[tower]}，需要 {state.FinalTowerCounts[tower]} 人。"
+                    : $"最後四塔：{names[tower]}預站位，等待塔出現。");
+            }
+            if (state.NumbersAssigned && state.Time < 46f)
                 ImGui.TextUnformatted($"你是 {state.Order[role] + 1} 號；位置：{LaneName(state.Order[role], state.ArrowsAssigned ? state.Lane[role] : state.NumberLane[role])}");
-            if (state.ArrowsAssigned)
+            if (state.ArrowsAssigned && state.Time < 46f)
                 ImGui.TextUnformatted(state.Direction[role] switch
                 {
                     1 => "上箭頭：朝東，塔落在面前 15 公尺。",
@@ -71,6 +81,13 @@ public sealed partial class DsrP3WyrmholeScenario
         for (var wave = 0; wave < 3; wave++)
             if (s.TowersVisible[wave])
                 foreach (var tower in s.Towers[wave]) draw.AddCircle(Map(tower), 5 * scale, 0xFF00DDEE, 40, 2);
+        if (s.FinalTowersVisible)
+            for (var tower = 0; tower < 4; tower++)
+            {
+                var position = Map(DsrP3WyrmholeState.FinalTowerPosition(tower));
+                draw.AddCircle(position, 5 * scale, 0xFF00DDEE, 40, 2);
+                draw.AddText(position + new Vector2(-4, -18), 0xFF00DDEE, s.FinalTowerCounts[tower].ToString());
+            }
         foreach (var line in lines)
         {
             var side = new Vector3(-line.Direction.Z, 0, line.Direction.X) * 4;

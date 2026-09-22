@@ -6,6 +6,9 @@
   "arrowsApplied": 201.758,
   "statusesRemoved": [210.745, 220.754, 231.749],
   "casts": [
+    { "actions": [26416], "begin": 243.193, "release": 243.193, "castSeconds": 0, "count": 1 },
+    { "actions": [26416], "begin": 246.322, "release": 246.322, "castSeconds": 0, "count": 1 },
+    { "actions": [26391, 26392, 26393, 26394], "begin": 252.627, "release": 257.590, "castSeconds": 4.7, "count": 4 },
     { "actions": [26381], "begin": 196.037, "release": 200.999, "castSeconds": 4.7, "count": 1 },
     { "actions": [26387], "begin": 203.142, "release": 210.701, "castSeconds": 7.3, "count": 1 },
     { "actions": [26382, 26383, 26384], "begin": 210.834, "release": 210.834, "castSeconds": 0, "count": 3 },

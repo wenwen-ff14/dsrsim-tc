@@ -18,6 +18,8 @@ internal static class DsrP3WyrmholeConstants
     public const uint Geirskogul = 26378;
     public const uint Drachenlance = 26379;
     public const uint DrachenlanceAoe = 26380;
+    public const uint AutoAttack = 26416;
+    public const uint FinalTowerOne = 26391;
     public const ushort First = 3004;
     public const uint FirstHeadmarker = 319;
     public const ushort Center = 2755;

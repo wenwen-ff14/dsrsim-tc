@@ -17,6 +17,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
     private SimWorld? world;
     private SimEnemy? boss;
     private readonly SimEnemy?[][] drakes = [new SimEnemy?[3], new SimEnemy?[2], new SimEnemy?[3]];
+    private readonly SimEnemy?[] finalDrakes = new SimEnemy?[4];
     private readonly List<(int Wave, Vector3 Source, Vector3 Direction)> lines = [];
     private bool fixedSeed, showHints = true, showMap = true;
     private int seed = 1;
@@ -34,6 +35,12 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         foreach (var wave in drakes) Array.Clear(wave);
         boss = Spawn(DsrP3WyrmholeConstants.Nidhogg, Vector3.Zero, true);
         boss?.SetTargetable(true);
+        // Instant hide/show actions need a loaded skeleton before their release packet arrives.
+        for (var wave = 0; wave < drakes.Length; wave++)
+            for (var lane = 0; lane < drakes[wave].Length; lane++)
+                drakes[wave][lane] = Spawn(DsrP3WyrmholeConstants.Drake, state.Towers[wave][lane], false);
+        for (var tower = 0; tower < finalDrakes.Length; tower++)
+            finalDrakes[tower] = Spawn(DsrP3WyrmholeConstants.Drake, DsrP3WyrmholeState.FinalTowerPosition(tower), false);
         // FFLogs V4F6z9GCthdf2Ppq / fight 42: 03:13.037 is this fragment's time zero.
         world.Events.Add(3f, () => boss?.Cast(DsrP3WyrmholeConstants.DiveFromGrace, castSeconds: 4.7f, fireDelay: .262f));
         world.Events.Add(3f, AssignNumbers);
@@ -63,11 +70,19 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         world.Events.Add(45.373f, () => ResolveTowers(2));
         world.Events.Add(46.000f, () => ResolveWheel(1, false));
         world.Events.Add(48.012f, () => BaitLines(2, .267f));
+        world.Events.Add(50.156f, AutoAttack);
         world.Events.Add(52.479f, () => ResolveLines(2));
+        world.Events.Add(53.285f, AutoAttack);
         world.Events.Add(54.582f, StartLance);
         world.Events.Add(54.627f, StartLanceAoe);
         world.Events.Add(58.114f, ResolveLance);
-        world.Events.Add(59f, () => state.Complete = true);
+        world.Events.Add(59.590f, ShowFinalTowers);
+        world.Events.Add(64.553f, ResolveFinalTowers);
+        world.Events.Add(66f, () =>
+        {
+            foreach (var clone in finalDrakes) clone?.SetVisible(false);
+            state.Complete = true;
+        });
     }
 
     private SimEnemy? Spawn(uint id, Vector3 position, bool visible)
@@ -132,7 +147,9 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
             foreach (var other in world.Party.ActiveMembers())
                 if (other != member && Vector3.DistanceSquared(other.Position, member.Position) < 25)
                     Hit(other, "數字龍：被其他人的跳躍範圍命中");
-            var clone = drakes[wave][lane] = Spawn(DsrP3WyrmholeConstants.Drake, landing, true);
+            var clone = drakes[wave][lane];
+            clone?.SetPosition(landing);
+            clone?.SetVisible(true);
             var action = state.Direction[role] switch
             {
                 1 => DsrP3WyrmholeConstants.ForwardJump,
@@ -244,11 +261,45 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
 
     private void StartLance()
     {
-        var target = world!.Party.Get(state!.RoleAt(0, 0));
+        var target = world!.Party.Get(state!.LanceTarget);
         if (target == null) return;
         state.LanceRotation = MathF.Atan2(target.Position.X, target.Position.Z);
         boss?.HoldFacing(state.LanceRotation);
         boss?.Cast(DsrP3WyrmholeConstants.Drachenlance, castSeconds: 2.6f, fireDelay: .263f);
+    }
+
+    private void AutoAttack()
+    {
+        var target = world!.Party.Get(0);
+        if (target == null || !target.IsAlive()) return;
+        boss?.HoldFacing(MathF.Atan2(target.Position.X, target.Position.Z));
+        boss?.Cast(DsrP3WyrmholeConstants.AutoAttack, target.Position, 0, target.GameObjectId);
+    }
+
+    private void ShowFinalTowers()
+    {
+        state!.FinalTowersVisible = true;
+        for (var tower = 0; tower < finalDrakes.Length; tower++)
+        {
+            var count = state.FinalTowerCounts[tower];
+            finalDrakes[tower]?.Cast(DsrP3WyrmholeConstants.FinalTowerOne + (uint)count - 1, castSeconds: 4.7f, fireDelay: .263f);
+            var omen = count == 1 ? "m0119_trap_01t" : $"general_trap_o{count}x";
+            world!.SpawnOmen($"vfx/omen/eff/{omen}.avfx", new(DsrP3WyrmholeState.FinalTowerPosition(tower), 0), new(5, 1, 5), 4.963f);
+        }
+    }
+
+    private void ResolveFinalTowers()
+    {
+        state!.FinalTowersVisible = false;
+        state.FinalTowersResolved = true;
+        for (var tower = 0; tower < finalDrakes.Length; tower++)
+        {
+            finalDrakes[tower]?.SetVisible(true);
+            var position = DsrP3WyrmholeState.FinalTowerPosition(tower);
+            var count = world!.Party.ActiveMembers().Count(m => m.IsAlive() && Vector3.DistanceSquared(m.Position, position) <= 25);
+            if (count != state.FinalTowerCounts[tower])
+                Fail($"最後四塔：第 {tower + 1} 座需要 {state.FinalTowerCounts[tower]} 人，目前 {count} 人");
+        }
     }
 
     private void StartLanceAoe()

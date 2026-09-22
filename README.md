@@ -34,7 +34,7 @@ https://raw.githubusercontent.com/wenwen-ff14/test/main/pluginmaster.json
 詳細設定與驗證限制見 [DSR-P2.md](DSR-P2.md)。
 
 P3 第一版提供「數字龍（Easthogg）」獨立練習，涵蓋三輪數字跳躍、箭頭面向、五人分攤、
-內外圈、踩塔、分身直線與第一輪龍槍。後續四人數塔、雙連線及整段 P3 尚未完成。
+內外圈、踩塔、分身直線、兩次普攻、隨機龍槍與最後四座人數塔。四塔依 tuuf 坦近戰順時針、逆時針、對角補位，補遠留原塔；雙連線及整段 P3 尚未完成。
 P3 原生動畫、特效和精確時序尚待遊戲內確認，詳見 [DSR-P3.md](DSR-P3.md)。
 
 ## 建置

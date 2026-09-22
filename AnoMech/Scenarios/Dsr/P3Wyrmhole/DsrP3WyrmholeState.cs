@@ -22,6 +22,10 @@ internal sealed class DsrP3WyrmholeState
     public bool Failed;
     public bool Complete;
     public float LanceRotation;
+    public readonly int LanceTarget;
+    public readonly int[] FinalTowerCounts = new int[4];
+    public bool FinalTowersVisible;
+    public bool FinalTowersResolved;
 
     public DsrP3WyrmholeState(int seed)
     {
@@ -54,6 +58,28 @@ internal sealed class DsrP3WyrmholeState
             for (var lane = 0; lane < lanes.Length; lane++)
                 NumberLane[RoleAt(order, lane)] = lanes[lane];
         }
+        LanceTarget = random.Next(8);
+        do
+        {
+            for (var tower = 0; tower < 4; tower++) FinalTowerCounts[tower] = random.Next(1, 5);
+        } while (FinalTowerCounts.Sum() != 8);
+    }
+
+    public static int FinalTowerHome(int role) => role switch { 0 or 2 => 0, 1 or 3 => 1, 5 or 7 => 2, _ => 3 };
+
+    public static Vector3 FinalTowerPosition(int tower) => tower switch
+    {
+        0 => new(-10, 0, -10), 1 => new(10, 0, -10),
+        2 => new(10, 0, 10), _ => new(-10, 0, 10)
+    };
+
+    public int FinalTowerAssignment(int role)
+    {
+        var home = FinalTowerHome(role);
+        if (role is 2 or 3 or 6 or 7 || FinalTowerCounts[home] >= 2) return home;
+        foreach (var offset in new[] { 1, 3, 2 })
+            if (FinalTowerCounts[(home + offset) % 4] > 2) return (home + offset) % 4;
+        return home;
     }
 
     public static Vector3 LanePosition(int order, int lane) => order == 1
