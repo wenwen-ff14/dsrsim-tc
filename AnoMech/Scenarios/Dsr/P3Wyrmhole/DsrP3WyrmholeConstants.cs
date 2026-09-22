@@ -20,6 +20,8 @@ internal static class DsrP3WyrmholeConstants
     public const uint DrachenlanceAoe = 26380;
     public const uint AutoAttack = 26416;
     public const uint FinalTowerOne = 26391;
+    public const uint SoulTether = 26396;
+    public const ushort SoulTetherLink = 84;
     public const ushort First = 3004;
     public const uint FirstHeadmarker = 319;
     public const ushort Center = 2755;

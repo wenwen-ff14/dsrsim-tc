@@ -32,6 +32,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
                 npc.MoveTo(DsrP3WyrmholeAi.OpeningPosition(role), 6, MathF.PI / 2);
             }
         lines.Clear();
+        Array.Clear(soulTethers);
         foreach (var wave in drakes) Array.Clear(wave);
         boss = Spawn(DsrP3WyrmholeConstants.Nidhogg, Vector3.Zero, true);
         boss?.SetTargetable(true);
@@ -80,16 +81,30 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         world.Events.Add(58.114f, ResolveLance);
         world.Events.Add(59.590f, ShowFinalTowers);
         world.Events.Add(64.553f, ResolveFinalTowers);
-        world.Events.Add(66f, () =>
+        world.Events.Add(64.553f, StartSoulTethers);
+        world.Events.Add(67.189f, BaitFinalLines);
+        world.Events.Add(71.617f, ResolveSoulTethers);
+        world.Events.Add(71.661f, ResolveFinalLines);
+        world.Events.Add(72f, () => state.TrackingMainTank = true);
+        world.Events.Add(76.759f, AutoAttack);
+        world.Events.Add(79.889f, AutoAttack);
+        world.Events.Add(83.020f, AutoAttack);
+        world.Events.Add(86.149f, AutoAttack);
+        world.Events.Add(89.281f, AutoAttack);
+        world.Events.Add(92.170f, BeginFinalLanceTurn);
+        world.Events.Add(92.770f, StartLance);
+        world.Events.Add(92.815f, StartLanceAoe);
+        world.Events.Add(96.302f, ResolveLance);
+        world.Events.Add(98f, () =>
         {
-            foreach (var clone in finalDrakes) clone?.SetVisible(false);
+            HideFinalDrakes();
             state.Complete = true;
         });
     }
 
     private SimEnemy? Spawn(uint id, Vector3 position, bool visible)
         => world!.SpawnEnemy(new EnemySpawnConfig(id, Level: 90,
-            EnemyList: visible ? EnemyListMode.ScenarioVisible : EnemyListMode.Never,
+            EnemyList: id == DsrP3WyrmholeConstants.Drake ? EnemyListMode.Manual : visible ? EnemyListMode.ScenarioVisible : EnemyListMode.Never,
             IsVisible: visible, Placement: new(position, MathF.PI), DisableLookAt: true,
             NameId: id is DsrP3WyrmholeConstants.Nidhogg or DsrP3WyrmholeConstants.Drake
                 ? DsrP3WyrmholeConstants.NidhoggName : 0));
@@ -195,6 +210,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
     private void ResolveTowers(int wave)
     {
         state!.TowersVisible[wave] = false;
+        foreach (var clone in drakes[wave]) clone?.SetVisibleInEnemyList(true);
         state.LineTracking[wave] = true;
         TrackLines();
         foreach (var tower in state.Towers[wave])
@@ -255,7 +271,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
             foreach (var member in world!.Party.ActiveMembers())
                 if (InLine(member.Position, line.Source, line.Direction)) Hit(member, "數字龍：未躲開分身直線");
         lines.RemoveAll(line => line.Wave == wave);
-        foreach (var clone in drakes[wave]) clone?.SetVisible(false);
+        foreach (var clone in drakes[wave]) { clone?.SetVisible(false); clone?.SetVisibleInEnemyList(false); }
     }
 
     private void BeginLanceTurn()
@@ -266,6 +282,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         var offset = target.Position - boss.Position;
         state.LanceRotation = offset.LengthSquared() > .001f ? MathF.Atan2(offset.X, offset.Z) : boss.Rotation;
         state.LanceTurnStartRotation = boss.Rotation;
+        state.LanceTurnStartTime = 53.982f;
         state.TurningForLance = true;
     }
 
@@ -292,7 +309,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         if (boss == null) return;
         if (state!.TurningForLance)
         {
-            var progress = Math.Clamp((elapsed - 53.982f) / .6f, 0, 1);
+            var progress = Math.Clamp((elapsed - state.LanceTurnStartTime) / .6f, 0, 1);
             var eased = progress * progress * (3 - 2 * progress);
             var angle = MathF.IEEERemainder(state.LanceRotation - state.LanceTurnStartRotation, MathF.Tau);
             boss.HoldFacing(state.LanceTurnStartRotation + angle * eased);
@@ -322,6 +339,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         for (var tower = 0; tower < finalDrakes.Length; tower++)
         {
             finalDrakes[tower]?.SetVisible(true);
+            finalDrakes[tower]?.SetVisibleInEnemyList(true);
             var position = DsrP3WyrmholeState.FinalTowerPosition(tower);
             var count = world!.Party.ActiveMembers().Count(m => m.IsAlive() && Vector3.DistanceSquared(m.Position, position) <= 25);
             if (count != state.FinalTowerCounts[tower])
@@ -353,6 +371,8 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         if (state == null || world == null) return;
         state.Time = elapsed;
         UpdateBossFacing(delta, elapsed);
+        UpdateSoulTethers();
+        TrackFinalLines();
         TrackLines();
         DsrP3WyrmholeAi.Tick(state, world);
     }

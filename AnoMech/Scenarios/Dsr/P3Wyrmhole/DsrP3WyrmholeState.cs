@@ -29,6 +29,12 @@ internal sealed class DsrP3WyrmholeState
     public readonly int[] FinalTowerCounts = new int[4];
     public bool FinalTowersVisible;
     public bool FinalTowersResolved;
+    public bool TethersActive;
+    public bool TethersResolved;
+    public readonly int TetherClone;
+    public readonly int[] TetherOwners = new int[2];
+    public readonly Vector3[] TetherPickup = new Vector3[2];
+    public float LanceTurnStartTime;
     public readonly Vector3?[] MovementTargets = new Vector3?[8];
     public readonly float?[] MovementFacings = new float?[8];
 
@@ -68,6 +74,10 @@ internal sealed class DsrP3WyrmholeState
         {
             for (var tower = 0; tower < 4; tower++) FinalTowerCounts[tower] = random.Next(1, 5);
         } while (FinalTowerCounts.Sum() != 8);
+        TetherClone = random.Next(4);
+        var tetherTargets = Enumerable.Range(2, 6).ToArray();
+        random.Shuffle(tetherTargets);
+        Array.Copy(tetherTargets, TetherOwners, 2);
     }
 
     public static int FinalTowerHome(int role) => role switch { 0 or 6 => 0, 1 or 7 => 1, 3 or 5 => 2, _ => 3 };

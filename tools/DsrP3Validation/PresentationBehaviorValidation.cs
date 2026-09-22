@@ -23,6 +23,7 @@ internal static class PresentationBehaviorValidation
             throw new Exception("Stack VFX must be released by the Nidhogg skeleton");
 
         var clone = world.Enemies.First(e => e.BNpcBaseId == DsrP3WyrmholeConstants.Drake);
+        if (!clone.InEnemyList) throw new Exception("Landed clone must appear in the enemy list for its spear cast");
         void ParkAllAway()
         {
             foreach (var member in world.Party.ActiveMembers()) member.SetPosition(new(0, 0, -40));

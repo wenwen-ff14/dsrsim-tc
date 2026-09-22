@@ -26,7 +26,7 @@ public sealed partial class DsrP3WyrmholeScenario
         ImGui.TextDisabled("本關練習數字龍、兩次普攻、隨機龍槍與最後四座人數塔。");
         ImGui.TextDisabled("四塔：坦近戰依順時針 → 逆時針 → 對角補位；補遠留原塔。");
         ImGui.TextDisabled("西北 MT＋D3／東北 ST＋D4／西南 D1＋H1／東南 D2＋H2");
-        ImGui.TextDisabled("時間軸依 FFLogs 第 42 場校正；四塔後的雙連線尚未加入。");
+        ImGui.TextDisabled("時間軸依 FFLogs 第 42 場校正；四塔後包含坦克接線、五次普攻與固定 C 點騰龍槍。");
         ImGui.Checkbox("顯示站位提示", ref showHints);
         ImGui.SameLine();
         ImGui.Checkbox("顯示戰術圖", ref showMap);
@@ -40,7 +40,12 @@ public sealed partial class DsrP3WyrmholeScenario
         {
             var role = (int)world.Party.PlayerRole;
             if (!state.NumbersAssigned) ImGui.TextUnformatted("準備：八方預站位，等待數字點名。");
-            if (state.Time >= 58.115f)
+            if (state.TethersActive)
+                ImGui.TextUnformatted(role == 0 ? "MT：走進本體連線接線，回王腳下。" : role == 1
+                    ? "ST：走進分身連線接線，回王腳下。" : "補遠引導槍後往內躲避，遠離坦克接線範圍。");
+            else if (state.TethersResolved)
+                ImGui.TextUnformatted("接線已結算：五次普攻後，固定 C 點騰龍槍。");
+            else if (state.Time >= 58.115f)
             {
                 string[] names = ["西北", "東北", "東南", "西南"];
                 var tower = state.FinalTowersVisible || state.FinalTowersResolved

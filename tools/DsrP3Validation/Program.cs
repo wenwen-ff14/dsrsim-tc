@@ -26,7 +26,7 @@ for (var seed = 0; seed < 300; seed++)
     Check(!scenario.State.NumbersAssigned && !scenario.State.ArrowsAssigned, "opening does not reveal assignments");
     for (var role = 0; role < 8; role++)
         Check(DsrP3WyrmholeAi.Destination(scenario.State, role) == DsrP3WyrmholeAi.OpeningPosition(role), "hold opening position until numbers");
-    for (var frame = 1; frame <= 67 * fps; frame++)
+    for (var frame = 1; frame <= 99 * fps; frame++)
     {
         SimCharacter.Time = frame / (float)fps;
         var beforeMove = world.Party.ActiveMembers().Select(m => m.Position).ToArray();
@@ -39,6 +39,11 @@ for (var seed = 0; seed < 300; seed++)
     }
     Check(SimCharacter.Failures.Count == 0, $"Seed {seed}, {fps} FPS: {string.Join("; ", SimCharacter.Failures.Distinct())}");
     Check(world.Events.IsEmpty && scenario.State.Complete, "scenario completes");
+    Check(scenario.State.TethersResolved && scenario.State.TetherOwners.SequenceEqual(new[] { 0, 1 }), "MT takes boss tether and ST takes clone tether");
+    var mainBoss = world.Enemies.Single(e => e.BNpcBaseId == DsrP3WyrmholeConstants.Nidhogg);
+    Check(mainBoss.Casts.Count(c => c.Action == DsrP3WyrmholeConstants.AutoAttack && c.Time > 71.617f) == 5, "five autos after tethers");
+    Check(MathF.Abs(MathF.IEEERemainder(scenario.State.LanceRotation, MathF.Tau)) < .001f, "final lance faces C/south");
+    Check(world.Enemies.Where(e => e.BNpcBaseId == DsrP3WyrmholeConstants.Drake).All(e => e.ListMode == EnemyListMode.Manual && !e.InEnemyList), "clone enemy list lifecycle");
     Check(world.Enemies.Count(e => e.BNpcBaseId == DsrP3WyrmholeConstants.Drake) == 12, "eight jump actors and four final tower actors");
     Check(world.Enemies.Where(e => e.BNpcBaseId is DsrP3WyrmholeConstants.Nidhogg or DsrP3WyrmholeConstants.Drake)
         .All(e => e.NameId == 3458), "boss and jump actors resolve the localized Nidhogg name");
@@ -52,7 +57,7 @@ void ExpectFailure(int seed, float start, float end, Action<SimWorld, DsrP3Wyrmh
     var world = new SimWorld();
     scenario.Run(world, 0);
     SimCharacter.Failures.Clear();
-    for (var frame = 1; frame <= 67 * 60; frame++)
+    for (var frame = 1; frame <= 99 * 60; frame++)
     {
         var time = frame / 60f;
         SimCharacter.Time = time;
@@ -79,7 +84,7 @@ for (var role = 0; role < 8; role++)
     scenario.Run(world, 0);
     Check(world.Party.Get(role)!.Position == new Vector3(0, 0, 16), "opening placement does not teleport player");
     SimCharacter.Failures.Clear();
-    for (var frame = 1; frame <= 4020; frame++)
+    for (var frame = 1; frame <= 5940; frame++)
     {
         var player = world.Party.Get(role)!;
         player.MoveTo(DsrP3WyrmholeAi.Destination(scenario.State, role), 6, MathF.PI / 2);
@@ -105,6 +110,10 @@ Console.WriteLine("Line geometry and player movement ownership passed. Native re
 PresentationBehaviorValidation.Run();
 FinalTowerValidation.Run();
 BossFacingValidation.Run();
+Check(DsrP3WyrmholeScenario.InterceptsSoulTether(new(0, 0, 5), Vector3.Zero, new(0, 0, 10)), "tank crosses tether");
+Check(!DsrP3WyrmholeScenario.InterceptsSoulTether(new(3, 0, 5), Vector3.Zero, new(0, 0, 10)), "standing beside tether does not take it");
+Check(!DsrP3WyrmholeScenario.InterceptsSoulTether(new(0, 0, 12), Vector3.Zero, new(0, 0, 10)), "standing behind holder does not take tether");
+ExpectFailure(0, 64.6f, 71.7f, (world, state) => world.Party.Get(0)!.SetPosition(new(0, 0, -40)), "MT 未接到本體線");
 
 namespace AnoMech.Scenarios.Dsr.P3Wyrmhole
 {

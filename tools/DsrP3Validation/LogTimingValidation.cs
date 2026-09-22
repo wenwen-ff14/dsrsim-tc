@@ -22,7 +22,7 @@ internal static class LogTimingValidation
             var arrows = 0f;
             float[] removed = [0, 0, 0];
             float[] towersResolved = [0, 0, 0];
-            for (var frame = 1; frame <= 67 * fps; frame++)
+            for (var frame = 1; frame <= 99 * fps; frame++)
             {
                 SimCharacter.Time = frame / (float)fps;
                 var beforeNumbers = scenario.State.NumbersAssigned;
@@ -78,6 +78,6 @@ internal static class LogTimingValidation
             if (SimCharacter.Failures.Count != 0)
                 throw new Exception($"P3 AI route failed at {fps} FPS: {string.Join(';', SimCharacter.Failures.Distinct())}");
         }
-        Console.WriteLine("FFLogs fight 42: 23 P3 cast groups, number/arrow timing, status removal and tower resolution match at 30/60/144 FPS.");
+        Console.WriteLine("FFLogs fight 42: 32 P3 cast groups, number/arrow timing, status removal and tower resolution match at 30/60/144 FPS.");
     }
 }

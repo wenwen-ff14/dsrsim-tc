@@ -52,7 +52,7 @@ internal static class FinalTowerValidation
                 for (var tower = 0; tower < 4; tower++)
                     if (Enumerable.Range(0, 8).Count(r => scenario.State.FinalTowerAssignment(r) == tower) != counts[tower])
                         throw new Exception($"Four-tower assignment failed: {string.Join(',', counts)}");
-                for (var frame = 1; frame <= 67 * fps; frame++)
+                for (var frame = 1; frame <= 99 * fps; frame++)
                 {
                     SimCharacter.Time = frame / (float)fps;
                     world.Events.Tick(1f / fps);
@@ -65,7 +65,7 @@ internal static class FinalTowerValidation
                     SimCharacter.Failures.Count != 0 || actors.Any(e => e.Visible))
                     throw new Exception($"Final towers {string.Join(',', counts)} failed at {fps} FPS: {string.Join(';', SimCharacter.Failures)}");
                 for (var tower = 0; tower < 4; tower++)
-                    if (actors[tower + 8].Casts.Single().Action != 26390 + counts[tower])
+                    if (actors[tower + 8].Casts.First().Action != 26390 + counts[tower])
                         throw new Exception("Tower action does not match its required player count");
             }
         }
@@ -77,7 +77,7 @@ internal static class FinalTowerValidation
             scenario.Run(world, 0);
             Array.Fill(scenario.State.FinalTowerCounts, 2);
             SimCharacter.Failures.Clear();
-            for (var frame = 1; frame <= 67 * 60; frame++)
+            for (var frame = 1; frame <= 99 * 60; frame++)
             {
                 SimCharacter.Time = frame / 60f;
                 if (SimCharacter.Time is > 64.4f and < 64.6f)

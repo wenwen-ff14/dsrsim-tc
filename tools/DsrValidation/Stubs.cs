@@ -20,7 +20,7 @@ namespace AnoMech.Core.Game
 }
 namespace AnoMech.Core.SimObjects
 {
-    public enum EnemyListMode { OnlyWhenVisible, ScenarioVisible, Never }
+    public enum EnemyListMode { OnlyWhenVisible, ScenarioVisible, Never, Manual }
     public record struct EnemySpawnConfig(uint BNpcBaseId, byte Level, EnemyListMode EnemyList, bool IsVisible, Game.Placement Placement, bool DisableLookAt = false, bool WeaponDrawn = false, uint NameId = 0);
     public interface ISimPartyMember { void Knockback(Vector3 source, float distance); }
     public class SimCharacter : ISimPartyMember
@@ -90,6 +90,8 @@ namespace AnoMech.Core.SimObjects
         public uint NameId;
         public EnemyListMode ListMode;
         public bool Visible;
+        public bool InEnemyList;
+        public void SetVisibleInEnemyList(bool visible) => InEnemyList = visible;
         public readonly List<(float Time, uint Action, float? Duration, float FireDelay)> Casts = [];
         public readonly List<uint> Dialogue = [];
         public void ShowDialogue(uint id, float duration) => Dialogue.Add(id);
@@ -115,8 +117,10 @@ namespace AnoMech.Core.SimObjects
         public void WipeAllPlayers(string cause) => Slots[0].Die(cause);
     }
     public class MapStub { public void AddEffect(uint effect, byte index, uint? resetFlags = null) { } }
+    public class SimTether { public void Despawn() { } }
     public class SimWorld
     {
+        public SimTether Tether(SimCharacter? a, SimCharacter? b, ushort id) => new();
         public readonly Game.EventScheduler Events = new();
         public readonly SimParty Party = new();
         public readonly MapStub Map = new();

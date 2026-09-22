@@ -20,6 +20,15 @@ internal sealed class DsrP3WyrmholeAi : IScenarioAi
     {
         var t = s.Time;
         var order = s.Order[role];
+        if (s.FinalTowersResolved)
+        {
+            if (s.TethersActive && role < 2)
+                return s.TetherOwners[role] == role ? new(0, 0, role == 0 ? -1 : 1) : s.TetherPickup[role];
+            if (t < 71.662f)
+                return DsrP3WyrmholeState.AtRadius(DsrP3WyrmholeState.FinalTowerPosition(DsrP3WyrmholeState.FinalTowerHome(role)),
+                    role is 2 or 3 or 6 or 7 && t < 67.190f ? 16 : 7);
+            return role == 0 ? North(7) : new(0, 0, 16);
+        }
         if (!s.NumbersAssigned) return OpeningPosition(role);
         if (!s.ArrowsAssigned) return s.NumberPosition(role);
         if (t < 10.105f) return s.JumpPosition(role);
