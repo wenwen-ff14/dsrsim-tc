@@ -4,6 +4,7 @@ using System.Numerics;
 
 var failures = new List<string>();
 LogTimingValidation.Run();
+MeteorSnapshotValidation.Run();
 var peak = 0;
 for (var seed = 0; seed < 1000; seed++)
 {
@@ -334,5 +335,6 @@ namespace AnoMech.Scenarios.Dsr.P2Sanctity
             meteorAngleSelection = angle switch { 120 => 1, 150 => 2, 180 => 3, 210 => 4, 240 => 5, _ => 0 };
         }
         internal DsrP2SanctityState CurrentState => state!;
+        internal Vector3 CapturedMeteor(int index, int target) => meteorSnapshots[index, target];
     }
 }

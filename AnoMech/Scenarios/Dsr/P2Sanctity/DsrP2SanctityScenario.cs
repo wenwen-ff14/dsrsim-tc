@@ -127,28 +127,35 @@ public sealed partial class DsrP2SanctityScenario : IScenario
         world.Events.Add(43.031f, () =>
         {
             ResolveTowers(false);
+            SnapshotMeteors();
             grinnaux = Spawn(DsrConstants.Npc.Grinnaux, Vector3.Zero);
             state.Stage = SanctityStage.Meteors;
             state.MeteorElapsed = 0;
         });
-        world.Events.Add(44.462f, SnapshotMeteors);
+        world.Events.Add(44.462f, () => ShowMeteorFall(0));
+        world.Events.Add(44.463f, SnapshotMeteors);
         world.Events.Add(45.176f, () => LandMeteors(0));
         world.Events.Add(45.355f, () => ShowTowers(true, 10.7f, .266f));
         world.Events.Add(45.894f, SnapshotMeteors);
+        world.Events.Add(45.894f, () => ShowMeteorFall(1));
         world.Events.Add(46.610f, () => LandMeteors(1));
         world.Events.Add(47.325f, SnapshotMeteors);
+        world.Events.Add(47.325f, () => ShowMeteorFall(2));
         world.Events.Add(48.041f, () => LandMeteors(2));
         world.Events.Add(48.756f, SnapshotMeteors);
+        world.Events.Add(48.756f, () => ShowMeteorFall(3));
         world.Events.Add(49.428f, () =>
         {
             grinnaux?.Cast(DsrConstants.Action.Knockback, castSeconds: 3.7f, fireDelay: .283f);
         });
         world.Events.Add(49.472f, () => LandMeteors(3));
         world.Events.Add(50.189f, SnapshotMeteors);
+        world.Events.Add(50.189f, () => ShowMeteorFall(4));
         world.Events.Add(50.905f, () => LandMeteors(4));
         world.Events.Add(51.621f, SnapshotMeteors);
+        world.Events.Add(51.621f, () => ShowMeteorFall(5));
         world.Events.Add(52.336f, () => LandMeteors(5));
-        world.Events.Add(53.052f, SnapshotMeteors);
+        world.Events.Add(53.052f, () => ShowMeteorFall(6));
         world.Events.Add(53.411f, ResolveKnockback);
         world.Events.Add(53.767f, () => LandMeteors(6));
         world.Events.Add(56.321f, () => { ResolveTowers(true); state.Stage = SanctityStage.SecondTowers; });
@@ -388,15 +395,21 @@ public sealed partial class DsrP2SanctityScenario : IScenario
             var member = world!.Party.Get(role);
             if (!member.IsAlive()) { Wipe("隕石點名者已倒下"); continue; }
             meteorSnapshots[meteorSnapshotCount, i] = member!.Position;
-            if (cometActors[meteorSnapshotCount, i] is { } comet)
-            {
-                comet.SetPosition(member.Position);
-                comet.SetVisible(true);
-                comet.Cast(DsrConstants.Action.Comet, member.Position, 0, comet.GameObjectId);
-            }
         }
         meteorSnapshotCount++;
         state!.MeteorSnapshots = meteorSnapshotCount;
+    }
+
+    private void ShowMeteorFall(int index)
+    {
+        for (var i = 0; i < 2; i++)
+            if (cometActors[index, i] is { } comet)
+            {
+                var position = meteorSnapshots[index, i];
+                comet.SetPosition(position);
+                comet.SetVisible(true);
+                comet.Cast(DsrConstants.Action.Comet, position, 0, comet.GameObjectId);
+            }
     }
 
     private void LandMeteors(int index)

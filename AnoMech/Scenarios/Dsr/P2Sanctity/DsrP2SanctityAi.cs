@@ -20,7 +20,7 @@ internal sealed class DsrP2SanctityAi : IScenarioAi
             SanctityStage.Pairs => state.PairPosition(role),
             SanctityStage.FirstTowers => state.HasMeteor(role) ? state.MeteorStart(role) :
                 Vector3.Normalize(state.FirstTower(role)) * (state.StartsInside(role) ? 3.5f : 20.4f),
-            SanctityStage.Meteors when state.HasMeteor(role) && state.MeteorSnapshots < 7 =>
+            SanctityStage.Meteors when state.HasMeteor(role) && state.MeteorElapsed < 10.02f =>
                 state.MeteorPosition(role, Math.Clamp(state.MeteorElapsed / 10.02f, 0, 1)),
             SanctityStage.Meteors when state.StartsInside(role) && !state.KnockbackResolved =>
                 DsrP2SanctityState.Polar(state.SecondTowerAngle(role), 2),
@@ -56,7 +56,7 @@ internal sealed class DsrP2SanctityAi : IScenarioAi
                 if (MathF.Abs(change) > 4)
                     destination = DsrP2SanctityState.Polar(current + Math.Clamp(change, -4, 4), 20);
             }
-            if (state.Stage == SanctityStage.Meteors && state.HasMeteor(role) && state.MeteorSnapshots < 7)
+            if (state.Stage == SanctityStage.Meteors && state.HasMeteor(role) && state.MeteorElapsed < 10.02f)
             {
                 var current = DsrP2SanctityState.Angle(npc.Position);
                 var change = DsrP2SanctityState.SignedAngle(DsrP2SanctityState.Angle(destination) - current);
