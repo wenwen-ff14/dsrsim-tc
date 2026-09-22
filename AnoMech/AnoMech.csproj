@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Dalamud.NET.Sdk/13.0.0">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <LangVersion>13.0</LangVersion>
+    <DalamudLibPath Condition="'$(DALAMUD_HOME)' == '' And Exists('$(APPDATA)/FFXIVSimpleLauncher/Dalamud/Injector/Dalamud.dll')">$(APPDATA)/FFXIVSimpleLauncher/Dalamud/Injector/</DalamudLibPath>
+    <AssemblySearchPaths>$(DalamudLibPath);{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
+    <Authors>Anomek</Authors>
+    <Version>0.4.0.18</Version>
+    <Description>Simulate ultimate raid mechanics solo client-side</Description>
+    <RootNamespace>AnoMech</RootNamespace>
+    <PackageProjectUrl>https://github.com/anomek/AnoMech</PackageProjectUrl>
+    <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+    <IsPackable>false</IsPackable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <Target Name="VerifyDalamudApi13" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="!Exists('$(DalamudLibPath)/Dalamud.dll')" Text="Set DALAMUD_HOME or DalamudLibPath to the Traditional Chinese API 13 SDK directory." />
+    <GetAssemblyIdentity AssemblyFiles="$(DalamudLibPath)/Dalamud.dll">
+      <Output TaskParameter="Assemblies" ItemName="DalamudSdkIdentity" />
+    </GetAssemblyIdentity>
+    <Error Condition="$([MSBuild]::VersionLessThan('%(DalamudSdkIdentity.Version)', '13.0')) Or $([MSBuild]::VersionGreaterThanOrEquals('%(DalamudSdkIdentity.Version)', '14.0'))" Text="This project requires Dalamud API 13. Found %(DalamudSdkIdentity.Version) at $(DalamudLibPath)." />
+  </Target>
+
+</Project>
+
+
+
+
+

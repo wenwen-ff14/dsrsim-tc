@@ -1,0 +1,17 @@
+.vs/
+obj/
+/logs/
+/docs/
+/Reference/
+bin/
+.idea/
+.claude/
+FFXIV-RaidsRewritten-Reference.md
+*.user
+__pycache__
+/tools/.venv/
+/.tools/
+/tools/reference/
+/tools/api13-*.txt
+/tools/api13-*.json
+/api13-build.log

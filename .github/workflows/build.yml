@@ -1,0 +1,18 @@
+name: Build API 13
+
+on:
+  workflow_dispatch:
+    inputs:
+      sdk_url:
+        description: Traditional Chinese Dalamud API 13 SDK zip URL
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/api13-build.yml
+    with:
+      sdk_url: ${{ inputs.sdk_url }}

@@ -1,0 +1,14 @@
+name: API 13 PR Build
+
+on:
+  pull_request:
+    branches: [ main, master ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    uses: ./.github/workflows/api13-build.yml
+    with:
+      sdk_url: ${{ vars.DALAMUD_API13_SDK_URL }}

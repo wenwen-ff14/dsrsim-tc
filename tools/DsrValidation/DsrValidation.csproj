@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>CS0414</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../AnoMech/Scenarios/Dsr/P2Sanctity/DsrP2SanctityState.cs" Link="State.cs" />
+    <Compile Include="../../AnoMech/Scenarios/Dsr/P2Sanctity/DsrP2SanctityAi.cs" Link="Ai.cs" />
+    <Compile Include="../../AnoMech/Scenarios/Dsr/P2Sanctity/DsrP2SanctityScenario.cs" Link="Scenario.cs" />
+    <Compile Include="../../AnoMech/Scenarios/Dsr/DsrConstants.cs" Link="Constants.cs" />
+    <Compile Include="../../AnoMech/Core/Game/EventScheduler.cs" Link="EventScheduler.cs" />
+  </ItemGroup>
+</Project>

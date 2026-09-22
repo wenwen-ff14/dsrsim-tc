@@ -1,0 +1,30 @@
+using System.Collections.Generic;
+using System.Numerics;
+using AnoMech.Core.Game;
+using AnoMech.Core.SimObjects;
+
+namespace AnoMech.Scenarios.Dsr;
+
+public sealed class DsrZone : IZone
+{
+    public static readonly DsrZone Instance = new();
+    // d00 contains the Allagan platform r1fz_d0_grd01; b00/c00 are other arenas.
+    public static readonly Phase P2 = new(Instance, "P2", 45, 312);
+    public string Name => "絕龍詩戰爭";
+    public uint TerritoryId => 968;
+    public Vector3 Origin => new(100, 0, 100);
+    public byte Level => 90;
+    public ushort ItemLevel => 605;
+    public IReadOnlyList<WaymarkLayout> WaymarkPresets { get; } =
+        [new("Tuuf P2 內圈標點", [
+            new(WaymarkSlot.A, new(0, 0, -13)),
+            new(WaymarkSlot.B, new(13, 0, 0)),
+            new(WaymarkSlot.C, new(0, 0, 13)),
+            new(WaymarkSlot.D, new(-13, 0, 0)),
+            new(WaymarkSlot.One, new(9.192f, 0, -9.193f)),
+            new(WaymarkSlot.Two, new(9.192f, 0, 9.192f)),
+            new(WaymarkSlot.Three, new(-9.193f, 0, 9.192f)),
+            new(WaymarkSlot.Four, new(-9.193f, 0, -9.193f)),
+        ])];
+    public void Run(SimWorld world) => world.EnforceArenaBoundary(21, "超出聖杖場地邊界");
+}

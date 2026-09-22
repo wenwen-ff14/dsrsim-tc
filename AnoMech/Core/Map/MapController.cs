@@ -1,0 +1,195 @@
+using AnoMech.Helpers;
+using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
+using System;
+using System.Collections.Generic;
+using System.Numerics;
+
+namespace AnoMech.Core.Map;
+
+// Unified entry point for zone loading and map effects. Owned by SimWorld as
+// world.Map. Zone and effects state are reset by Reset(); zone hooks are
+// released by Dispose().
+public sealed unsafe class MapController : IDisposable
+{
+    private readonly MapEffects effects = new();
+    private readonly MapEffectResets effectResets = new();
+    private readonly ZoneSession zone = new();
+    private uint targetTerritory;
+    private byte? desiredWeather;
+    private float weatherTransition = 0.5f;
+    private bool weatherLogged;
+
+    // Layout instances forced inactive for the run's lifetime — see SuppressLayer.
+    private readonly List<nint> suppressedLayerInstances = new();
+
+    // Collider-deactivation state. Zone-load is async (resources stream in over
+    // several frames), so each pending drop re-tries DisableSpawnAreaColliders
+    // each frame until at least one SharedGroup is found near its center, or it
+    // times out. Holds the spawn-ring barrier (armed by TryLoad) plus any arena
+    // points a scenario requested via ArmColliderDrops.
+    private readonly List<PendingColliderDrop> pendingColliderDrops = new();
+    private const int BarrierDropMaxFrames = 300; // ~5s at 60fps
+    private const float ColliderDropRadius = 10f; // per-point radius (matches spawn barrier)
+
+    private struct PendingColliderDrop
+    {
+        public Vector3 Center;
+        public float Radius;
+        public int FramesLeft;
+    }
+
+    // ── Zone ─────────────────────────────────────────────────────────────────
+
+    // True while a scenario was started by loading a client-side zone.
+    // Cleared by Unload() and Reset().
+    public bool IsInInstance { get; private set; }
+
+    public bool IsZoneLoaded => zone.IsActive;
+    public bool IsInInn() => ZoneSession.IsInInn();
+
+    // Load the target territory client-side. Must be called from the Inn.
+    public void Load(uint territoryId, Vector3 playerPosition, byte levelSync, ushort itemLevelSync) => zone.Enter(territoryId, playerPosition, levelSync, itemLevelSync);
+
+    // Immediately change the active weather (mid-scenario). transition = fade seconds.
+    public void SetWeather(byte weatherId, float transition = 0.5f)
+    {
+        desiredWeather = weatherId;
+        weatherTransition = transition;
+        weatherLogged = false;
+        ReconcileWeather();
+    }
+
+    // Revert to the saved inn territory and restore position.
+    public void Unload()
+    {
+        ResetEffects();
+        effects.Loaded = false;
+        desiredWeather = null;
+        targetTerritory = 0;
+        zone.Revert(false);
+        IsInInstance = false;
+        pendingColliderDrops.Clear();
+        suppressedLayerInstances.Clear();
+    }
+
+    // Forces one native LGB layer's instances inactive for as long as the zone stays loaded.
+    // Some zones' client-side load activates every layer at once (there is no real duty
+    // director selecting the current phase's), so competing geometry from different phases can
+    // render in the same space and z-fight. A one-shot SetActive doesn't stick — the engine
+    // reconciles it back within a frame or two — so this re-asserts every tick until Unload.
+    public void SuppressLayer(ushort layerKey)
+        => suppressedLayerInstances.AddRange(LayoutQuery.CollectLayerInstances(layerKey));
+
+    // Per-frame poll. Called from SimWorld.Tick.
+    internal void Tick()
+    {
+        ReconcileWeather();
+        foreach (var ptr in suppressedLayerInstances)
+            ((ILayoutInstance*)ptr)->SetActive(false);
+
+        for (int i = pendingColliderDrops.Count - 1; i >= 0; i--)
+        {
+            var drop = pendingColliderDrops[i];
+            var disabled = DirectorFunctions.DisableSpawnAreaColliders(drop.Center, drop.Radius);
+            if (disabled > 0) { pendingColliderDrops.RemoveAt(i); continue; }
+            drop.FramesLeft--;
+            if (drop.FramesLeft <= 0)
+            {
+                Plugin.Log.Warning($"[BarrierDrop] Gave up after {BarrierDropMaxFrames} frames — no SGs found near ({drop.Center.X:F2},{drop.Center.Y:F2},{drop.Center.Z:F2})");
+                pendingColliderDrops.RemoveAt(i);
+            }
+            else
+            {
+                pendingColliderDrops[i] = drop;
+            }
+        }
+    }
+
+    private void ReconcileWeather()
+    {
+        if (!IsZoneLoaded || desiredWeather is not { } weather) return;
+        var layoutWorld = LayoutWorld.Instance();
+        if (layoutWorld == null || layoutWorld->ActiveLayout == null) return;
+        var layout = layoutWorld->ActiveLayout;
+        if (layout->InitState != 7 || layout->TerritoryTypeId != targetTerritory) return;
+        var env = EnvManager.Instance();
+        if (env == null) return;
+        // Zone streaming can overwrite an early one-shot weather write.
+        if (env->ActiveWeather != weather) zone.SetWeather(weather, weatherTransition);
+        if (weatherLogged) return;
+        Plugin.Log.Info($"[Map] Territory {targetTerritory}: requested weather {weather}, active {env->ActiveWeather}, layout ready.");
+        weatherLogged = true;
+    }
+
+    // Enter the scenario's target instance if conditions are met.
+    // Sets IsInInstance when the zone is already active or the Inn load succeeds.
+    // No-op (IsInInstance stays false) when target is null or the player isn't in the Inn.
+    public void TryLoad(TargetInstance? target, byte levelSync, ushort itemLevelSync)
+    {
+        if (target == null) return;
+        // Fresh load only when no zone is active yet (must be in the Inn). When a
+        // zone is already loaded we're switching scenarios within the same
+        // territory — skip the reload but still fall through to re-apply weather.
+        targetTerritory = target.TerritoryId;
+        desiredWeather = null;
+        if (!IsZoneLoaded)
+        {
+            if (!IsInInn()) return;
+            Load(target.TerritoryId, target.PlayerPosition, levelSync, itemLevelSync);
+        }
+        if (target.WeatherId is { } wid)
+        {
+            SetWeather(wid);
+        }
+        IsInInstance = true;
+        effects.Loaded = true;
+        InstanceContentDirectorHelper.Commence();
+        ArmBarrierDrop(target.PlayerPosition, 10f);
+    }
+
+    private void ArmBarrierDrop(Vector3 center, float radius)
+    {
+        pendingColliderDrops.Add(new PendingColliderDrop
+        {
+            Center = center,
+            Radius = radius,
+            FramesLeft = BarrierDropMaxFrames,
+        });
+    }
+
+    // Arm collider drops at scenario-provided arena points (already converted to
+    // world coordinates). Same async-load retry as the spawn-ring barrier.
+    public void ArmColliderDrops(IEnumerable<Vector3> worldCenters)
+    {
+        foreach (var center in worldCenters)
+            ArmBarrierDrop(center, ColliderDropRadius);
+    }
+
+    // ── Map effects ───────────────────────────────────────────────────────────
+
+    // Replay a single MapEffect state change. packetFlags: high16=State, low8=Flags.
+    public void AddEffect(uint packetFlags, byte index, uint? resetFlags = null)
+    {
+        if (!effects.Loaded) return;
+        if (resetFlags is { } state) effectResets.Track(index, state);
+        effects.Apply(packetFlags, index);
+    }
+
+    public void ResetEffects() => effectResets.Reset(effects.Apply);
+
+    // Replay a native DirectorUpdate event (instance progress / state sync) — the
+    // server-side InstanceContentDirector message a scenario timeline replays. Thin
+    // forwarder so scenarios address it through world.Map alongside AddEffect.
+    public void DirectorUpdate(uint category, uint arg1 = 0, uint arg2 = 0, uint arg3 = 0, uint arg4 = 0, uint arg5 = 0, uint arg6 = 0)
+        => InstanceContentDirectorHelper.ProcessDirectorUpdate(category, arg1, arg2, arg3, arg4, arg5, arg6);
+
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
+
+    public void Dispose()
+    {
+        ResetEffects();
+        effects.Dispose();
+        zone.Dispose();
+    }
+}

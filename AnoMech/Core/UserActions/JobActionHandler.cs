@@ -1,0 +1,29 @@
+using System;
+using FFXIVClientStructs.FFXIV.Client.Game;
+
+namespace AnoMech.Core.UserActions;
+
+// Applies a player action's client-side effects from the JobActions table: first clears
+// any statuses the action ends (StatusClearedOnAction), then applies its effects — gauge
+// writes and status grants, gated by Combo(...) / Random(...) wrappers. Replaces the old
+// resource-generation and Continuation handlers. MUST run before ComboHandler: combo-gated
+// effects read the PRE-advance combo state, which ComboHandler mutates.
+internal sealed class JobActionHandler : IUserActionHandler
+{
+    private readonly Random rng = new();
+
+    public void OnAction(ActionType actionType, uint actionId)
+    {
+        if (actionType != ActionType.Action) return;
+        var player = Plugin.GameInstance?.Player;
+        if (player == null) return;
+
+        // Clear first so a line action can re-grant after its own weaponskill clear.
+        JobActions.ClearStatuses(player, actionId);
+        JobActions.ApplyCost(actionId);   // generic spender pass (sheet PrimaryCost)
+
+        if (!JobActions.TryGetEffects(Plugin.PlayerState.ClassJob.RowId, actionId, out var effects)) return;
+        var ctx = new ActionContext(actionId, player, rng);
+        foreach (var effect in effects) effect.Apply(ctx);
+    }
+}

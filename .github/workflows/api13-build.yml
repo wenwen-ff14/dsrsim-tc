@@ -1,0 +1,43 @@
+name: API 13 Builder
+
+on:
+  workflow_call:
+    inputs:
+      sdk_url:
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 9.0.x
+      - name: Download specified API 13 SDK
+        shell: pwsh
+        env:
+          API13_SDK_URL: ${{ inputs.sdk_url }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:API13_SDK_URL)) {
+            throw 'Set DALAMUD_API13_SDK_URL to a Traditional Chinese API 13 SDK archive URL.'
+          }
+          $sdkRoot = Join-Path $env:RUNNER_TEMP 'dalamud-api13'
+          $archive = Join-Path $env:RUNNER_TEMP 'dalamud-api13.zip'
+          Invoke-WebRequest -Uri $env:API13_SDK_URL -OutFile $archive
+          Expand-Archive -LiteralPath $archive -DestinationPath $sdkRoot
+          $assemblies = @(Get-ChildItem -LiteralPath $sdkRoot -Filter Dalamud.dll -Recurse)
+          if ($assemblies.Count -ne 1) { throw 'SDK archive must contain exactly one Dalamud.dll.' }
+          "DALAMUD_HOME=$($assemblies[0].DirectoryName)" >> $env:GITHUB_ENV
+      - name: Build
+        run: dotnet build AnoMech.sln --configuration Release -p:RestoreLockedMode=true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AnoMech-API13
+          path: AnoMech/bin/x64/Release/AnoMech/*
+          if-no-files-found: error
+          retention-days: 7
