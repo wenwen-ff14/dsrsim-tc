@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <NoWarn>CS0414</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../DsrValidation/Stubs.cs" Link="Stubs.cs" />
+    <Compile Include="../../AnoMech/Core/Game/EventScheduler.cs" Link="EventScheduler.cs" />
+    <Compile Include="../../AnoMech/Scenarios/Dsr/DsrConstants.cs" Link="DsrConstants.cs" />
+    <Compile Include="../../AnoMech/Scenarios/Dsr/P3Wyrmhole/*.cs" Exclude="../../AnoMech/Scenarios/Dsr/P3Wyrmhole/*Settings.cs" />
+  </ItemGroup>
+</Project>

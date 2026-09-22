@@ -20,6 +20,7 @@ public unsafe class MainWindow : Window, IDisposable
 {
     private readonly Plugin plugin;
     private bool _leftPanelOpen = true;
+    private bool compact;
     internal IScenario? SelectedScenario => _selectedScenario;
     private IScenario? _selectedScenario;
 
@@ -96,10 +97,7 @@ public unsafe class MainWindow : Window, IDisposable
 
     public void Dispose() { }
 
-    private bool _wasInInstance;
-
-    // While the fake-zone instance is loaded, pin the window open and uncollapsible
-    // so the user can always reach Reset/Leave/God-mode without re-opening it.
+    // Keep a way back to Leave even while the native zone is replaced.
     public override void PreOpenCheck()
     {
         var inInstance = plugin.Game.World.Map.IsInInstance;
@@ -108,26 +106,30 @@ public unsafe class MainWindow : Window, IDisposable
             IsOpen = true;
             ShowCloseButton = false;
             RespectCloseHotkey = false;
-            Flags |= ImGuiWindowFlags.NoCollapse;
-            if (!_wasInInstance)
-            {
-                Collapsed = false;
-                CollapsedCondition = ImGuiCond.Always;
-            }
         }
         else
         {
             ShowCloseButton = true;
             RespectCloseHotkey = true;
-            Flags &= ~ImGuiWindowFlags.NoCollapse;
-            if (_wasInInstance)
-                CollapsedCondition = ImGuiCond.FirstUseEver;
         }
-        _wasInInstance = inInstance;
+        Flags &= ~ImGuiWindowFlags.NoCollapse;
     }
 
     public override void Draw()
     {
+        if (compact)
+        {
+            if (ImGui.Button("展開視窗")) compact = false;
+            ImGui.SameLine();
+            if (ImGui.Button("重置")) plugin.Game.Reset();
+            if (plugin.Game.World.Map.IsInInstance)
+            {
+                ImGui.SameLine();
+                if (ImGui.Button("離開模擬")) plugin.Game.Leave();
+            }
+            return;
+        }
+        if (ImGui.SmallButton("收合視窗")) compact = true;
         var leftWidth = _leftPanelOpen ? ScenarioPanelWidth() : 30f * ImGuiHelpers.GlobalScale;
 
         if (ImGui.BeginTable("##layout", 2, ImGuiTableFlags.BordersInnerV | ImGuiTableFlags.SizingFixedFit))

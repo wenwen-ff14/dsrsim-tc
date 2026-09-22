@@ -8,7 +8,7 @@ namespace AnoMech.Scenarios
 }
 namespace AnoMech.Scenarios.Dsr
 {
-    public static class DsrZone { public static IPhase P2 => null!; }
+    public static class DsrZone { public static IPhase P2 => null!; public static IPhase P3 => null!; }
 }
 namespace AnoMech.Core.Game.Ai
 {
@@ -64,6 +64,7 @@ namespace AnoMech.Core.SimObjects
         public void Face(Vector3 p) => Rotation = MathF.Atan2(p.X - Position.X, p.Z - Position.Z);
         public void AddStatus(ushort status, float duration) => statuses[status] = duration;
         public bool HasStatus(ushort status) => statuses.GetValueOrDefault(status) > 0;
+        public void RemoveStatus(ushort status) => statuses.Remove(status);
         public readonly List<uint> LockonVfx = [];
         public void AttachLockonVfx(uint id, float duration) => LockonVfx.Add(id);
         public void Despawn() => Active = false;

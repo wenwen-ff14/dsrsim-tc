@@ -10,6 +10,7 @@ public sealed class DsrZone : IZone
     public static readonly DsrZone Instance = new();
     // d00 contains the Allagan platform r1fz_d0_grd01; b00/c00 are other arenas.
     public static readonly Phase P2 = new(Instance, "P2", 45, 312);
+    public static readonly Phase P3 = new(Instance, "P3", 45, 0);
     public string Name => "絕龍詩戰爭";
     public uint TerritoryId => 968;
     public Vector3 Origin => new(100, 0, 100);
@@ -26,5 +27,5 @@ public sealed class DsrZone : IZone
             new(WaymarkSlot.Three, new(-9.193f, 0, 9.192f)),
             new(WaymarkSlot.Four, new(-9.193f, 0, -9.193f)),
         ])];
-    public void Run(SimWorld world) => world.EnforceArenaBoundary(21, "超出聖仗場地邊界");
+    public void Run(SimWorld world) => world.EnforceArenaBoundary(21, "超出絕龍詩場地邊界");
 }

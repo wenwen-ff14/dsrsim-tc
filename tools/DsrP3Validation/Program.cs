@@ -1,0 +1,98 @@
+using System.Numerics;
+using AnoMech.Core.SimObjects;
+using AnoMech.Scenarios.Dsr.P3Wyrmhole;
+
+void Check(bool condition, string message) { if (!condition) throw new Exception(message); }
+for (var seed = 0; seed < 300; seed++)
+{
+    var state = new DsrP3WyrmholeState(seed);
+    Check(state.Order.Count(x => x == 0) == 3 && state.Order.Count(x => x == 1) == 2 && state.Order.Count(x => x == 2) == 3, "3/2/3 assignments");
+    Check(state.Arrows.Count(x => x) is 1 or 2, "one or two arrow pairs");
+    for (var role = 0; role < 8; role++)
+    {
+        var landing = DsrP3WyrmholeState.Landing(state.JumpPosition(role), MathF.PI / 2, state.Direction[role]);
+        Check(Vector3.Distance(landing, state.Towers[state.Order[role]][state.LandingLane(role)]) < .001f, "east-facing arrow landing");
+    }
+    var scenario = new DsrP3WyrmholeScenario();
+    scenario.UseSeed(seed);
+    var world = new SimWorld();
+    SimCharacter.Failures.Clear();
+    scenario.Run(world, 0);
+    for (var frame = 1; frame <= 60 * 60; frame++)
+    {
+        SimCharacter.Time = frame / 60f;
+        world.Events.Tick(1f / 60);
+        foreach (var member in world.Party.ActiveMembers()) member.Advance(1f / 60);
+        scenario.Tick(1f / 60, frame / 60f);
+    }
+    Check(SimCharacter.Failures.Count == 0, $"Seed {seed}: {string.Join("; ", SimCharacter.Failures.Distinct())}");
+    Check(world.Events.IsEmpty && scenario.State.Complete, "scenario completes");
+    Check(world.Enemies.Count(e => e.BNpcBaseId == DsrP3WyrmholeConstants.Drake) == 8, "eight jump actors");
+}
+Console.WriteLine("300 seeds: assignments, facing offsets, all AI routes and scenario completion passed.");
+
+void ExpectFailure(int seed, float start, float end, Action<SimWorld, DsrP3WyrmholeState> disturb, string expected)
+{
+    var scenario = new DsrP3WyrmholeScenario();
+    scenario.UseSeed(seed);
+    var world = new SimWorld();
+    scenario.Run(world, 0);
+    SimCharacter.Failures.Clear();
+    for (var frame = 1; frame <= 60 * 60; frame++)
+    {
+        var time = frame / 60f;
+        SimCharacter.Time = time;
+        if (time >= start && time <= end) disturb(world, scenario.State);
+        world.Events.Tick(1f / 60);
+        foreach (var member in world.Party.ActiveMembers()) member.Advance(1f / 60);
+        scenario.Tick(1f / 60, time);
+    }
+    Check(SimCharacter.Failures.Any(message => message.Contains(expected)), $"Missing failure detection: {expected}");
+}
+var arrowSeed = Enumerable.Range(0, 100).First(seed => new DsrP3WyrmholeState(seed).Arrows[0]);
+ExpectFailure(arrowSeed, 17.6f, 17.8f, (world, state) => world.Party.Get(state.RoleAt(0, 0))!.SetRotation(-MathF.PI / 2), "塔落在場外");
+ExpectFailure(0, 24.3f, 24.5f, (world, state) => world.Party.Get(state.Soaker(0, 0))!.SetPosition(new(0, 0, -19)), "輪塔需要一人");
+ExpectFailure(0, 17.6f, 17.8f, (world, state) => world.Party.Get(state.RoleAt(1, 0))!.SetPosition(new(0, 0, -19)), "分攤需要五人");
+ExpectFailure(0, 21.3f, 21.5f, (world, state) => world.Party.Get(0)!.SetPosition(new(0, 0, state.OutFirst[0] ? 0 : 18)), "未躲開");
+Console.WriteLine("Wrong facing, missed towers, missing stack members and in/out failures detected.");
+
+for (var role = 0; role < 8; role++)
+{
+    var scenario = new DsrP3WyrmholeScenario();
+    scenario.UseSeed(role * 17);
+    var world = new SimWorld();
+    world.Party.Slots[role] = new SimPlayer { Role = role, Position = new(0, 0, 16) };
+    scenario.Run(world, 0);
+    SimCharacter.Failures.Clear();
+    for (var frame = 1; frame <= 3600; frame++)
+    {
+        var player = world.Party.Get(role)!;
+        player.MoveTo(DsrP3WyrmholeAi.Destination(scenario.State, role), 6, MathF.PI / 2);
+        SimCharacter.Time = frame / 60f;
+        world.Events.Tick(1f / 60);
+        foreach (var member in world.Party.ActiveMembers()) member.Advance(1f / 60);
+        scenario.Tick(1f / 60, frame / 60f);
+    }
+    Check(SimCharacter.Failures.Count == 0, $"Scripted player route failed for role {role}");
+}
+Console.WriteLine("All eight player roles completed with scripted player input and seven AI partners.");
+
+Check(DsrP3WyrmholeScenario.InLine(new(0, 0, 5), Vector3.Zero, Vector3.UnitZ), "line hit");
+Check(!DsrP3WyrmholeScenario.InLine(new(5, 0, 5), Vector3.Zero, Vector3.UnitZ), "line side dodge");
+Check(!DsrP3WyrmholeScenario.InLine(new(0, 0, -5), Vector3.Zero, Vector3.UnitZ), "behind line origin");
+var playerWorld = new SimWorld();
+playerWorld.Party.Slots[0] = new SimPlayer { Position = new(3, 0, 4) };
+var playerState = new DsrP3WyrmholeState(42) { Time = 20 };
+DsrP3WyrmholeAi.Tick(playerState, playerWorld);
+playerWorld.Party.Slots[0].Advance(10);
+Check(playerWorld.Party.Slots[0].Position == new Vector3(3, 0, 4), "AI does not move player");
+Console.WriteLine("Line geometry and player movement ownership passed. Native rendering is not exercised.");
+
+namespace AnoMech.Scenarios.Dsr.P3Wyrmhole
+{
+    public sealed partial class DsrP3WyrmholeScenario
+    {
+        internal DsrP3WyrmholeState State => state!;
+        internal void UseSeed(int value) { fixedSeed = true; seed = value; }
+    }
+}
