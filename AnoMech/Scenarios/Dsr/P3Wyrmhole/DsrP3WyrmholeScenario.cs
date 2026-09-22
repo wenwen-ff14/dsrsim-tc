@@ -187,10 +187,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
     {
         state!.TowersVisible[wave] = true;
         for (var lane = 0; lane < drakes[wave].Length; lane++)
-        {
             drakes[wave][lane]?.Cast(DsrP3WyrmholeConstants.Tower, castSeconds: 2.2f, fireDelay: fireDelay);
-            world!.SpawnOmen("vfx/omen/eff/general01f.avfx", new(state.Towers[wave][lane], 0), new(5, 1, 5), 2.2f + fireDelay);
-        }
     }
 
     private void ResolveTowers(int wave)
@@ -283,8 +280,6 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         {
             var count = state.FinalTowerCounts[tower];
             finalDrakes[tower]?.Cast(DsrP3WyrmholeConstants.FinalTowerOne + (uint)count - 1, castSeconds: 4.7f, fireDelay: .263f);
-            var omen = count == 1 ? "m0119_trap_01t" : $"general_trap_o{count}x";
-            world!.SpawnOmen($"vfx/omen/eff/{omen}.avfx", new(DsrP3WyrmholeState.FinalTowerPosition(tower), 0), new(5, 1, 5), 4.963f);
         }
     }
 
