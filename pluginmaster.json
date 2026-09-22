@@ -3,7 +3,7 @@
     "Author": "Anomek / wenwen-ff14",
     "Name": "絕龍詩模擬器",
     "InternalName": "AnoMech",
-    "AssemblyVersion": "0.4.0.23",
+    "AssemblyVersion": "0.4.0.24",
     "Description": "API 13 繁中版。於旅館內模擬七名隊友，練習 P2 聖仗與 P3 Easthogg 數字龍。P3 目前包含三輪跳躍、分攤、內外圈、踩塔、直線與龍槍，四人數塔與雙連線尚未加入。使用 /anomech 或 /ano 開啟；視窗可收合。",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/wenwen-ff14/test",
@@ -23,12 +23,12 @@
     "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/test/main/images/icon.png",
     "Punchline": "DSR P2 聖仗與 P3 數字龍練習，使用 tuuf／Elemental 打法。",
     "AcceptsFeedback": true,
-    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.23.zip",
-    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.23.zip",
-    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.23.zip",
+    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.24.zip",
+    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.24.zip",
+    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.24.zip",
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": 1790089500,
-    "Changelog": "移除騎士動作診斷按鈕；依 FFLogs 第 42 場校正 P2 讀條、分攤劍、衝鋒、雙視線、冰火圈、踩塔、擊退與隕石時序；改善高 FPS 排程累計誤差。白球與頭標出現時間仍使用練習近似值。"
+    "LastUpdate": 1790093358,
+    "Changelog": "修正 P3 尼德霍格場地及本體／分身名稱，加入邪龍急襲 BGM 與音樂開關、重播。"
   }
 ]

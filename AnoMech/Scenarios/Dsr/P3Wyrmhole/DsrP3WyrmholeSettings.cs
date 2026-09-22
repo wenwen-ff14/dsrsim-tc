@@ -11,6 +11,18 @@ public sealed partial class DsrP3WyrmholeScenario
     public void DrawSettings()
     {
         ImGui.TextUnformatted("tuuf／Elemental：Easthogg（箭頭朝東）");
+        var playMusic = !Plugin.Config.SuppressBgm;
+        if (ImGui.Checkbox("背景音樂：邪龍急襲", ref playMusic))
+        {
+            Plugin.Config.SuppressBgm = !playMusic;
+            Plugin.Config.Save();
+        }
+        if (playMusic && Plugin.GameInstance.Bgm.IsActive)
+        {
+            ImGui.SameLine();
+            if (ImGui.Button("重新播放音樂")) Plugin.GameInstance.Bgm.Restart();
+        }
+        ImGui.TextDisabled("配樂使用遊戲的背景音樂音量設定。");
         ImGui.TextDisabled("本關練習三輪數字跳躍、踩塔、內外圈、分攤、直線與龍槍。");
         ImGui.TextDisabled("四人數塔與雙連線尚未加入；時間軸及原生演出待實機校正。");
         ImGui.Checkbox("顯示站位提示", ref showHints);

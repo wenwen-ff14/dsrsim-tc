@@ -4,6 +4,7 @@ internal static class DsrP3WyrmholeConstants
 {
     public const uint Nidhogg = 0x313D;
     public const uint Drake = 0x313E;
+    public const uint NidhoggName = 3458;
     public const uint DiveFromGrace = 26381;
     public const uint HighJump = 26382;
     public const uint ForwardJump = 26383;

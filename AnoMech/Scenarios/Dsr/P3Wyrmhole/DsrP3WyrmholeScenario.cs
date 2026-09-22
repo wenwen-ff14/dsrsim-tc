@@ -61,7 +61,9 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
     private SimEnemy? Spawn(uint id, Vector3 position, bool visible)
         => world!.SpawnEnemy(new EnemySpawnConfig(id, Level: 90,
             EnemyList: visible ? EnemyListMode.ScenarioVisible : EnemyListMode.Never,
-            IsVisible: visible, Placement: new(position, MathF.PI), DisableLookAt: true));
+            IsVisible: visible, Placement: new(position, MathF.PI), DisableLookAt: true,
+            NameId: id is DsrP3WyrmholeConstants.Nidhogg or DsrP3WyrmholeConstants.Drake
+                ? DsrP3WyrmholeConstants.NidhoggName : 0));
 
     private void AssignNumbers()
     {

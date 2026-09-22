@@ -28,6 +28,8 @@ for (var seed = 0; seed < 300; seed++)
     Check(SimCharacter.Failures.Count == 0, $"Seed {seed}: {string.Join("; ", SimCharacter.Failures.Distinct())}");
     Check(world.Events.IsEmpty && scenario.State.Complete, "scenario completes");
     Check(world.Enemies.Count(e => e.BNpcBaseId == DsrP3WyrmholeConstants.Drake) == 8, "eight jump actors");
+    Check(world.Enemies.Where(e => e.BNpcBaseId is DsrP3WyrmholeConstants.Nidhogg or DsrP3WyrmholeConstants.Drake)
+        .All(e => e.NameId == 3458), "boss and jump actors resolve the localized Nidhogg name");
 }
 Console.WriteLine("300 seeds: assignments, facing offsets, all AI routes and scenario completion passed.");
 
