@@ -28,8 +28,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         for (var role = 0; role < 8; role++)
             if (world.Party.Get(role) is SimPartyNpc npc)
             {
-                npc.SetPosition(DsrP3WyrmholeAi.OpeningPosition(role));
-                npc.SetRotation(MathF.PI / 2);
+                npc.MoveTo(DsrP3WyrmholeAi.OpeningPosition(role), 6, MathF.PI / 2);
             }
         lines.Clear();
         foreach (var wave in drakes) Array.Clear(wave);
@@ -154,7 +153,8 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         for (var role = 0; role < 8; role++)
             if (state!.Order[role] == jumpWave && stack.Contains(world.Party.Get(role)))
                 Fail("數字龍：本輪跳躍點名者不能參與分攤");
-        Spawn(DsrConstants.Npc.Helper, target.Position, false)?.Cast(DsrP3WyrmholeConstants.Stack, target.Position, 0, target.GameObjectId);
+        // The release timeline resolves mon_sp/[SKL_ID]/mon_sp004 on Nidhogg's skeleton.
+        boss?.Cast(DsrP3WyrmholeConstants.Stack, target.Position, 0, target.GameObjectId);
     }
 
     private void ResolveWheel(int round, bool first)
@@ -179,6 +179,8 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
     private void ResolveTowers(int wave)
     {
         state!.TowersVisible[wave] = false;
+        state.LineTracking[wave] = true;
+        TrackLines();
         foreach (var tower in state.Towers[wave])
         {
             var inside = world!.Party.FilledSlots().Where(pair => Vector3.DistanceSquared(pair.Item2.Position, tower) <= 25).ToArray();
@@ -191,16 +193,36 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
 
     private void BaitLines(int wave, float fireDelay)
     {
+        state!.LineTracking[wave] = false;
         foreach (var clone in drakes[wave])
         {
             if (clone == null) continue;
-            var target = world!.Party.ActiveMembers().OrderBy(m => Vector3.DistanceSquared(m.Position, clone.Position)).FirstOrDefault();
+            var target = world!.Party.ActiveMembers().Where(m => m.IsAlive())
+                .OrderBy(m => Vector3.DistanceSquared(m.Position, clone.Position)).FirstOrDefault();
             if (target == null) { Fail("數字龍：直線沒有引導目標"); continue; }
             var direction = DsrP3WyrmholeState.AtRadius(target.Position - clone.Position, 1);
             var rotation = MathF.Atan2(direction.X, direction.Z);
             clone.HoldFacing(rotation);
             clone.Cast(DsrP3WyrmholeConstants.Geirskogul, castSeconds: 4.2f, fireDelay: fireDelay);
             lines.Add((wave, clone.Position, direction));
+        }
+    }
+
+    private void TrackLines()
+    {
+        for (var wave = 0; wave < drakes.Length; wave++)
+        {
+            if (!state!.LineTracking[wave]) continue;
+            foreach (var clone in drakes[wave])
+            {
+                if (clone == null) continue;
+                var target = world!.Party.ActiveMembers().Where(m => m.IsAlive())
+                    .OrderBy(m => Vector3.DistanceSquared(m.Position, clone.Position)).FirstOrDefault();
+                if (target == null) continue;
+                var offset = target.Position - clone.Position;
+                if (offset.LengthSquared() > .001f)
+                    clone.HoldFacing(MathF.Atan2(offset.X, offset.Z));
+            }
         }
     }
 
@@ -252,6 +274,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
     {
         if (state == null || world == null) return;
         state.Time = elapsed;
+        TrackLines();
         DsrP3WyrmholeAi.Tick(state, world);
     }
 }

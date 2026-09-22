@@ -15,6 +15,7 @@ internal sealed class DsrP3WyrmholeState
     public readonly bool[] OutFirst = new bool[2];
     public readonly Vector3[][] Towers = [new Vector3[3], new Vector3[2], new Vector3[3]];
     public readonly bool[] TowersVisible = new bool[3];
+    public readonly bool[] LineTracking = new bool[3];
     public float Time;
     public bool NumbersAssigned;
     public bool ArrowsAssigned;

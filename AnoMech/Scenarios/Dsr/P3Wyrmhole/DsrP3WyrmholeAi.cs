@@ -27,7 +27,8 @@ internal sealed class DsrP3WyrmholeAi : IScenarioAi
         if (t < 24.456f) return WheelPosition(s, role, 0, t < 21.331f);
         if (t < 27.048f) return order == 2 ? Bait(s, 0, role) : order == 1 ? s.JumpPosition(role) : North(7);
         if (t < 27.808f) return order == 2 ? Dodge(s, 0, role) : order == 1 ? s.JumpPosition(role) : North(7);
-        if (t < 31.519f) return order == 2 ? Dodge(s, 0, role) : SoakOrNorth(s, 1, role);
+        if (t < 31.519f) return order == 2 ? Dodge(s, 0, role) : North(7);
+        if (t < 31.921f) return North(7);
         if (t < 34.378f) return SoakOrNorth(s, 1, role);
         if (t < 37.014f) return s.SoakLane(1, role) >= 0 ? Bait(s, 1, role) : order == 2 ? s.JumpPosition(role) : North(7);
         if (t < 39.472f) return s.SoakLane(1, role) >= 0 ? Dodge(s, 1, role) : order == 2 ? s.JumpPosition(role) : North(7);

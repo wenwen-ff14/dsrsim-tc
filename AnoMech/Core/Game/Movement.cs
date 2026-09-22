@@ -163,8 +163,9 @@ internal class Movement(SimCharacter parent)
         var dz = dest2.Y - cur.Z;
         var distSq = dx * dx + dz * dz;
         var step = speed * deltaSeconds;
+        if (step <= 0f) return;
 
-        if (distSq <= step * step || step <= 0f)
+        if (distSq <= step * step)
         {
             var rot = finalRotation ?? (faceTravel && distSq > 1e-6f ? MathF.Atan2(dx, dz) : parent.Rotation);
             parent.SetPosition(new Placement(new Vector3(dest2.X, dest.Y, dest2.Y), rot));

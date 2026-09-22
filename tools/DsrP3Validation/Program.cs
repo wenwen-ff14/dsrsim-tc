@@ -19,17 +19,23 @@ for (var seed = 0; seed < 300; seed++)
     scenario.UseSeed(seed);
     var world = new SimWorld();
     SimCharacter.Failures.Clear();
+    var initialPositions = world.Party.ActiveMembers().Select(m => m.Position).ToArray();
     scenario.Run(world, 0);
-    Check(world.Party.ActiveMembers().Select(m => m.Position).Distinct().Count() == 8, "eight distinct opening positions");
+    Check(world.Party.ActiveMembers().Select(m => m.Position).SequenceEqual(initialPositions), "opening does not teleport NPCs");
+    Check(Enumerable.Range(0, 8).Select(DsrP3WyrmholeAi.OpeningPosition).Distinct().Count() == 8, "eight distinct opening destinations");
     Check(!scenario.State.NumbersAssigned && !scenario.State.ArrowsAssigned, "opening does not reveal assignments");
     for (var role = 0; role < 8; role++)
         Check(DsrP3WyrmholeAi.Destination(scenario.State, role) == DsrP3WyrmholeAi.OpeningPosition(role), "hold opening position until numbers");
     for (var frame = 1; frame <= 60 * fps; frame++)
     {
         SimCharacter.Time = frame / (float)fps;
+        var beforeMove = world.Party.ActiveMembers().Select(m => m.Position).ToArray();
         world.Events.Tick(1f / fps);
         foreach (var member in world.Party.ActiveMembers()) member.Advance(1f / fps);
         scenario.Tick(1f / fps, SimCharacter.Time);
+        for (var role = 0; role < 8; role++)
+            Check(Vector3.Distance(beforeMove[role], world.Party.Get(role)!.Position) <= 6f / fps + .001f,
+                $"NPC {role} teleported at {SimCharacter.Time:F3}s");
     }
     Check(SimCharacter.Failures.Count == 0, $"Seed {seed}, {fps} FPS: {string.Join("; ", SimCharacter.Failures.Distinct())}");
     Check(world.Events.IsEmpty && scenario.State.Complete, "scenario completes");
@@ -96,6 +102,7 @@ DsrP3WyrmholeAi.Tick(playerState, playerWorld);
 playerWorld.Party.Slots[0].Advance(10);
 Check(playerWorld.Party.Slots[0].Position == new Vector3(3, 0, 4), "AI does not move player");
 Console.WriteLine("Line geometry and player movement ownership passed. Native rendering is not exercised.");
+PresentationBehaviorValidation.Run();
 
 namespace AnoMech.Scenarios.Dsr.P3Wyrmhole
 {
