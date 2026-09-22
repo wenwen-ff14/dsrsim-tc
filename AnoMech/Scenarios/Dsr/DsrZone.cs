@@ -26,5 +26,5 @@ public sealed class DsrZone : IZone
             new(WaymarkSlot.Three, new(-9.193f, 0, 9.192f)),
             new(WaymarkSlot.Four, new(-9.193f, 0, -9.193f)),
         ])];
-    public void Run(SimWorld world) => world.EnforceArenaBoundary(21, "超出聖杖場地邊界");
+    public void Run(SimWorld world) => world.EnforceArenaBoundary(21, "超出聖仗場地邊界");
 }

@@ -4,7 +4,7 @@
 *Another FFXIV mechanics simulator*
 
 本分支目標為繁中 Dalamud API 13（.NET 9 / C# 13），目前以本機
-Dalamud 13.0.0.16 的函式庫編譯。主選單目前只顯示絕龍詩 P2 聖杖，
+Dalamud 13.0.0.16 的函式庫編譯。主選單目前只顯示絕龍詩 P2 聖仗，
 使用 [tuuf／Elemental 打法](https://ffxiv.tuufless.com/elemental/dsr/02_thordan/)。
 其他關卡保留原始碼，暫時從選單隱藏。
 
@@ -26,7 +26,7 @@ https://raw.githubusercontent.com/wenwen-ff14/test/main/pluginmaster.json
 5. 外圈擊退需使用親疏自行／沉穩詠唱；設定內須啟用「模擬自身技能效果」。
 6. 「重置」清除本輪，「離開模擬」回到旅館。固定種子可重練同一組點名。
 
-聖杖包含分攤劍、雙視線、騎士衝鋒、白球、冰火圈、第一輪塔、七次隕石、擊退與第二輪塔。
+聖仗包含分攤劍、雙視線、騎士衝鋒、白球、冰火圈、第一輪塔、七次隕石、擊退與第二輪塔。
 本關卡不包含 P2 的聖劍、後續終極結局與揮劍。
 目前是可建置的練習實作，尚未完成繁中遊戲內驗收；精確時間與部分地面幾何仍需校正。
 詳細設定與驗證限制見 [DSR-P2.md](DSR-P2.md)。

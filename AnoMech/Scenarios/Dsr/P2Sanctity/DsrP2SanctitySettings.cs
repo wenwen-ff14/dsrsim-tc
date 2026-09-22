@@ -56,7 +56,7 @@ public sealed partial class DsrP2SanctityScenario
         ImGui.TextDisabled("外圈擊退請使用親疏自行／沉穩詠唱，並啟用「模擬自身技能效果」。");
         if (state == null || world?.Party.Player == null) return;
         ImGui.Separator();
-        string[] stages = ["準備", "分攤劍與雙視線", "騎士衝鋒與白球", "隕石換位、兩人冰圈", "第一輪踩塔", "順時針放隕石、準備擊退", "第二輪踩塔完成", "聖杖練習結束"];
+        string[] stages = ["準備", "分攤劍與雙視線", "騎士衝鋒與白球", "隕石換位、兩人冰圈", "第一輪踩塔", "順時針放隕石、準備擊退", "第二輪踩塔完成", "聖仗練習結束"];
         ImGui.TextUnformatted($"{stages[(int)state.Stage]}　{time:F1} 秒　種子 {state.Seed}");
         if (state.FirstTowersVisible || state.Stage >= SanctityStage.FirstTowers)
             ImGui.TextUnformatted($"本輪隕石塔夾角：{state.MeteorTowerAngle}°");
