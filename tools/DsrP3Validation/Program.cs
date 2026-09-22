@@ -104,6 +104,7 @@ Check(playerWorld.Party.Slots[0].Position == new Vector3(3, 0, 4), "AI does not 
 Console.WriteLine("Line geometry and player movement ownership passed. Native rendering is not exercised.");
 PresentationBehaviorValidation.Run();
 FinalTowerValidation.Run();
+BossFacingValidation.Run();
 
 namespace AnoMech.Scenarios.Dsr.P3Wyrmhole
 {

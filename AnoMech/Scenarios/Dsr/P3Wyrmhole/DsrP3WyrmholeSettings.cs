@@ -25,6 +25,7 @@ public sealed partial class DsrP3WyrmholeScenario
         ImGui.TextDisabled("配樂使用遊戲的背景音樂音量設定。");
         ImGui.TextDisabled("本關練習數字龍、兩次普攻、隨機龍槍與最後四座人數塔。");
         ImGui.TextDisabled("四塔：坦近戰依順時針 → 逆時針 → 對角補位；補遠留原塔。");
+        ImGui.TextDisabled("西北 MT＋D3／東北 ST＋D4／西南 D1＋H1／東南 D2＋H2");
         ImGui.TextDisabled("時間軸依 FFLogs 第 42 場校正；四塔後的雙連線尚未加入。");
         ImGui.Checkbox("顯示站位提示", ref showHints);
         ImGui.SameLine();

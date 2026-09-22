@@ -22,6 +22,9 @@ internal sealed class DsrP3WyrmholeState
     public bool Failed;
     public bool Complete;
     public float LanceRotation;
+    public float LanceTurnStartRotation;
+    public bool TrackingMainTank;
+    public bool TurningForLance;
     public readonly int LanceTarget;
     public readonly int[] FinalTowerCounts = new int[4];
     public bool FinalTowersVisible;
@@ -65,7 +68,7 @@ internal sealed class DsrP3WyrmholeState
         } while (FinalTowerCounts.Sum() != 8);
     }
 
-    public static int FinalTowerHome(int role) => role switch { 0 or 2 => 0, 1 or 3 => 1, 5 or 7 => 2, _ => 3 };
+    public static int FinalTowerHome(int role) => role switch { 0 or 6 => 0, 1 or 7 => 1, 3 or 5 => 2, _ => 3 };
 
     public static Vector3 FinalTowerPosition(int tower) => tower switch
     {

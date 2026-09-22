@@ -6,6 +6,28 @@ internal static class FinalTowerValidation
 {
     public static void Run()
     {
+        // Tuuf's starting-position diagram: NW MT/D3, NE ST/D4, SE D2/H2, SW D1/H1.
+        int[] homes = [0, 1, 3, 2, 3, 2, 0, 1];
+        for (var role = 0; role < 8; role++)
+            if (DsrP3WyrmholeState.FinalTowerHome(role) != homes[role])
+                throw new Exception($"Tuuf starting tower mismatch for role {role}");
+        var examples = new (int[] Counts, int Role, int Expected)[]
+        {
+            ([1, 3, 1, 3], 0, 1),
+            ([1, 3, 1, 3], 5, 3),
+            ([1, 4, 1, 2], 5, 1),
+            ([3, 2, 1, 2], 5, 0)
+        };
+        foreach (var example in examples)
+        {
+            var state = new DsrP3WyrmholeState(0);
+            example.Counts.CopyTo(state.FinalTowerCounts, 0);
+            if (state.FinalTowerAssignment(example.Role) != example.Expected)
+                throw new Exception("Tuuf clockwise/counterclockwise/across priority mismatch");
+            foreach (var fixedRole in new[] { 2, 3, 6, 7 })
+                if (state.FinalTowerAssignment(fixedRole) != homes[fixedRole])
+                    throw new Exception("Healers and ranged must stay in their original towers");
+        }
         var patterns = 0;
         for (var a = 1; a <= 4; a++)
         for (var b = 1; b <= 4; b++)

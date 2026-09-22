@@ -70,9 +70,11 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         world.Events.Add(45.373f, () => ResolveTowers(2));
         world.Events.Add(46.000f, () => ResolveWheel(1, false));
         world.Events.Add(48.012f, () => BaitLines(2, .267f));
+        world.Events.Add(48.012f, () => state.TrackingMainTank = true);
         world.Events.Add(50.156f, AutoAttack);
         world.Events.Add(52.479f, () => ResolveLines(2));
         world.Events.Add(53.285f, AutoAttack);
+        world.Events.Add(53.982f, BeginLanceTurn);
         world.Events.Add(54.582f, StartLance);
         world.Events.Add(54.627f, StartLanceAoe);
         world.Events.Add(58.114f, ResolveLance);
@@ -256,11 +258,20 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
         foreach (var clone in drakes[wave]) clone?.SetVisible(false);
     }
 
+    private void BeginLanceTurn()
+    {
+        state!.TrackingMainTank = false;
+        var target = world!.Party.Get(state!.LanceTarget);
+        if (target == null || boss == null) return;
+        var offset = target.Position - boss.Position;
+        state.LanceRotation = offset.LengthSquared() > .001f ? MathF.Atan2(offset.X, offset.Z) : boss.Rotation;
+        state.LanceTurnStartRotation = boss.Rotation;
+        state.TurningForLance = true;
+    }
+
     private void StartLance()
     {
-        var target = world!.Party.Get(state!.LanceTarget);
-        if (target == null) return;
-        state.LanceRotation = MathF.Atan2(target.Position.X, target.Position.Z);
+        state!.TurningForLance = false;
         boss?.HoldFacing(state.LanceRotation);
         boss?.Cast(DsrP3WyrmholeConstants.Drachenlance, castSeconds: 2.6f, fireDelay: .263f);
     }
@@ -269,8 +280,29 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
     {
         var target = world!.Party.Get(0);
         if (target == null || !target.IsAlive()) return;
-        boss?.HoldFacing(MathF.Atan2(target.Position.X, target.Position.Z));
-        boss?.Cast(DsrP3WyrmholeConstants.AutoAttack, target.Position, 0, target.GameObjectId);
+        // Supplying a ground position would snap the facing in SimCast.FaceTarget.
+        boss?.Cast(DsrP3WyrmholeConstants.AutoAttack, castSeconds: 0, targetId: target.GameObjectId);
+    }
+
+    internal static float TurnTowards(float current, float target, float maxStep)
+        => current + Math.Clamp(MathF.IEEERemainder(target - current, MathF.Tau), -MathF.Max(0, maxStep), MathF.Max(0, maxStep));
+
+    private void UpdateBossFacing(float delta, float elapsed)
+    {
+        if (boss == null) return;
+        if (state!.TurningForLance)
+        {
+            var progress = Math.Clamp((elapsed - 53.982f) / .6f, 0, 1);
+            var eased = progress * progress * (3 - 2 * progress);
+            var angle = MathF.IEEERemainder(state.LanceRotation - state.LanceTurnStartRotation, MathF.Tau);
+            boss.HoldFacing(state.LanceTurnStartRotation + angle * eased);
+        }
+        else if (state.TrackingMainTank && world!.Party.Get(0) is { } tank && tank.IsAlive())
+        {
+            var offset = tank.Position - boss.Position;
+            if (offset.LengthSquared() > .001f)
+                boss.HoldFacing(TurnTowards(boss.Rotation, MathF.Atan2(offset.X, offset.Z), MathF.Tau * delta));
+        }
     }
 
     private void ShowFinalTowers()
@@ -320,6 +352,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
     {
         if (state == null || world == null) return;
         state.Time = elapsed;
+        UpdateBossFacing(delta, elapsed);
         TrackLines();
         DsrP3WyrmholeAi.Tick(state, world);
     }
