@@ -19,6 +19,7 @@ internal static class DsrP3WyrmholeConstants
     public const uint Drachenlance = 26379;
     public const uint DrachenlanceAoe = 26380;
     public const ushort First = 3004;
+    public const uint FirstHeadmarker = 319;
     public const ushort Center = 2755;
     public const ushort Forward = 2756;
     public const ushort Backward = 2757;

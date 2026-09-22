@@ -49,6 +49,13 @@ internal static class LogTimingValidation
             }
             Match(numbers, data.GetProperty("numbersApplied").GetSingle(), "numbers");
             Match(arrows, data.GetProperty("arrowsApplied").GetSingle(), "arrows");
+            for (var role = 0; role < 8; role++)
+            {
+                var markers = world.Party.Get(role)!.LockonDurations;
+                if (markers.Count != 1 || markers[0].Id != 319 + scenario.State.Order[role] ||
+                    MathF.Abs(markers[0].Duration - 4.7f) > .001f)
+                    throw new Exception("P3 headmarker must match its number and expire at cast-bar completion");
+            }
             for (var wave = 0; wave < 3; wave++)
                 Match(removed[wave], data.GetProperty("statusesRemoved")[wave].GetSingle(), $"wave {wave + 1} status removal");
             var casts = world.Enemies.SelectMany(e => e.Casts).ToArray();

@@ -66,7 +66,12 @@ namespace AnoMech.Core.SimObjects
         public bool HasStatus(ushort status) => statuses.GetValueOrDefault(status) > 0;
         public void RemoveStatus(ushort status) => statuses.Remove(status);
         public readonly List<uint> LockonVfx = [];
-        public void AttachLockonVfx(uint id, float duration) => LockonVfx.Add(id);
+        public readonly List<(uint Id, float Duration)> LockonDurations = [];
+        public void AttachLockonVfx(uint id, float duration)
+        {
+            LockonVfx.Add(id);
+            LockonDurations.Add((id, duration));
+        }
         public void Despawn() => Active = false;
         public void Die(string cause) => Failures.Add($"{Time:F2}s role {Role}: {cause}");
     }

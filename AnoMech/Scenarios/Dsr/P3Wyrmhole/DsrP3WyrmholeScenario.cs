@@ -82,7 +82,12 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
     {
         state!.NumbersAssigned = true;
         for (var role = 0; role < 8; role++)
-            world!.Party.Get(role)?.AddStatus((ushort)(DsrP3WyrmholeConstants.First + state.Order[role]), 9999);
+        {
+            var member = world!.Party.Get(role);
+            member?.AddStatus((ushort)(DsrP3WyrmholeConstants.First + state.Order[role]), 9999);
+            // Match the cast bar's real-time duration, excluding its post-cast release delay.
+            member?.AttachLockonVfx(DsrP3WyrmholeConstants.FirstHeadmarker + (uint)state.Order[role], 4.7f);
+        }
     }
 
     private void AssignArrows()
