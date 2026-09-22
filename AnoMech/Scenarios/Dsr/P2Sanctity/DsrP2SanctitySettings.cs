@@ -18,7 +18,7 @@ public sealed partial class DsrP2SanctityScenario
 
     private void CapturePoseDiagnostics()
     {
-        var report = new System.Text.StringBuilder("AnoMech 0.4.0.18 DSR pose diagnostics\n");
+        var report = new System.Text.StringBuilder("AnoMech DSR pose diagnostics\n");
         foreach (var enemy in new[] { boss, darkKnight, knights[0], knights[1] })
             if (enemy != null) report.AppendLine(enemy.DescribePose());
         poseDiagnostics = report.ToString();
@@ -48,18 +48,22 @@ public sealed partial class DsrP2SanctityScenario
         ImGui.SetNextItemWidth(180);
         ImGui.Combo("騎士方向", ref direction, ["隨機", "順時針", "逆時針"], 3);
         ImGui.SetNextItemWidth(180);
+        ImGui.BeginDisabled(meteorAngleSelection != 0);
         ImGui.Combo("隕石點名", ref meteorPreference, ["隨機", "坦克／補師", "輸出", "保證點名自己"], 4);
+        ImGui.EndDisabled();
         ImGui.SetNextItemWidth(180);
-        ImGui.Combo("隕石塔夾角", ref meteorAngleSelection, ["隨機", "120°", "150°", "180°"], 4);
-        ImGui.TextDisabled("夾角指兩座隕石起點塔的較小角度；120°／150° 會有一人跑較長路線。");
-        ImGui.TextDisabled("種子、方向、點名與夾角選項於下次開始生效。");
+        ImGui.Combo("自己隕石跑動角度", ref meteorAngleSelection, ["隨機", "120°", "150°", "180°", "210°", "240°"], 6);
+        ImGui.TextDisabled("指定角度會保證點名自己；角度是你沿外圈順時針跑的路線。");
+        ImGui.TextDisabled("種子、方向、點名與跑動角度選項於下次開始生效。");
         ImGui.TextDisabled("外圈擊退請使用親疏自行／沉穩詠唱，並啟用「模擬自身技能效果」。");
         if (state == null || world?.Party.Player == null) return;
         ImGui.Separator();
         string[] stages = ["準備", "分攤劍與雙視線", "騎士衝鋒與白球", "隕石換位、兩人冰圈", "第一輪踩塔", "順時針放隕石、準備擊退", "第二輪踩塔完成", "聖仗練習結束"];
         ImGui.TextUnformatted($"{stages[(int)state.Stage]}　{time:F1} 秒　種子 {state.Seed}");
         if (state.FirstTowersVisible || state.Stage >= SanctityStage.FirstTowers)
-            ImGui.TextUnformatted($"本輪隕石塔夾角：{state.MeteorTowerAngle}°");
+            ImGui.TextUnformatted(state.HasMeteor((int)world.Party.PlayerRole)
+                ? $"本輪自己隕石跑動角度：{state.MeteorArc((int)world.Party.PlayerRole):F0}°（順時針）"
+                : "本輪你沒有隕石點名。");
         if (state.Stage == SanctityStage.Complete)
             ImGui.TextUnformatted(state.Failed ? "本輪有失誤；可重置後重練。" : "本輪完成！");
         if (showHints && state.Stage != SanctityStage.Complete)

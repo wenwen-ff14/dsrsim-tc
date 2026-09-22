@@ -46,6 +46,7 @@ internal static class DsrConstants
     public static class Timeline
     {
         public const ushort KnightEntrance = 0x1E43;
+        public const ushort KnightDeparture = 0x1E39;
         public const ushort BattleIdle = 34;
     }
 

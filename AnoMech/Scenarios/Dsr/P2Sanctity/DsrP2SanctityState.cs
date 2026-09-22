@@ -12,9 +12,11 @@ internal sealed class DsrP2SanctityState
     public static readonly string[] Roles = ["MT", "ST", "H1", "H2", "D1", "D2", "D3", "D4"];
     public static readonly string[] Directions = ["北", "東", "南", "西"];
     public static readonly int[] BaseQuadrants = [0, 2, 3, 1, 3, 1, 0, 2];
+    private static readonly int[] OpeningAngles = [0, 180, 270, 90, 225, 135, 315, 45];
     public int Seed { get; }
     public bool Clockwise { get; }
-    public int MeteorTowerAngle { get; private set; }
+    public bool SwordGroupsMoving { get; set; }
+    public static Vector3 OpeningPosition(int role) => Polar(OpeningAngles[role], 10);
     public int DarkKnightQuadrant { get; }
     public int EyeIndex { get; }
     public int BossIndex { get; }
@@ -56,6 +58,8 @@ internal sealed class DsrP2SanctityState
     public DsrP2SanctityState(int seed, int direction = 0, int meteorPreference = 0, int playerRole = 0, int meteorAngle = 0)
     {
         Seed = seed;
+        if (meteorAngle is not (0 or 120 or 150 or 180 or 210 or 240)) throw new ArgumentOutOfRangeException(nameof(meteorAngle));
+        if (meteorAngle != 0) meteorPreference = 3;
         var random = new Random(seed);
         Clockwise = direction == 0 ? random.Next(2) == 0 : direction == 1;
         DarkKnightQuadrant = random.Next(4);
@@ -74,8 +78,7 @@ internal sealed class DsrP2SanctityState
         if (meteorPreference == 3) { candidates.Remove(playerRole); candidates.Insert(0, playerRole); }
         MeteorRoles = candidates.Take(2).ToArray();
         AdjustMeteorPairs();
-        if (meteorAngle is not (0 or 120 or 150 or 180)) throw new ArgumentOutOfRangeException(nameof(meteorAngle));
-        GenerateTowers(random, meteorAngle);
+        GenerateTowers(random, meteorAngle, playerRole);
         GenerateCharges();
     }
 
@@ -93,7 +96,7 @@ internal sealed class DsrP2SanctityState
             Swap(occupied.Single(q => q % 2 == 1), occupied.Contains(0) ? 2 : 0);
     }
 
-    private void GenerateTowers(Random random, int meteorAngle)
+    private void GenerateTowers(Random random, int meteorAngle, int playerRole)
     {
         int[] priority = [1, 0, 2];
         int[] choices;
@@ -119,9 +122,8 @@ internal sealed class DsrP2SanctityState
                         choices[2] = s;
                         bestPenalty = Math.Abs(n - s);
                     }
-            MeteorTowerAngle = 180 - bestPenalty * 30;
         }
-        while (meteorAngle != 0 && MeteorTowerAngle != meteorAngle);
+        while (meteorAngle != 0 && 180 + (choices[2] - choices[0]) * 30 * (Quadrants[playerRole] == 0 ? 1 : -1) != meteorAngle);
         var innerRoles = new List<int>();
         for (var q = 0; q < 4; q++)
         {
@@ -172,13 +174,7 @@ internal sealed class DsrP2SanctityState
         return Polar(DarkKnightQuadrant * 90 + 45 + (Groups[role] == 0 ? 180 : 0) + (Clockwise ? offset : -offset), 20);
     }
 
-    public Vector3 MeteorStart(int role)
-    {
-        var angle = Angle(FirstTower(role));
-        var cardinal = Quadrants[role] * 90;
-        var delta = SignedAngle(cardinal - angle);
-        return Polar(angle + Math.Clamp(delta, -6, 6), 19);
-    }
+    public Vector3 MeteorStart(int role) => Polar(Angle(FirstTower(role)), 19);
 
     public Vector3 MeteorPosition(int role, float progress)
         => Polar(Angle(MeteorStart(role)) + MeteorArc(role) * Math.Clamp(progress, 0, 1), 19.5f);

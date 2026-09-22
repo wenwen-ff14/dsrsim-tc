@@ -39,7 +39,10 @@ public sealed partial class DsrP2SanctityScenario : IScenario
     {
         world = simWorld;
         state = new(fixedSeed ? seed : Random.Shared.Next(), direction, meteorPreference, (int)world.Party.PlayerRole,
-            meteorAngleSelection switch { 1 => 120, 2 => 150, 3 => 180, _ => 0 });
+            meteorAngleSelection switch { 1 => 120, 2 => 150, 3 => 180, 4 => 210, 5 => 240, _ => 0 });
+        for (var role = 0; role < 8; role++)
+            if (world.Party.Get(role) is SimPartyNpc npc)
+                npc.SetPosition(DsrP2SanctityState.OpeningPosition(role));
         time = puddleGrace = iceGrace = 0;
         ice.Clear(); meteors.Clear(); puddleHits.Clear(); towerCasters.Clear();
         openingKnights.Clear(); landedMeteors.Clear();
@@ -56,16 +59,24 @@ public sealed partial class DsrP2SanctityScenario : IScenario
         });
         world.Events.Add(2.5f, SummonOpeningKnights);
         world.Events.Add(3f, () => boss?.Cast(DsrConstants.Action.Sanctity, castSeconds: 4, targetId: boss.GameObjectId));
+        world.Events.Add(7.1f, () =>
+        {
+            foreach (var knight in openingKnights) knight.PlayDeparture(DsrConstants.Timeline.KnightDeparture);
+        });
+        world.Events.Add(8.5f, () =>
+        {
+            foreach (var knight in openingKnights) knight.Despawn();
+            openingKnights.Clear();
+        });
         world.Events.Add(9.2f, () => BossAction(DsrConstants.Action.Teleport));
         world.Events.Add(10.1f, () =>
         {
             boss?.SetTargetable(false);
             boss?.SetVisible(false);
-            foreach (var knight in openingKnights) knight.Despawn();
-            openingKnights.Clear();
         });
         world.Events.Add(11.5f, RevealSwords);
         world.Events.Add(14f, CapturePoseDiagnostics);
+        world.Events.Add(14.5f, () => state!.SwordGroupsMoving = true);
         world.Events.Add(15.7f, () => boss?.Cast(DsrConstants.Action.Gaze, castSeconds: 4, targetId: boss.GameObjectId));
         world.Events.Add(20.7f, () => Sever(0));
         world.Events.Add(20.9f, ResolveGaze);
@@ -279,7 +290,7 @@ public sealed partial class DsrP2SanctityScenario : IScenario
         state!.Stage = SanctityStage.Pairs;
         boss?.SetVisible(false); darkKnight?.SetVisible(false);
         foreach (var knight in knights) knight?.SetVisible(false);
-        haumeric = Spawn(DsrConstants.Npc.Haumeric, new Vector3(0, 0, -16));
+        haumeric = Spawn(DsrConstants.Npc.Haumeric, new Vector3(0, 0, -23));
         world!.Map.AddEffect(0x00080004, (byte)state.EyeIndex);
     }
 

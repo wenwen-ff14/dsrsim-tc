@@ -66,6 +66,8 @@ public sealed unsafe class SimEnemy : SimNpc
     private bool disableLookAt;
     private bool weaponDrawn;
     private bool weaponsInitialized;
+    private bool hiddenWeaponsRemoved;
+    private bool departurePlaying;
     private bool battleIdleActive;
     private bool battleStanceInitialized;
     private nint poseDrawObject;
@@ -84,6 +86,14 @@ public sealed unsafe class SimEnemy : SimNpc
         entranceTimeline = timelineId;
         entranceDuration = duration;
         ReconcileVisibility();
+    }
+
+    public void PlayDeparture(ushort timelineId)
+    {
+        StopEntrance();
+        departurePlaying = true;
+        battleIdleActive = false;
+        PlayActionTimeline(timelineId);
     }
 
     private void StopEntrance()
@@ -372,7 +382,27 @@ public sealed unsafe class SimEnemy : SimNpc
     {
         desiredVisible = visible;
         visibilityDirty = true;
+        if (visible)
+        {
+            departurePlaying = false;
+            hiddenWeaponsRemoved = false;
+        }
         ReconcileVisibility();
+        if (!visible) RemoveHiddenWeapons();
+    }
+
+    private void RemoveHiddenWeapons()
+    {
+        var chara = BattleCharaPtr;
+        if (!weaponDrawn || hiddenWeaponsRemoved || chara == null || !chara->IsReadyToDraw()) return;
+        // Weapon scene objects have their own visibility and may be re-enabled by native timelines.
+        // Let LoadWeapon retire them; changing only DrawObject.IsVisible leaves the attachments alive.
+        for (var slot = 0; slot < 3; slot++)
+            DrawDataPointers.LoadWeapon(&chara->DrawData, (DrawDataContainer.WeaponSlot)slot, default);
+        hiddenWeaponsRemoved = true;
+        weaponsInitialized = battleStanceInitialized = battleIdleActive = false;
+        appliedWeaponVisibility = null;
+        System.Array.Clear(weaponDrawObjects);
     }
 
     public void SetWeaponsVisible(bool visible)
@@ -494,8 +524,16 @@ public sealed unsafe class SimEnemy : SimNpc
         {
             poseDrawObject = (nint)chara->DrawObject;
             weaponsInitialized = battleIdleActive = battleStanceInitialized = false;
+            hiddenWeaponsRemoved = false;
             poseRetryRemaining = 0;
         }
+
+        if (!desiredVisible)
+        {
+            RemoveHiddenWeapons();
+            return;
+        }
+        if (departurePlaying) return;
 
         if (!weaponsInitialized)
         {

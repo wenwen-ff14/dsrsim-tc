@@ -13,7 +13,8 @@ internal sealed class DsrP2SanctityAi : IScenarioAi
     {
         return state.Stage switch
         {
-            SanctityStage.Preparation => DsrP2SanctityState.Polar(DsrP2SanctityState.BaseQuadrants[role] * 90, 10),
+            SanctityStage.Preparation => DsrP2SanctityState.OpeningPosition(role),
+            SanctityStage.Swords when !state.SwordGroupsMoving => DsrP2SanctityState.OpeningPosition(role),
             SanctityStage.Swords => state.SwordPosition(role, false),
             SanctityStage.Charges => state.SwordPosition(role, state.Explosions >= (state.EarlyMove ? 3 : 5)),
             SanctityStage.Pairs => state.PairPosition(role),

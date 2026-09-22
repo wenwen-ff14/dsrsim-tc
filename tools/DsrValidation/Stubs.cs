@@ -77,6 +77,8 @@ namespace AnoMech.Core.SimObjects
     {
         public uint BNpcBaseId;
         public readonly List<(ushort Timeline, float Duration)> Entrances = [];
+        public readonly List<(float Time, ushort Timeline)> Departures = [];
+        public void PlayDeparture(ushort id) => Departures.Add((Time, id));
         public void QueueEntrance(ushort id, float duration) => Entrances.Add((id, duration));
         public uint NameId;
         public EnemyListMode ListMode;

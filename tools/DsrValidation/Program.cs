@@ -38,6 +38,23 @@ for (var seed = 0; seed < 1000; seed++)
         world.Events.Tick(1f / 60);
         foreach (var member in world.Party.ActiveMembers()) member.Advance(1f / 60);
         scenario.Tick(1f / 60, time);
+        if (frame == 7 * 60 + 30)
+        {
+            var opening = world.Enemies.Where(e => e.NameId is >= 3633 and <= 3644).ToArray();
+            Check(opening.Length == 8 && opening.All(e => e.Active && e.Departures.Count == 1 &&
+                e.Departures[0].Timeline == 0x1E39 && MathF.Abs(e.Departures[0].Time - 7.1f) < .05f),
+                "all opening knights take off after Sanctity cast and remain alive for animation");
+        }
+        if (frame == 9 * 60)
+            Check(world.Enemies.Where(e => e.NameId is >= 3633 and <= 3644).All(e => !e.Active), "opening knights retired after takeoff");
+        if (frame is 720 or 840)
+        {
+            var positions = world.Party.ActiveMembers().Select(m => m.Position).ToArray();
+            Check(positions.Distinct().Count() == 8, "sword markers have eight distinct positions");
+            for (var r = 0; r < 8; r++)
+                Check(Vector3.Distance(world.Party.Get(r)!.Position, DsrP2SanctityState.OpeningPosition(r)) < .05f,
+                    "NPCs hold opening spread while sword markers are read");
+        }
         if (frame == 9 * 60 + 30) Check(thordan.WeaponsVisible, "Thordan takeoff retains native weapon animation control");
         if (frame == 10 * 60 + 30) Check(!thordan.Visible, "Thordan hidden after departure");
         if (frame == 12 * 60) Check(thordan.Visible && thordan.WeaponsVisible, "Thordan body and weapon restored on reappearance");
@@ -104,6 +121,11 @@ ExpectFailure("隕石間距不足", (w, s, t) =>
 var playerWorld = new SimWorld();
 var localPlayer = new SimPlayer { Position = new(1, 0, 2) };
 playerWorld.Party.Slots[0] = localPlayer;
+new DsrP2SanctityScenario().Run(playerWorld, 0);
+if (localPlayer.Position != new Vector3(1, 0, 2)) throw new Exception("Opening spread moved the player");
+for (var role = 1; role < 8; role++)
+    if (Vector3.Distance(playerWorld.Party.Get(role)!.Position, DsrP2SanctityState.OpeningPosition(role)) > .01f)
+        throw new Exception("NPC did not start at its opening spread position");
 DsrP2SanctityAi.Tick(new(0) { Stage = SanctityStage.Swords }, playerWorld);
 localPlayer.Advance(1);
 if (localPlayer.Position != new Vector3(1, 0, 2)) throw new Exception("AI moved the player");
@@ -173,7 +195,7 @@ for (var seed = 0; seed < 100; seed++)
 if (humanMeteorRuns == 0) throw new Exception("No normal-speed player meteor cases exercised");
 Console.WriteLine($"Normal-speed player meteor runs: {humanMeteorRuns} passed with an AI partner.");
 
-foreach (var angle in new[] { 120, 150, 180 })
+foreach (var angle in new[] { 120, 150, 180, 210, 240 })
     for (var seed = 0; seed < 100; seed++)
     {
         var scenario = new DsrP2SanctityScenario();
@@ -181,10 +203,7 @@ foreach (var angle in new[] { 120, 150, 180 })
         var world = new SimWorld();
         scenario.Run(world, 0);
         var state = scenario.CurrentState;
-        var separation = MathF.Abs(DsrP2SanctityState.SignedAngle(
-            DsrP2SanctityState.Angle(state.FirstTower(state.MeteorRoles[0])) -
-            DsrP2SanctityState.Angle(state.FirstTower(state.MeteorRoles[1]))));
-        if (MathF.Abs(separation - angle) > .01f || state.FirstTowerByRole.Distinct().Count() != 8)
+        if (!state.HasMeteor(0) || MathF.Abs(state.MeteorArc(0) - angle) > .01f || state.FirstTowerByRole.Distinct().Count() != 8)
             throw new Exception($"Forced {angle} degree tower geometry invalid, seed {seed}");
         SimCharacter.Failures.Clear();
         for (var frame = 0; frame < 61 * 60 + 5; frame++)
@@ -198,7 +217,19 @@ foreach (var angle in new[] { 120, 150, 180 })
         if (SimCharacter.Failures.Count != 0)
             throw new Exception($"Forced {angle} degree route failed, seed {seed}: {SimCharacter.Failures[0]}");
     }
-Console.WriteLine("Forced 120/150/180 degree tower layouts: 300 complete routes passed.");
+Console.WriteLine("Player 120/150/180/210/240 degree routes: 500 complete routes passed.");
+
+foreach (var angle in new[] { 120, 150, 180, 210, 240 })
+    for (var role = 0; role < 8; role++)
+        for (var seed = 0; seed < 100; seed++)
+        {
+            var state = new DsrP2SanctityState(seed, meteorPreference: role < 4 ? 2 : 1, playerRole: role, meteorAngle: angle);
+            if (!state.HasMeteor(role) || MathF.Abs(state.MeteorArc(role) - angle) > .01f ||
+                MathF.Abs(state.MeteorRoles.Sum(state.MeteorArc) - 360) > .01f ||
+                state.MeteorRoles.Any(r => (r < 4) != (role < 4)))
+                throw new Exception($"Player route selection failed: role {role}, angle {angle}, seed {seed}");
+        }
+Console.WriteLine("All eight player roles: 4000 angle selections honor player route and override conflicting target preference.");
 
 {
     var scenario = new DsrP2SanctityScenario();
@@ -227,7 +258,7 @@ Console.WriteLine("Forced 120/150/180 degree tower layouts: 300 complete routes 
         if (frame == 32 * 60)
         {
             var iceKnight = world.Enemies.Last(e => e.BNpcBaseId == AnoMech.Scenarios.Dsr.DsrConstants.Npc.Haumeric);
-            if (!iceKnight.Visible || !iceKnight.Casts.Any(c => c.Action == 25574 && c.Duration == 7))
+            if (!iceKnight.Visible || iceKnight.Position.Length() <= 21 || !iceKnight.Casts.Any(c => c.Action == 25574 && c.Duration == 7))
                 throw new Exception("Ice knight missing or not casting Hiemal Storm");
         }
         if (frame == 38 * 60 && world.Party.ActiveMembers().Any(m => m.HasStatus(2903)))
@@ -300,7 +331,7 @@ namespace AnoMech.Scenarios.Dsr.P2Sanctity
         internal void UseSeed(int value, int angle = 0)
         {
             fixedSeed = true; seed = value; direction = 0; meteorPreference = 0;
-            meteorAngleSelection = angle switch { 120 => 1, 150 => 2, 180 => 3, _ => 0 };
+            meteorAngleSelection = angle switch { 120 => 1, 150 => 2, 180 => 3, 210 => 4, 240 => 5, _ => 0 };
         }
         internal DsrP2SanctityState CurrentState => state!;
     }
