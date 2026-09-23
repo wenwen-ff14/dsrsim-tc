@@ -19,7 +19,6 @@ public sealed partial class DsrP6DragonsScenario
             if(world!.Party.Get(r) is {} member)
             {
                 tethers.Add(world.Tether(member,state.Fire[r]?nidhogg:hraesvelgr,state.Fire[r]?(ushort)194:(ushort)195));
-                if(!second)member.AddStatus(state.Fire[r]?(ushort)2898:(ushort)2899,7.066f);
             }
     }
     private void ResolveBlizzard()
@@ -150,7 +149,8 @@ public sealed partial class DsrP6DragonsScenario
         world!.Party.Get(role)?.AddStatus(2896,remaining);
         if(startAt==0)
         {
-            Effect(27952,DsrP6DragonsState.Nidhogg,world.Party.Get(role)!.Position,world.Party.Get(role));
+            var target=world.Party.Get(role)!;
+            nidhogg?.Cast(27952,target.Position,0,targetId:target.GameObjectId);
             foreach(var member in world.Party.ActiveMembers())
                 if(member!=world.Party.Get(role)&&Vector3.Distance(member.Position,world.Party.Get(role)!.Position)<5)Hit(member,"滅殺的誓言：DPS 點名時須散開");
         }
@@ -226,10 +226,14 @@ public sealed partial class DsrP6DragonsScenario
         if(hit>0)nidhogg?.Cast(27975,position,0,targetId:target.GameObjectId);
         foreach(var member in world.Party.ActiveMembers())
             if(Vector3.Distance(member.Position,position)>6)Hit(member,"死亡輪迴：八人集合分攤");
-        var puddle=world.SpawnEventObject(new EventObjectSpawnConfig{EObjId=0x1EB683,Placement=new(position,0)});
-        if(puddle!=null)puddles.Add(puddle);
+        akhMornPositions[hit]=position;
         puddleHits.Add((position,state!.Time+1.5f));
         for(var r=0;r<8;r++)state.Destinations[r]=hit switch{0=>new(-12,0,13),1=>new(-12,0,6.5f),2=>new(-5,0,6.5f),_=>new(-5,0,0)};
+    }
+    private void SpawnAkhMornPuddle(int hit)
+    {
+        var puddle=world!.SpawnEventObject(new EventObjectSpawnConfig{EObjId=0x1EB683,Placement=new(akhMornPositions[hit],0)});
+        if(puddle!=null)puddles.Add(puddle);
     }
     private void ResolveHot(bool wings)
     {

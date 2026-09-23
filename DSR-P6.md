@@ -4,11 +4,13 @@ P6 整合為一個「機制流程」入口，可選開始與結束機制：冰�
 
 **十字火已接入連續流程，但火球出現與爆炸時間仍是參考程式和攻略推估，並非完整 logs 重現。** 目前固定東側白龍俯衝、中央→東北→西南三波火球及燃燒之尾；其他十字火配置尚未隨機化。
 
-## 0.4.0.52 修正
+## 0.4.0.53 修正
 
 - 所有 P6 分攤移除額外的 Lockon 62 提示，保留雙龍原版吐息與死亡輪迴命中特效。
-- 冰火 1 連線期間顯示火 `2898`／冰 `2899` 狀態；判定成功同吃冰火時清除，只有單一屬性命中時保留該屬性並判定失誤。
-- 十字火白龍維持原位直到邪念之炎讀條結束後才離場：62.107 秒離場、63.407 秒在俯衝位出現、72.479 秒俯衝判定、73.5 秒回原位並恢復選取。黑龍保持原位可攻擊並執行四次死亡輪迴。返回時間仍待遊戲內校準。
+- 冰火狀態只在吐息判定時套用，連線期間不提前套用。冰火 1 正確同吃冰火時互相抵消；只有單一屬性命中時保留該屬性並判定失誤。基準紀錄的 `2898` 僅記錄冰火 2 於 `13:05.358` 套用，沒有冰火 1 連線時套用的事件。
+- 冰火 1 後先散開，22.031 秒隨機點名一名 DPS；由黑龍本體釋放原版滅殺的誓言 `27952`，避免隱藏輔助物件無法播放模型動作。第一次坦死刑後黑龍於 50 秒回原位並執行原版進場動作，恢復選取。
+- 十字火於 63.127 秒套用 23 秒炎狀態（logs `11:53.127`）；依使用者要求先給狀態再讓白龍離場：63.18 秒播放離場、63.85 秒隱藏、64 秒在俯衝位出現，72.479 秒俯衝判定、73.5 秒回原位並恢復選取。黑龍保持原位可攻擊並執行四次死亡輪迴。離場／返回動畫時間仍待遊戲內校準；logs 邪念之炎的施法來源仍為黑龍。
+- 死亡輪迴的釋放快照與地板火圈分開。四次火圈分別於 73.735／75.390／76.954／78.520 秒生成，保留釋放時落點，不追蹤已移動的目標。logs 第一輪釋放為 `12:02.435`，實際逐人傷害為 `12:03.330～03.642`；後續三輪亦約延後 0.895 秒命中。地板採用釋放後 1.3 秒的呈現延遲，確保晚於命中特效，這不是 logs 的物件生成事件，仍需遊戲內精校。
 
 ## 場地與站位修正
 
@@ -28,6 +30,7 @@ P6 整合為一個「機制流程」入口，可選開始與結束機制：冰�
 ## 來源
 
 - 基準：[V4F6z9GCthdf2Ppq／fight 42，P6 敵方施法事件](https://www.fflogs.com/reports/V4F6z9GCthdf2Ppq?fight=42&type=casts&hostility=1&phase=7&view=events)。模擬器 0 秒對應整場 `10:50.000`，分段入口扣除各自的起始秒數。
+- 本次效果順序核對：[逐漸升溫](https://www.fflogs.com/reports/V4F6z9GCthdf2Ppq?fight=42&type=auras&spells=debuffs&ability=1002898&phase=7&view=events)、[炎狀態](https://www.fflogs.com/reports/V4F6z9GCthdf2Ppq?fight=42&type=auras&spells=debuffs&ability=1002758&phase=7&view=events)、[死亡輪迴首次傷害](https://www.fflogs.com/reports/V4F6z9GCthdf2Ppq?fight=42&type=damage-done&hostility=1&ability=27974&phase=7&view=events)、[後續三次傷害](https://www.fflogs.com/reports/V4F6z9GCthdf2Ppq?fight=42&type=damage-done&hostility=1&ability=27975&phase=7&view=events)。
 - 交叉核對：[xCPHfKRndL7tk2gz／fight 7](https://www.fflogs.com/reports/xCPHfKRndL7tk2gz?fight=7&type=casts&hostility=1&phase=7&view=events)。這場有不同的嘴部發光與燃燒之翼組合，不能把兩場的分支時間直接混用。
 - 新增繁中紀錄：[vqjRtKHxcT6YZy4J／fight 8](https://www.fflogs.com/reports/vqjRtKHxcT6YZy4J?fight=8&type=casts&hostility=1&phase=7&view=events)。冰火 1 白龍發光，冰火 2 雙龍發光。
 - 新增獨立團隊紀錄：[2FhKvQ1AyxVbJkL8／fight 4](https://www.fflogs.com/reports/2FhKvQ1AyxVbJkL8?fight=4&type=casts&hostility=1&phase=7&view=events)。兩次冰火均出現 Dark Orb／Holy Orb，並可核對吐息、分攤及俯衝時序。

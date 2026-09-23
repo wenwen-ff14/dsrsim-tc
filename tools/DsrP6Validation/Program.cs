@@ -157,7 +157,7 @@ Console.WriteLine("PASS: entering a fireball cross lane fails at its scheduled e
  {
   var time=frame/60f;SimCharacter.Time=time;
   w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
-  if(time>8&&time<14.7f)for(var r=2;r<8;r++)Check(w.Party.Slots[r].HasStatus(s.State.Fire[r]?(ushort)2898:(ushort)2899),"first breath tether debuff");
+  if(time<14.8f)Check(w.Party.Slots.All(m=>!m.HasStatus(2898)&&!m.HasStatus(2899)),"tethers must not apply breath statuses before impact");
   if(time>15)Check(w.Party.Slots.All(m=>!m.HasStatus(2898)&&!m.HasStatus(2899)),"opposite breaths clear first-breath statuses");
  }
 }
@@ -169,14 +169,49 @@ Console.WriteLine("PASS: entering a fireball cross lane fails at its scheduled e
   var time=frame/60f;SimCharacter.Time=time;
   w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
   Check(black.Visible&&black.Targetable&&black.Position==DsrP6DragonsState.Nidhogg&&black.Departures.Count==0,"black dragon stays attackable at home through Wroth");
-  if(time<4.1f)Check(white.Position==DsrP6DragonsState.Hraesvelgr&&white.Targetable,"white dragon waits for Wroth cast end");
-  if(time>4.2f&&time<15.49f)Check(!white.Targetable,"white dragon untargetable during departure and dive");
+  if(time<5.17f)Check(white.Position==DsrP6DragonsState.Hraesvelgr&&white.Targetable,"white dragon waits for Wroth debuffs");
+  if(white.Departures.Count>0)Check(s.State.FlamesAssigned,"Wroth debuffs precede departure");
+  if(time>5.2f&&time<15.49f)Check(!white.Targetable,"white dragon untargetable during departure and dive");
   if(time>15.6f)Check(white.Visible&&white.Targetable&&white.Position==DsrP6DragonsState.Hraesvelgr,"white dragon returns attackable after dive");
+  if(time>14.5f&&time<15.7f)Check(w.EventObjects.Count==0,"first ground puddle must wait until after native hit effects");
+  if(time>15.8f&&time<17.3f)
+  {
+   Check(w.EventObjects.Count==1,"first puddle appears after damage");
+   Check(Vector3.Distance(w.EventObjects[0].Config.Placement.Position,new(-19,0,13))<.1f,"puddle preserves stack snapshot instead of following moving target");
+  }
  }
  Check(black.Casts.Count(c=>c.Action is 27974 or 27975)==4,"four black dragon stack hits");
  Check(white.Departures.Count==1&&white.Casts.Count(c=>c.Action==27967)==1,"only white dragon departs and dives once");
 }
 Console.WriteLine("PASS: first-breath status lifecycle and white-only Wroth departure, dive, return and targetability.");
+{
+ var s=new DsrP6DragonsScenario();s.UseSeed(0);var w=new SimWorld();s.Run(w,0);
+ for(var frame=1;frame<=51*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;
+  w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
+  if(time>22.1f&&time<22.5f)
+  {
+   Check(s.State.VowOwner>=4&&s.State.VowOwner<=7,"first poison selects a DPS");
+   Check(w.Enemies[0].Casts.Count(c=>c.Action==27952)==1,"Nidhogg itself plays Mortal Vow");
+   Check(w.Enemies.Skip(1).All(e=>e.Casts.All(c=>c.Action!=27952)),"no invisible helper for dragon poison animation");
+  }
+ }
+ Check(w.Enemies[0].Position==DsrP6DragonsState.Nidhogg&&w.Enemies[0].Visible&&w.Enemies[0].Targetable&&w.Enemies[0].Entrances.Count==1,"Nidhogg returns from hidden dive with entrance animation");
+}
+Console.WriteLine("PASS: native Nidhogg poison source and post-tankbuster return.");
+{
+ var s=new DsrP6DragonsScenario(DsrP6Section.Breath1);s.UseSeed(0);var w=new SimWorld();
+ var player=new SimPlayer{Role=2,Position=new(-14,0,-12)};w.Party.Slots[2]=player;s.Run(w,0);
+ for(var frame=1;frame<=16*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;
+  w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
+  if(time<14.8f)Check(!player.HasStatus(2898)&&!player.HasStatus(2899),"isolated fire target has no early status");
+  if(time>14.9f)Check(player.HasStatus(2898)&&!player.HasStatus(2899),"single fire hit applies Boiling only on impact");
+ }
+}
+Console.WriteLine("PASS: isolated first-breath target receives its status only at impact.");
 namespace AnoMech.Scenarios.Dsr.P6Dragons
 {
  public sealed partial class DsrP6DragonsScenario
