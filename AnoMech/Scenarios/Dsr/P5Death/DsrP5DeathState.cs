@@ -38,7 +38,7 @@ internal sealed class DsrP5DeathState
     public static Vector3 Polar(float degrees,float radius)=>new(radius*MathF.Sin(degrees*MathF.PI/180),0,-radius*MathF.Cos(degrees*MathF.PI/180));
     public Vector3 Hammer=>Rotate(new(0,0,-7));
     public Vector3 Eye=>Polar(EyeIndex*45,40);
-    public Vector3 Boss=>Polar(BossIndex*45,23);
+    public Vector3 Boss=>Polar(BossIndex*45,40);
     public Vector3 Spread(int role)
     {
         var doom=HasDoom(role);var index=Array.IndexOf(doom?Dooms:Clean,role);

@@ -26,7 +26,7 @@ public sealed partial class DsrP5DeathScenario
             meteors[i]?.SetVisible(true);
             meteors[i]?.SetTargetable(true);
         }
-        state.LimitBreakMessage=state.LimitBreakUsed?"本輪 LB 已使用。":"LB 已滿，可以自由選點施放；隕石不結算。";
+        state.LimitBreakMessage=state.LimitBreakUsed?"本輪 LB 已使用。":"LB 已滿，可以自由選點施放；命中隕石會消失，不自動結束。";
     }
 
     internal bool TryLimitBreak(Vector3 target)
@@ -55,7 +55,7 @@ public sealed partial class DsrP5DeathScenario
             if(state.LimitBreakRefill>=1f)
             {
                 state.LimitBreakUsed=false;
-                state.LimitBreakMessage="LB 已補滿，可繼續練習；隕石不結算。";
+                state.LimitBreakMessage="LB 已補滿，可繼續練習；命中隕石會消失，不自動結束。";
             }
         }
         if(!state!.LimitBreakCasting)return;
@@ -74,7 +74,16 @@ public sealed partial class DsrP5DeathScenario
         state.LimitBreakRefill=0;
         if(caster is not SimPlayer)
             Spawn(DsrConstants.Npc.Helper,3632,state.LimitBreakTarget,false)?.Cast(204,state.LimitBreakTarget,0);
-        state.LimitBreakMessage="LB2 施放完成；1 秒後補滿，不結算隕石。";
+        var destroyed=0;
+        if(state.MeteorsActive)
+            for(var i=0;i<meteors.Length;i++)
+                if(!state.MeteorDestroyed[i]&&Vector3.DistanceSquared(state.MeteorPositions[i],state.LimitBreakTarget)<=100)
+                {
+                    state.MeteorDestroyed[i]=true;
+                    meteors[i]?.Despawn();
+                    destroyed++;
+                }
+        state.LimitBreakMessage=$"LB2 擊破 {destroyed} 顆隕石；1 秒後補滿，可繼續練習。";
         Array.Clear(state.Destinations);
     }
 

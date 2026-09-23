@@ -18,6 +18,7 @@ for(var seed=0;seed<100;seed++)
     Check(!s.State.Complete&&s.State.MeteorsActive&&w.Events.IsEmpty,"incomplete timeline");
     Check(!s.State.LimitBreakUsed&&!s.State.MeteorDestroyed.Any(x=>x),"NPC meteor clear");
     Check(s.State.MeteorPositions.All(p=>MathF.Abs(p.Length()-13)<.001f),"meteor ring radius");
+    Check(MathF.Abs(s.State.Boss.Length()-40)<.001f,"Thordan outside arena");
     Check(s.State.MeteorPositions.Count(p=>Vector3.Distance(p,s.State.MeteorPositions[0])<=10)==3,"LB2 must cover three adjacent meteors");
     Check(s.State.MeteorPositions.All(p=>p.Length()>10),"LB2 centered in arena must not clear the meteor ring");
     Check(w.Enemies.SelectMany(e=>e.Casts).Count(c=>c.Action==204)==0&&!w.Enemies.SelectMany(e=>e.Casts).Any(c=>c.Action==205),"native LB2 action, not LB3");
@@ -93,9 +94,10 @@ foreach(var mode in new[]{"correct","miss","interrupt","retry","unused","late"})
         w.Events.Tick(1f/60);foreach(var m in w.Party.Slots)m.Advance(1f/60);s.Tick(1f/60,t);
     }
 
-    Check(!s.State.MeteorDestroyed.Any(x=>x),"meteor result: "+mode);
+    var destroyed=mode is "interrupt" or "unused"?0:3;
+    Check(s.State.MeteorDestroyed.Count(x=>x)==destroyed,"meteor result: "+mode);
     Check(!SimCharacter.Failures.Any(x=>x.Contains("隕石未擊破")),"meteor failure: "+mode);
-    Check(!s.State.Complete&&w.Enemies.Count(e=>e.Active)==8,"LB cleanup: "+mode);
+    Check(!s.State.Complete&&w.Enemies.Count(e=>e.Active)==8-destroyed,"LB cleanup: "+mode);
 }
 Console.WriteLine("PASS: manual D4 LB hit/miss, movement interruption/retry, no cast, late cast, range and duplicate-cast checks.");
 {
@@ -125,7 +127,7 @@ foreach(var expected in new[]{0,1,2,3})
     s.AdvanceLimitBreak(2.9f);
     Check(s.State.LimitBreakCasting&&!s.State.LimitBreakUsed&&!s.State.MeteorDestroyed.Any(x=>x),"LB resolved before cast finished");
     s.AdvanceLimitBreak(.11f);
-    Check(s.State.LimitBreakUsed&&!s.State.MeteorDestroyed.Any(x=>x),$"LB hit count {expected}");
+    Check(s.State.LimitBreakUsed&&s.State.MeteorDestroyed.Count(x=>x)==expected,$"LB hit count {expected}");
 }
 {
     var s=new DsrP5DeathScenario();s.UseSeed(12);var w=new SimWorld();
@@ -137,7 +139,7 @@ foreach(var expected in new[]{0,1,2,3})
     s.AdvanceLimitBreak(1.01f);
     Check(s.TryLimitBreak(Vector3.Zero),"practice LB did not refill");
 }
-Console.WriteLine("PASS: full LB available before meteors; three-second cast; arbitrary placements leave meteors intact; empty gauge rejected and refilled.");
+Console.WriteLine("PASS: full LB available before meteors; three-second cast; zero/one/two/three meteor hits despawn only hit targets; empty gauge rejected and refilled.");
 namespace AnoMech.Scenarios.Dsr.P5Death
 {
     public sealed partial class DsrP5DeathScenario
