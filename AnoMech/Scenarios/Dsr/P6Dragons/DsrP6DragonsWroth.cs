@@ -52,7 +52,7 @@ public sealed partial class DsrP6DragonsScenario
     }
     private void BeginFireballs(int wave)
     {
-        for(var i=0;i<3;i++)fireballs[wave,i]?.Cast(26409,castSeconds:5,omenDelay:5);
+        for(var i=0;i<3;i++)fireballs[wave,i]?.Cast(26409,castSeconds:5,omenDelay:4.5f);
     }
     private void ResolveFireballs(int wave)
     {

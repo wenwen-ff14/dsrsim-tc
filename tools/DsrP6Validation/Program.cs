@@ -151,6 +151,11 @@ for(var first=1;first<=5;first++)for(var last=first;last<=5;last++)
  var hasWroth=first<=3&&last>=3;
  Check(w.Enemies.Count(e=>e.BNpcBaseId==0x33B6)==(hasWroth?9:0),"nine fireballs only in selected Wroth window");
  Check(w.Enemies.SelectMany(e=>e.Casts).Count(c=>c.Action==26409)==(hasWroth?9:0),"three waves of native cross casts");
+ foreach(var enemy in w.Enemies)
+ {
+  foreach(var cast in enemy.Casts.Where(c=>c.Action==26409))Check(cast.Duration==5,"cross explosion timing stays unchanged");
+  foreach(var omen in enemy.Omens.Where(o=>o.Action==26409))Check(omen.Delay==4.5f,"native cross omen appears only in the final half-second");
+ }
  Check(w.Party.Slots.All(m=>!m.LockonVfx.Contains(62)),"no stack markers in any P6 range");
 }
 var invalidRange=false;
