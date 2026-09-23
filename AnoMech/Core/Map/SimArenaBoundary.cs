@@ -51,7 +51,8 @@ internal sealed unsafe class SimArenaBoundary : ISimObject
         // Member positions are scenario-local; the boundary is centered on local zero.
         foreach (var member in party.ActiveMembers())
         {
-            if (IsOutside(member.Position)) member.Die(cause);
+            if (IsOutside(member.Position))
+                member.Die($"{cause}（場中相對座標 X={member.Position.X:F2}, Z={member.Position.Z:F2}；{(square?"方形半寬":"圓形半徑")}={System.MathF.Sqrt(radiusSq):F1}）");
         }
     }
 

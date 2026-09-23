@@ -177,7 +177,7 @@ Console.WriteLine("PASS: entering a fireball cross lane fails at its scheduled e
   if(time>15.8f&&time<17.3f)
   {
    Check(w.EventObjects.Count==1,"first puddle appears after damage");
-   Check(Vector3.Distance(w.EventObjects[0].Config.Placement.Position,new(-19,0,13))<.1f,"puddle preserves stack snapshot instead of following moving target");
+   Check(Vector3.Distance(w.EventObjects[0].Config.Placement.Position,s.State.Wroth.Start)<.1f,"puddle preserves stack snapshot instead of following moving target");
   }
  }
  Check(black.Casts.Count(c=>c.Action is 27974 or 27975)==4,"four black dragon stack hits");
@@ -212,6 +212,31 @@ Console.WriteLine("PASS: native Nidhogg poison source and post-tankbuster return
  }
 }
 Console.WriteLine("PASS: isolated first-breath target receives its status only at impact.");
+for(var variant=0;variant<24;variant++)foreach(var fps in new[]{30,60,144})
+{
+ var s=new DsrP6DragonsScenario(DsrP6Section.Wroth);s.UseSeed(variant);var w=new SimWorld();
+ SimCharacter.Failures.Clear();s.Run(w,0);s.State.Wroth=new(variant);
+ var pattern=s.State.Wroth;var before=new Vector3[8];
+ for(var frame=1;frame<=46*fps;frame++)
+ {
+  var time=frame/(float)fps;SimCharacter.Time=time;
+  for(var r=0;r<8;r++)before[r]=w.Party.Slots[r].Position;
+  w.Events.Tick(1f/fps);foreach(var member in w.Party.Slots)member.Advance(1f/fps);s.Tick(1f/fps,time);
+  foreach(var member in w.Party.Slots)
+   Check(MathF.Abs(member.Position.X)<=21&&MathF.Abs(member.Position.Z)<=21,"all Wroth routes stay in square arena, including corners");
+  if(time>14.5f&&time<15.3f)
+   for(var r=0;r<8;r++)Check(Vector3.Distance(before[r],w.Party.Slots[r].Position)<.001f,"wait for native Akh Morn impact before stepping");
+ }
+ Check(SimCharacter.Failures.Count==0,$"Wroth variant {variant}/{fps}: {string.Join(";",SimCharacter.Failures.Take(4))}");
+ Check(w.EventObjects.Count==4,"four native puddles per configuration");
+ var p=w.EventObjects.Select(o=>o.Config.Placement.Position).ToArray();
+ Check(MathF.Abs(p[0].Z-p[1].Z)<.01f&&MathF.Abs(p[1].Z-p[2].Z)<.01f,"first three drops run horizontally");
+ Check(MathF.Abs(p[2].Z-p[3].Z)>5,"last drop turns inward for L route");
+ Check(pattern.Fireballs(1).All(p=>MathF.Sign(p.X)==pattern.SecondX&&MathF.Sign(p.Z)==pattern.SecondZ),"second-wave quadrant");
+ Check(pattern.Fireballs(2).All(p=>MathF.Sign(p.X)==-pattern.SecondX&&MathF.Sign(p.Z)==-pattern.SecondZ),"third wave is diagonally opposite");
+ Check(w.Enemies[1].Casts.Count(c=>c.Action==27967)==1,"one white dragon dive for each variant");
+}
+Console.WriteLine("PASS: all 24 Wroth configurations at 30/60/144 FPS, cue-gated movement, L routes, four puddles, square bounds and outcomes.");
 namespace AnoMech.Scenarios.Dsr.P6Dragons
 {
  public sealed partial class DsrP6DragonsScenario

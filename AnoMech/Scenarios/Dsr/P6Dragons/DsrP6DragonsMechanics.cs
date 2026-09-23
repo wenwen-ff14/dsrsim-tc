@@ -216,19 +216,23 @@ public sealed partial class DsrP6DragonsScenario
     }
     private void PrepareWroth()
     {
-        state!.Hint="十字火：西南集合，死亡輪迴每次命中後一起移動，依序躲三組十字爆。";
+        state!.Hint="十字火：避開白龍、遠離第二組火球；等命中特效後橫移，再轉彎走 L 型。";
         ClearFireballs();
-        for(var r=0;r<8;r++)state.Destinations[r]=new(-19,0,13);
+        for(var r=0;r<8;r++)state.Destinations[r]=Vector3.Zero;
+    }
+    private void PlayAkhMornHit()
+    {
+        var target=world!.Party.Get(state!.AkhMornTarget)!;
+        nidhogg?.Cast(27975,target.Position,0,targetId:target.GameObjectId);
     }
     private void ResolveAkhMorn(int hit)
     {
         var target=world!.Party.Get(state!.AkhMornTarget)!;var position=target.Position;
-        if(hit>0)nidhogg?.Cast(27975,position,0,targetId:target.GameObjectId);
         foreach(var member in world.Party.ActiveMembers())
             if(Vector3.Distance(member.Position,position)>6)Hit(member,"死亡輪迴：八人集合分攤");
         akhMornPositions[hit]=position;
         puddleHits.Add((position,state!.Time+1.5f));
-        for(var r=0;r<8;r++)state.Destinations[r]=hit switch{0=>new(-12,0,13),1=>new(-12,0,6.5f),2=>new(-5,0,6.5f),_=>new(-5,0,0)};
+        for(var r=0;r<8;r++)state.Destinations[r]=state.Wroth.NextStack(hit);
     }
     private void SpawnAkhMornPuddle(int hit)
     {

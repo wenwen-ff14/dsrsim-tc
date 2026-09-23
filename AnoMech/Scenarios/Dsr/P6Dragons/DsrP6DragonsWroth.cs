@@ -6,12 +6,6 @@ namespace AnoMech.Scenarios.Dsr.P6Dragons;
 
 public sealed partial class DsrP6DragonsScenario
 {
-    private static readonly Vector3[][] FireballPositions=
-    [
-        [new(-3,0,-3),new(3,0,0),new(-2,0,3)],
-        [new(10,0,-16),new(16,0,-13),new(11,0,-10)],
-        [new(-16,0,10),new(-10,0,13),new(-15,0,16)],
-    ];
     private readonly SimEnemy?[,] fireballs=new SimEnemy?[3,3];
 
     private void DepartWrothHraesvelgr()
@@ -21,10 +15,11 @@ public sealed partial class DsrP6DragonsScenario
     }
     private void ShowWrothDive()
     {
-        hraesvelgr?.SetPosition(new Vector3(11,0,-34));
-        hraesvelgr?.HoldFacing(0);
+        hraesvelgr?.SetPosition(state!.Wroth.DiveOrigin);
+        hraesvelgr?.HoldFacing(state!.Wroth.DiveOrigin.Z<0?0:MathF.PI);
         hraesvelgr?.QueueEntrance(DsrConstants.Timeline.KnightEntrance,.65f);
         hraesvelgr?.SetVisible(true);
+        for(var r=0;r<8;r++)state!.Destinations[r]=new(state.Wroth.StartSide*19,0,0);
     }
     private void ReturnWrothHraesvelgr()
     {
@@ -49,9 +44,10 @@ public sealed partial class DsrP6DragonsScenario
     {
         for(var i=0;i<3;i++)
         {
-            fireballs[wave,i]=Spawn(0x33B6,0,FireballPositions[wave][i],true,false);
+            fireballs[wave,i]=Spawn(0x33B6,0,state!.Wroth.Fireballs(wave)[i],true,false);
             fireballs[wave,i]?.SetTargetable(false);
         }
+        if(wave==1)for(var r=0;r<8;r++)state!.Destinations[r]=state.Wroth.Start;
     }
     private void BeginFireballs(int wave)
     {
@@ -59,7 +55,7 @@ public sealed partial class DsrP6DragonsScenario
     }
     private void ResolveFireballs(int wave)
     {
-        foreach(var origin in FireballPositions[wave])
+        foreach(var origin in state!.Wroth.Fireballs(wave))
             foreach(var member in world!.Party.ActiveMembers())
             {
                 var offset=member.Position-origin;

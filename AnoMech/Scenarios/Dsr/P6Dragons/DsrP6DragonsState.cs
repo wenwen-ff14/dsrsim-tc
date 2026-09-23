@@ -18,6 +18,7 @@ internal sealed class DsrP6DragonsState
     public readonly int[] Flames;
     public readonly int FirstVow;
     public readonly int AkhMornTarget;
+    public DsrP6WrothPattern Wroth;
     public int VowOwner=-1;
     public bool Complete, Failed, SecondBreath, FlamesAssigned, ThermalActive;
     public float Time;
@@ -31,6 +32,7 @@ internal sealed class DsrP6DragonsState
         foreach(var role in breathRoles.Take(3))SecondFire[role]=true;
         SecondGlow=(DsrP6Glow)random.Next(3);
         AkhMornTarget=random.Next(8);
+        Wroth=new(random.Next(24));
         SetIdle();
     }
     public void SetIdle()
@@ -99,8 +101,8 @@ internal sealed class DsrP6DragonsState
     }
     public void SetFlames()
     {
-        for(var i=0;i<4;i++)Destinations[Flames[i]]=new(-18+i*6,0,-10);
-        for(var i=4;i<8;i++)Destinations[Flames[i]]=new(i%2==0?9:18,0,-10);
+        for(var i=0;i<4;i++)Destinations[Flames[i]]=new(-18+i*6,0,-Wroth.StartZ*10);
+        for(var i=4;i<8;i++)Destinations[Flames[i]]=new(i%2==0?9:18,0,-Wroth.StartZ*10);
         Hint="燃燒之尾：離開中央橫線；黑色散開往西，白色與無標各二人分攤往東。";
     }
     public void SetDoubleDive()
