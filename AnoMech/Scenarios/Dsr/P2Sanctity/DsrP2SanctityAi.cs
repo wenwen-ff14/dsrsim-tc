@@ -17,7 +17,7 @@ internal sealed class DsrP2SanctityAi : IScenarioAi
             SanctityStage.Swords when !state.SwordGroupsMoving => DsrP2SanctityState.OpeningPosition(role),
             SanctityStage.Swords => state.SwordPosition(role, false),
             SanctityStage.Charges => state.SwordPosition(role, state.Explosions >= (state.EarlyMove ? 3 : 5)),
-            SanctityStage.Pairs => state.PairPosition(role),
+            SanctityStage.Pairs => state.PreviewTowerAssignment ? state.TowerPreviewPosition(role) : state.PairPosition(role),
             SanctityStage.FirstTowers => state.HasMeteor(role) ? state.MeteorStart(role) :
                 Vector3.Normalize(state.FirstTower(role)) * (state.StartsInside(role) ? 3.5f : 20.4f),
             SanctityStage.Meteors when state.HasMeteor(role) && state.MeteorElapsed < 10.02f =>

@@ -121,6 +121,7 @@ public sealed partial class DsrP2SanctityScenario : IScenario
         });
         world.Events.Add(31.784f, () => haumeric?.Cast(DsrConstants.Action.HiemalStorm, castSeconds: 7,
             targetId: haumeric.GameObjectId));
+        world.Events.Add(33.5f, () => state.PreviewTowerAssignment = false);
         world.Events.Add(38.606f, ResolveFire);
         world.Events.Add(38.784f, ResolveIce);
         world.Events.Add(40.4f, () => haumeric?.SetVisible(false));
@@ -322,7 +323,7 @@ public sealed partial class DsrP2SanctityScenario : IScenario
     private void ShowTowers(bool second, float castSeconds, float fireDelay)
     {
         if (second) state!.SecondTowersVisible = true;
-        else state!.FirstTowersVisible = true;
+        else { state!.FirstTowersVisible = true; state.PreviewTowerAssignment = true; }
         towerCasters.Clear();
         var positions = second ? Enumerable.Range(0, 8).Select(r => state!.SecondTower(r)) : state!.FirstTowers;
         foreach (var position in positions)

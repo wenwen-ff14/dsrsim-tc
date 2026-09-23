@@ -17,6 +17,7 @@ public sealed partial class DsrP2SanctityScenario
     public void DrawSettings()
     {
         ImGui.TextUnformatted("打法：tuuf／Elemental　同職能換組、南北隕石");
+        ImGui.TextWrapped("NPC 選塔：中間 → 逆時針 → 順時針；南北只為避開同側困難配置而調整，不強湊 180°。塔出現後先示意去向，再集合放冰圈。");
         var playMusic = !Plugin.Config.SuppressBgm;
         if (ImGui.Checkbox("背景音樂：英傑", ref playMusic))
         {

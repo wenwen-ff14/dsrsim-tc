@@ -5,6 +5,7 @@ using System.Numerics;
 var failures = new List<string>();
 LogTimingValidation.Run();
 MeteorSnapshotValidation.Run();
+TowerPriorityValidation.Run();
 var peak = 0;
 for (var seed = 0; seed < 1000; seed++)
 {

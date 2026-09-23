@@ -39,6 +39,7 @@ internal sealed class DsrP2SanctityState
     public float MeteorElapsed { get; set; }
     public bool Failed { get; set; }
     public bool FirstTowersVisible { get; set; }
+    public bool PreviewTowerAssignment { get; set; }
     public bool SecondTowersVisible { get; set; }
     public bool FireVisible { get; set; }
     public bool EarlyMove => ((DarkKnightQuadrant & 1) == 1) == Clockwise;
@@ -112,16 +113,7 @@ internal sealed class DsrP2SanctityState
                 var omittedOrPresent = random.Next(3);
                 OuterMasks[q] = doubleQuadrants.Contains(q) ? 7 ^ (1 << omittedOrPresent) : 1 << omittedOrPresent;
             }
-            choices = Enumerable.Range(0, 4).Select(q => priority.First(t => (OuterMasks[q] & (1 << t)) != 0)).ToArray();
-            var bestPenalty = Math.Abs(choices[0] - choices[2]);
-            foreach (var n in priority)
-                foreach (var s in priority)
-                    if ((OuterMasks[0] & (1 << n)) != 0 && (OuterMasks[2] & (1 << s)) != 0 && Math.Abs(n - s) < bestPenalty)
-                    {
-                        choices[0] = n;
-                        choices[2] = s;
-                        bestPenalty = Math.Abs(n - s);
-                    }
+            choices = ChooseOuterTowers(OuterMasks);
         }
         while (meteorAngle != 0 && 180 + (choices[2] - choices[0]) * 30 * (Quadrants[playerRole] == 0 ? 1 : -1) != meteorAngle);
         var innerRoles = new List<int>();
@@ -152,6 +144,29 @@ internal sealed class DsrP2SanctityState
             FirstTowerByRole[innerRoles[i]] = FirstTowers.Count;
             FirstTowers.Add(Polar(innerQuadrants[i] * 90 + 45, 6));
         }
+    }
+
+    internal static int[] ChooseOuterTowers(int[] masks)
+    {
+        int[] priority = [1, 0, 2];
+        var choices = Enumerable.Range(0, 4).Select(q => priority.First(t => (masks[q] & (1 << t)) != 0)).ToArray();
+        // Only override priority to escape the same-side 120/240 pattern, not to optimize every pair to 180.
+        if (Math.Abs(choices[0] - choices[2]) != 2) return choices;
+        foreach (var north in priority)
+            foreach (var south in priority)
+                if ((masks[0] & (1 << north)) != 0 && (masks[2] & (1 << south)) != 0 && Math.Abs(north - south) < 2)
+                {
+                    choices[0] = north;
+                    choices[2] = south;
+                    return choices;
+                }
+        return choices;
+    }
+
+    public Vector3 TowerPreviewPosition(int role)
+    {
+        var pair = PairPosition(role);
+        return pair + Vector3.Normalize(FirstTower(role) - pair) * 2.5f;
     }
 
     private void GenerateCharges()
