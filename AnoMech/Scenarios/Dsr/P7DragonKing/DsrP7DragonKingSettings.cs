@@ -21,6 +21,7 @@ public sealed partial class DsrP7DragonKingScenario
         if(!string.IsNullOrEmpty(state.TankMessage))ImGui.TextWrapped(state.TankMessage);
         ImGui.TextUnformatted($"MT：暗 {state.DarkStacks[0]}／光 {state.LightStacks[0]}　ST：暗 {state.DarkStacks[1]}／光 {state.LightStacks[1]}");
         ImGui.TextWrapped("普攻雙坦固定從人群左／右側分開：MT 左、ST 右；挑釁／退避不互換站位。選中王時，小隊列表顯示模擬仇恨順位。仇恨比例僅表示換坦狀態，不計算實際輸出。");
+        ImGui.TextWrapped("下一輪地火前，雙坦優先分站 A／C，讓王保持南北面向；玩家坦克請依提示自行移動。");
         if(state.Failed)ImGui.TextWrapped("本輪有失誤，可重置重練。");
     }
 }

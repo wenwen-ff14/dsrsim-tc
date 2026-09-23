@@ -112,7 +112,7 @@ public sealed partial class DsrP6DragonsScenario
     }
     private void PrepareWings(bool second)
     {
-        RestoreDragons();state!.SetWings(second);
+        RestoreDragons();
         if(!second){nidhogg?.SetTargetable(false);nidhogg?.SetPosition(new Vector3(11,0,-34));nidhogg?.HoldFacing(0);}
     }
     private void ResolveWings(bool second)
@@ -172,7 +172,8 @@ public sealed partial class DsrP6DragonsScenario
         nidhogg?.SetTargetable(true);hraesvelgr?.SetTargetable(true);
         nidhogg?.SetPosition(new Vector3(-10,0,-34));nidhogg?.HoldFacing(0);
         hraesvelgr?.SetPosition(new Vector3(10,0,-34));hraesvelgr?.HoldFacing(0);
-        state!.SetDoubleDive();
+        for(var r=0;r<8;r++)state!.Destinations[r]=Vector3.Zero;
+        state!.Hint="冰火結束，回場中等待雙龍俯衝讀條。";
     }
     private void ResolveDoubleDive()
     {

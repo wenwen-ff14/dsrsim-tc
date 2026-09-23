@@ -15,6 +15,26 @@ scheduler.Tick(1.9f);Check(fired.Count==1,"window must preserve relative delay")
 scheduler.Tick(.11f);Check(fired.SequenceEqual(new[]{5,7,70})&&scheduler.IsEmpty,"inclusive end, stable event order, excluded handlers");
 Console.WriteLine("PASS: scheduler windows preserve order and boundaries after a nonzero clock origin.");
 {
+ var scenario=new DsrP6DragonsScenario();scenario.UseSeed(23);var world=new SimWorld();scenario.Run(world,0);
+ (float Start,float Cast)[] waits=[(0,7.770f),(22.1f,25.207f),(33.5f,39.023f),(58,59.148f),
+  (90.3f,94.532f),(103,107.228f),(126,128.289f),(137.1f,142.914f)];
+ var held=new Vector3[]?[waits.Length];
+ for(var frame=1;frame<=145*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;world.Events.Tick(1f/60);
+  foreach(var member in world.Party.Slots)member.Advance(1f/60);
+  scenario.Tick(1f/60,time);
+  for(var i=0;i<waits.Length;i++)
+   if(time>waits[i].Start+.05f&&time<waits[i].Cast-.05f)
+   {
+    held[i]??=scenario.State.Destinations.ToArray();
+    Check(scenario.State.Destinations.SequenceEqual(held[i]!),$"no early mechanic positioning before cast at {waits[i].Cast}");
+   }
+ }
+ Check(held.All(p=>p!=null),"all cast-gated movement windows checked");
+}
+Console.WriteLine("PASS: eight P6 movement windows hold destinations until the corresponding cast starts.");
+{
  var scenario=new DsrP6DragonsScenario(DsrP6Section.Breath2);var world=new SimWorld();scenario.Run(world,0);
  for(var frame=1;frame<=30*60;frame++)
  {

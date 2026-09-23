@@ -211,6 +211,7 @@ public sealed partial class DsrP7DragonKingScenario : IScenario
     }
     private void BeginExaflares(float fireDelay)
     {
+        state!.AlignForExaflares=false;
         Begin(28059,5.7f);
         Vector3[] origins=[new(-6.9282f,0,-4),new(6.9282f,0,-4),new(0,0,8)];
         for(var i=0;i<3;i++)
@@ -297,7 +298,15 @@ public sealed partial class DsrP7DragonKingScenario : IScenario
     {
         if(hit<2)state!.SetAll(-Vector3.Normalize(state.Gigaflares[hit+1])*10);
     }
-    private void PrepareTrinity(int role)=>state!.SetTrinity(role);
+    private void PrepareTrinity(int role)
+    {
+        if(role==2)
+        {
+            state!.AlignForExaflares=true;
+            state.NorthTank=world!.Party.Get(0)!.Position.Z<=world.Party.Get(1)!.Position.Z?0:1;
+        }
+        state!.SetTrinity(role);
+    }
     private void PlayTrinity()=>boss?.Cast(28062,castSeconds:0);
     private void SnapshotTrinity()
     {

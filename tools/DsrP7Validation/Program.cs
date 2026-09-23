@@ -14,6 +14,8 @@ for(var sword=0;sword<3;sword++)
         var time=frame/(float)fps;SimCharacter.Time=time;
         var before=world.Party.Slots.Select(m=>m.Position).ToArray();
         world.Events.Tick(1f/fps);
+        if(scenario.State.MechanicIndex is 1 or 4 or 7 && !scenario.State.FaceTank)
+            Check(MathF.Abs(MathF.Sin(scenario.State.MechanicFacing))<.025f,"all three Exaflares must face A/C with NPC tanks");
         foreach(var member in world.Party.Slots)member.Advance(1f/fps);
         scenario.Tick(1f/fps,time);
         for(var r=0;r<8;r++)Check(Vector3.Distance(before[r],world.Party.Slots[r].Position)<=6f/fps+.003f,"NPC teleported");

@@ -14,6 +14,8 @@ internal sealed class DsrP7DragonKingState
     public readonly Vector3[] Exaflares=new Vector3[3],Towers=new Vector3[3],Gigaflares=new Vector3[3];
     public readonly float[] ExaflareRotations=new float[3];
     public bool Fire,Complete,Failed,ManualTanks,FaceTank=true,Enrage;
+    public bool AlignForExaflares;
+    public int NorthTank;
     public int MainTank,ExpectedTank,TrinityRole=4,TrinityHits,MechanicIndex,SwordChoice;
     public float Time,Facing=MathF.PI,MechanicFacing=MathF.PI;
     public string Hint="讓一仇坦克把托爾丹面向北方或南方。";
@@ -40,9 +42,16 @@ internal sealed class DsrP7DragonKingState
         Destinations[role]=Relative(new(0,0,1.5f));
         SetTankPositions();
         Hint=$"三劍一體：{RoleName(role)} 進目標圈；兩坦與人群保持 3 碼間距。";
+        if(AlignForExaflares)Hint+=" 下一輪地火：雙坦分站 A／C，接手一仇後保持南北面向。";
     }
     public void SetTankPositions()
     {
+        if(AlignForExaflares)
+        {
+            Destinations[NorthTank]=new(0,0,-10);
+            Destinations[1-NorthTank]=new(0,0,10);
+            return;
+        }
         Destinations[0]=Relative(new(-7,0,0));
         Destinations[1]=Relative(new(7,0,0));
     }
