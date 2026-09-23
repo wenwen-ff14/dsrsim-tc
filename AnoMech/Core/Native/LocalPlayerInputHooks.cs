@@ -33,6 +33,11 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
     // subscribes to resolve effects the sim firewall blocks; nothing here depends
     // on a subscriber.
     public event Action<ActionType, uint>? ActionExecuted;
+    internal bool PracticeLimitBreakEnabled { get; set; }
+    internal bool PracticeLimitBreakCasting { get; set; }
+    internal Func<bool>? CanPracticeLimitBreak { get; set; }
+    internal Func<Vector3?,bool>? UsePracticeLimitBreak { get; set; }
+    internal event Action? CastCancelled;
 
     // --- Player activity signals (read by SimPlayer to drive Party.Player.IsMoving/IsActing) ---
     // Movement is the engine's own per-frame movement sample taken in RMIWalkDetour — the same
@@ -91,6 +96,7 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
     private readonly Hook<ActionManager.Delegates.Update> updateHook;
     private readonly Hook<ActionManager.Delegates.UseAction> useActionHook;
     private readonly Hook<ActionManager.Delegates.UseActionLocation> useActionLocationHook;
+    private readonly Hook<ActionManager.Delegates.GetActionStatus> actionStatusHook;
     private readonly Hook<Hotbar.Delegates.CancelCast> cancelCastHook;
 
     public LocalPlayerInputHooks(IGameInteropProvider hook)
@@ -107,6 +113,8 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
             ActionManager.Addresses.UseActionLocation.Value, UseActionLocationDetour);
         cancelCastHook = hook.HookFromAddress<Hotbar.Delegates.CancelCast>(
             Hotbar.Addresses.CancelCast.Value, CancelCastDetour);
+        actionStatusHook = hook.HookFromAddress<ActionManager.Delegates.GetActionStatus>(
+            ActionManager.Addresses.GetActionStatus.Value, GetActionStatusDetour);
 
         rmiWalkHook.Enable();
         checkStrafeKeybindHook.Enable();
@@ -115,6 +123,7 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
         useActionHook.Enable();
         useActionLocationHook.Enable();
         cancelCastHook.Enable();
+        actionStatusHook.Enable();
     }
 
     public void Dispose()
@@ -126,6 +135,7 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
         useActionHook?.Dispose();
         useActionLocationHook?.Dispose();
         cancelCastHook?.Dispose();
+        actionStatusHook?.Dispose();
     }
 
     // The player asked to cancel their cast; latch it and let the original run (its
@@ -133,6 +143,7 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
     private void CancelCastDetour(Hotbar* thisPtr)
     {
         cancelCastRequested = true;
+        CastCancelled?.Invoke();
         cancelCastHook.Original(thisPtr);
     }
 
@@ -175,6 +186,9 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
     private bool UseActionDetour(ActionManager* self, ActionType actionType, uint actionId, ulong targetId, uint extraParam, ActionManager.UseActionMode mode, uint comboRouteId, bool* outOptAreaTargeted)
     {
         if (DisableAllActions && !IsStopAutosAction(actionType, actionId)) return false;
+        if(PracticeLimitBreakEnabled&&IsLimitBreak(actionType,actionId))
+            return CanPracticeLimitBreak?.Invoke()==true && useActionHook.Original(self,ActionType.Action,204,targetId,extraParam,mode,comboRouteId,outOptAreaTargeted);
+        if(PracticeLimitBreakCasting&&!IsStopAutosAction(actionType,actionId))return false;
         var result = useActionHook.Original(self, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
         // Record a real action use for Party.Player.IsActing — but ignore the auto-attack-cancel
         // general action that UpdateDetour issues while stunned.
@@ -189,6 +203,9 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
     private bool UseActionLocationDetour(ActionManager* self, ActionType actionType, uint actionId, ulong targetId, Vector3* location, uint extraParam, byte a7)
     {
         if (DisableAllActions && !IsStopAutosAction(actionType, actionId)) return false;
+        if(PracticeLimitBreakEnabled&&IsLimitBreak(actionType,actionId))
+            return CanPracticeLimitBreak?.Invoke()==true && UsePracticeLimitBreak?.Invoke(location==null?null:*location)==true;
+        if(PracticeLimitBreakCasting&&!IsStopAutosAction(actionType,actionId))return false;
         var result = useActionLocationHook.Original(self, actionType, actionId, targetId, location, extraParam, a7);
         if (result)
         {
@@ -197,6 +214,15 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
         }
         return result;
     }
+
+    private uint GetActionStatusDetour(ActionManager* self,ActionType actionType,uint actionId,ulong targetId,bool checkRecastActive,bool checkCastingActive,uint* extraInfo)
+    {
+        if(PracticeLimitBreakEnabled&&IsLimitBreak(actionType,actionId))
+            return !DisableAllActions&&CanPracticeLimitBreak?.Invoke()==true?0u:1u;
+        return actionStatusHook.Original(self,actionType,actionId,targetId,checkRecastActive,checkCastingActive,extraInfo);
+    }
+
+    private static bool IsLimitBreak(ActionType type,uint id)=>type==ActionType.GeneralAction&&id==3||type==ActionType.Action&&id is 203 or 204 or 205 or 209;
 
     // Lets the auto-cancel UseAction from UpdateDetour through; everything else
     // bounces while autos are still firing.

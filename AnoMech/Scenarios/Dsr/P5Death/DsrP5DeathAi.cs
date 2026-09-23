@@ -26,7 +26,7 @@ internal sealed class DsrP5DeathAi : IScenarioAi
     }
     public static void Tick(DsrP5DeathState s,SimWorld world)
     {
-        if(s.Complete || s.Knocked && s.Time<38.7f)return;
+        if(!s.FormationVisible || s.Complete || s.Knocked && s.Time<38.7f)return;
         for(var role=0;role<8;role++)
             if(world.Party.Get(role) is SimPartyNpc npc && npc.IsAlive())
             {

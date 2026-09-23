@@ -22,7 +22,7 @@ internal sealed class DsrP5DeathState
     public float LimitBreakElapsed;
     public Vector3 LimitBreakOrigin, LimitBreakTarget;
     public string LimitBreakMessage="";
-    public bool Assigned, SpreadsResolved, SymbolsAssigned, Knocked, Failed, Complete;
+    public bool FormationVisible, Assigned, SpreadsResolved, SymbolsAssigned, Knocked, Failed, Complete;
     public DsrP5DeathState(int seed)
     {
         Random=new(seed);

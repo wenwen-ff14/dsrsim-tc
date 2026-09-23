@@ -1,9 +1,23 @@
 using System;
+using System.Numerics;
 
 namespace AnoMech.Scenarios.Dsr.P5Death;
 
 public sealed partial class DsrP5DeathScenario
 {
+    internal bool PracticeActive=>state!=null&&!state.Complete;
+    internal bool PracticeReady=>state is { Complete:false, LimitBreakCasting:false, LimitBreakUsed:false };
+    internal bool PracticeCasting=>state?.LimitBreakCasting==true;
+    internal bool PracticeUsed=>state?.LimitBreakUsed==true;
+    internal float PracticeCastElapsed=>state?.LimitBreakElapsed??0;
+    internal Vector3 PracticeTarget=>state?.LimitBreakTarget??default;
+    internal void CancelPracticeCast()
+    {
+        if(state?.LimitBreakCasting!=true)return;
+        state.LimitBreakCasting=false;
+        state.LimitBreakMessage="LB2 讀條中斷，可以重新施放。";
+        Array.Clear(state.Destinations);
+    }
     public void RequestLimitBreak()
     {
         if(state==null||world==null||state.Complete||!state.MeteorsActive)return;

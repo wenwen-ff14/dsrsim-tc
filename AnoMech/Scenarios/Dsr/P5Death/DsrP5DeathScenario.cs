@@ -30,8 +30,16 @@ public sealed partial class DsrP5DeathScenario : IScenario
         boss=Spawn(0x3143,3632,Vector3.Zero,true);
         boss?.SetTargetable(true);
         world.Events.Add(3f,()=>boss?.Cast(27538,castSeconds:3.7f,fireDelay:.279f));
-        world.Events.Add(9f,()=>{boss?.SetTargetable(false);boss?.PlayDeparture(DsrConstants.Timeline.KnightDeparture);});
+        world.Events.Add(9f,()=>{boss?.SetTargetable(false);boss?.Cast(DsrConstants.Action.Teleport,castSeconds:0,targetId:boss.GameObjectId);});
         world.Events.Add(9.6f,()=>boss?.SetVisible(false));
+        world.Events.Add(10.1f,()=>
+        {
+            boss?.SetPosition(state.Boss);
+            boss?.HoldFacing(MathF.Atan2(-state.Boss.X,-state.Boss.Z));
+            boss?.SetVisible(true);
+            boss?.Cast(DsrConstants.Action.Reappear,castSeconds:0,targetId:boss.GameObjectId);
+            boss?.AddVfx("vfx/common/eff/mon_eisyo01et.avfx",27.281f);
+        });
         world.Events.Add(11.6f,SpawnFormation);
         world.Events.Add(13.956f,()=>dark?.Cast(27540,castSeconds:0));
         world.Events.Add(14.760f,()=>AssignDoom(0,14.760f));
@@ -57,7 +65,6 @@ public sealed partial class DsrP5DeathScenario : IScenario
         {
             charibert?.Cast(25310,castSeconds:6.7f,fireDelay:.275f);
             boss?.Cast(25552,castSeconds:3.7f,fireDelay:.280f);
-            boss?.AddVfx("vfx/common/eff/mon_eisyo01et.avfx",5.142f);
         });
         world.Events.Add(33.357f,()=>grinnaux?.Cast(25308,castSeconds:3.7f,fireDelay:.280f));
         world.Events.Add(34.117f,ShowCleanses);
@@ -97,14 +104,16 @@ public sealed partial class DsrP5DeathScenario : IScenario
         dark=Spawn(0x3156,3983,chargeStarts[0],true);
         white=Spawn(0x3166,11314,chargeStarts[1],true);
         spear=Spawn(DsrConstants.Npc.Zephirin,3633,chargeStarts[2],true);
-        boss?.SetPosition(state.Boss);boss?.SetVisible(true);
         world!.Map.AddEffect(0x00020001,(byte)state.EyeIndex,resetFlags:0x00080004);
+        state.FormationVisible=true;
     }
     private void AssignDoom(int index,float time)
     {
         var role=state!.Dooms[index];state.Assigned=true;
         world!.Party.Get(role)?.AddStatus(2976,26,playEffects:false);
-        world.Party.Get(role)?.AddVfx("vfx/common/eff/dk05ht_dth0t.avfx",1.5f);
+        var target=world.Party.Get(role);
+        if(target!=null)
+            Spawn(0x3156,3983,chargeStarts[0],false)?.Cast(27540,target.Position,0,target.GameObjectId);
         doomExpires[role]=time+26;
     }
     private void StartCharges()

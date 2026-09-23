@@ -22,12 +22,12 @@ public sealed partial class DsrP5DeathScenario
             meteors[i]?.SetVisible(true);
             meteors[i]?.SetTargetable(true);
         }
-        state.LimitBreakMessage="D4：瞄準正北隕石，以法系 LB2 擊破北側三顆；其他五顆由隊友處理。";
+        state.LimitBreakMessage=state.LimitBreakUsed?"本輪 LB 已使用。":"LB 已滿，可以自由選點施放；命中數依實際範圍判定。";
     }
 
     internal bool TryLimitBreak(Vector3 target)
     {
-        if(state==null||world==null||!state.MeteorsActive||state.Complete||state.LimitBreakUsed||state.LimitBreakCasting)return false;
+        if(state==null||world==null||state.Complete||state.LimitBreakUsed||state.LimitBreakCasting)return false;
         var caster=world.Party.Get(7);
         if(!caster.IsAlive())return false;
         if(Vector3.Distance(caster!.Position,target)>25)
@@ -63,10 +63,11 @@ public sealed partial class DsrP5DeathScenario
         if(state.LimitBreakElapsed<3f)return;
         state.LimitBreakCasting=false;
         state.LimitBreakUsed=true;
-        Spawn(DsrConstants.Npc.Helper,3632,state.LimitBreakTarget,false)?.Cast(204,state.LimitBreakTarget,0);
+        if(caster is not SimPlayer)
+            Spawn(DsrConstants.Npc.Helper,3632,state.LimitBreakTarget,false)?.Cast(204,state.LimitBreakTarget,0);
         var count=0;
         for(var i=0;i<8;i++)
-            if(!state.MeteorDestroyed[i]&&Vector3.DistanceSquared(state.MeteorPositions[i],state.LimitBreakTarget)<=100)
+            if(state.MeteorsActive&&!state.MeteorDestroyed[i]&&Vector3.DistanceSquared(state.MeteorPositions[i],state.LimitBreakTarget)<=100)
             {DestroyMeteor(i);count++;}
         state.LimitBreakMessage=$"LB2 擊破 {count} 顆隕石。";
         Array.Clear(state.Destinations);
@@ -85,7 +86,7 @@ public sealed partial class DsrP5DeathScenario
         if(state.MeteorDestroyed.Any(destroyed=>!destroyed))
         {
             Spawn(DsrConstants.Npc.Helper,3632,Vector3.Zero,false)?.Cast(27544,Vector3.Zero,0);
-            foreach(var member in world!.Party.ActiveMembers())Hit(member,"隕石未擊破：D4 需以 LB2 覆蓋北側三顆隕石");
+            foreach(var member in world!.Party.ActiveMembers())Hit(member,"隕石未擊破：限時結束時仍有隕石存活");
         }
         state.MeteorsActive=false;
     }

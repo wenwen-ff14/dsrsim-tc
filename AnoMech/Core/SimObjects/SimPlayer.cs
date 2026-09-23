@@ -10,6 +10,37 @@ namespace AnoMech.Core.SimObjects;
 
 public sealed unsafe class SimPlayer(Coordinates coordinates) : SimCharacter(coordinates), ISimPartyMember
 {
+    private SimCast? practiceLimitBreak;
+    private bool practiceLimitBreakActive;
+
+    internal void BeginPracticeLimitBreak(Vector3 target)
+    {
+        practiceLimitBreak??=new SimCast(this,Coordinates);
+        practiceLimitBreakActive=true;
+        practiceLimitBreak.NativeCast(204,FFXIVClientStructs.FFXIV.Client.Game.ActionType.Action,0,3,false,position:target);
+        var am=FFXIVClientStructs.FFXIV.Client.Game.ActionManager.Instance();
+        if(am!=null&&BattleCharaPtr!=null)
+            am->OpenCastBar(BattleCharaPtr,FFXIVClientStructs.FFXIV.Client.Game.ActionType.Action,204,204,0,0,3);
+    }
+
+    internal void UpdatePracticeLimitBreak(float elapsed)
+    {
+        if(!practiceLimitBreakActive||BattleCharaPtr==null)return;
+        BattleCharaPtr->CastInfo.CurrentCastTime=elapsed;
+        var am=FFXIVClientStructs.FFXIV.Client.Game.ActionManager.Instance();
+        if(am!=null&&am->CastActionId==204)am->CastTimeElapsed=elapsed;
+    }
+
+    internal void EndPracticeLimitBreak(bool completed,Vector3 target=default)
+    {
+        if(!practiceLimitBreakActive)return;
+        practiceLimitBreakActive=false;
+        if(BattleCharaPtr!=null)
+            AnoMech.Pointers.PacketDispatcherPointers.HandleActorControlPacket(
+                BattleCharaPtr->EntityId,15,538,1,204,0,0,0,0,0,0xE0000000,false);
+        practiceLimitBreak?.Despawn();
+        if(completed)practiceLimitBreak?.NativeActionEffect(204,0,204,0,FFXIVClientStructs.FFXIV.Client.Game.ActionType.Action,0,position:target);
+    }
     private const ushort StunStatusId = 896;  // "Down for the Count" (896) — IsPermanent + LockControl variant.
 
     // The player's HP bar (real bc->Health) is touched only on a scenario KO — dropped to a 1-HP
@@ -84,6 +115,7 @@ public sealed unsafe class SimPlayer(Coordinates coordinates) : SimCharacter(coo
 
     public override void Despawn()
     {
+        EndPracticeLimitBreak(false);
         base.Despawn();
         StopMoving();
         // Undo any KO bar drop (no-op if already full). Unconditional so it also covers a godmode

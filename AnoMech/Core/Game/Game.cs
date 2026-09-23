@@ -98,6 +98,7 @@ public sealed class Game : IDisposable
     private bool deathOccurredThisRun;
 
     private IScenario? activeScenario;
+    private readonly PracticeLimitBreakSession practiceLimitBreak=new();
     public void PracticeLimitBreak()
     {
         if(activeScenario is DsrP5DeathScenario death)death.RequestLimitBreak();
@@ -258,6 +259,7 @@ public sealed class Game : IDisposable
 
     public void Tick(float deltaSeconds)
     {
+        practiceLimitBreak.Update(activeScenario as DsrP5DeathScenario,World);
         if (activeScenario != null)
         {
             if (Plugin.Config.SuppressBgm || activeScenario.Phase.Bgm == 0) Bgm.Reset();
@@ -429,6 +431,7 @@ public sealed class Game : IDisposable
 
     private void ResetInternal()
     {
+        practiceLimitBreak.Reset();
         activeScenario = null;
         scenarioElapsed = 0f;
         Events.Clear();
@@ -456,6 +459,7 @@ public sealed class Game : IDisposable
     // leaked all six LocalPlayerInputHooks hooks.
     public void Dispose()
     {
+        practiceLimitBreak.Dispose();
         activeScenario = null;
         Events.Clear();
         Plugin.UserActions.OnSessionEnd();   // restore the gauge if the plugin unloads mid-session (no-op otherwise)
