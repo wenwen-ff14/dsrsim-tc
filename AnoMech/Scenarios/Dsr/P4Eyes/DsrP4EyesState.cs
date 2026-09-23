@@ -17,6 +17,8 @@ internal sealed class DsrP4EyesState
     public readonly float[] DiveFadeRemaining = new float[8];
     public readonly int[] DiveLane = [-1, -1, -1, -1, 0, 3, 2, 1];
     public readonly int[] SwapTarget = Enumerable.Repeat(-1, 8).ToArray();
+    public readonly bool[] OrbExchangeDone = new bool[8];
+    public readonly Vector3?[] SwapWaitPosition = new Vector3?[8];
     public int[] FirstDps = [];
     public bool BuffsApplied, ColorsAssigned, YellowReady, BlueReady, MirageStarted, Failed, Complete;
     public int DiveCount;

@@ -12,6 +12,7 @@ internal sealed class DsrP4EyesAi : IScenarioAi
     {
         if (!s.BuffsApplied) return DsrP4EyesState.BuffPosition;
         if (!s.ColorsAssigned) return DsrP4EyesState.Opening(role);
+        if (s.SwapWaitPosition[role] is { } waiting) return waiting;
         if (s.BlueDone || s.MirageStarted)
         {
             if (s.SwapTarget[role] >= 0) return s.Positions[s.SwapTarget[role]];
@@ -22,8 +23,8 @@ internal sealed class DsrP4EyesAi : IScenarioAi
             if (s.Red[role] != (role < 4)) return Vector3.Zero;
             return role < 4 ? DsrP4EyesState.YellowWait(role, s.YellowReady ? 1 : 3) : DsrP4EyesState.Opening(role);
         }
-        if (role < 4) return DsrP4EyesState.YellowWait(role, 1);
-        if (!s.Red[role])
+        if (role < 4) return s.OrbExchangeDone[role] ? DsrP4EyesState.Opening(role) : DsrP4EyesState.YellowWait(role, 1);
+        if (!s.OrbExchangeDone[role])
         {
             var partner = DsrP4EyesState.Partner(role);
             var target = DsrP4EyesState.YellowWait(partner, 1);

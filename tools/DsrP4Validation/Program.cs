@@ -2,6 +2,7 @@ using System.Numerics;
 using AnoMech.Core.SimObjects;
 using AnoMech.Scenarios.Dsr.P4Eyes;
 
+SwapWaitingValidation.Run();
 BehaviorValidation.Run();
 foreach (var fps in new[] { 30, 60, 144 })
 for (var seed = 0; seed < 70; seed++)

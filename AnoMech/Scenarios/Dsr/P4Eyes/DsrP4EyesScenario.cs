@@ -125,15 +125,22 @@ public sealed partial class DsrP4EyesScenario : IScenario
             var outgoing = state.Red[a] ? a : b;
             var incoming = state.Red[a] ? b : a;
             (state.Red[a], state.Red[b]) = (state.Red[b], state.Red[a]);
+            if (state.YellowDone && !state.BlueDone && !state.MirageStarted)
+            {
+                state.OrbExchangeDone[a] = state.Red[a] == (a >= 4);
+                state.OrbExchangeDone[b] = state.Red[b] == (b >= 4);
+            }
             if (state.MirageStarted || state.BlueDone)
             {
                 state.DiveLane[incoming] = state.DiveLane[outgoing];
                 state.DiveLane[outgoing] = -1;
                 state.SwapTarget[incoming] = state.SwapTarget[outgoing] = -1;
+                state.SwapWaitPosition[incoming] = state.SwapWaitPosition[outgoing] = null;
             }
             foreach (var role in new[] { a, b })
             {
                 state.SwapCooldown[role] = 3;
+                world.Party.Get(role)?.RemoveStatus(DsrP4EyesConstants.SwapLock);
                 world.Party.Get(role)?.AddStatus(DsrP4EyesConstants.SwapLock, 3);
                 UpdateColor(role);
             }
@@ -196,7 +203,11 @@ public sealed partial class DsrP4EyesScenario : IScenario
         }
         if (wave == 0) state.FirstDps = targets.Order().ToArray();
         int[] incoming = wave switch { 0 => [2, 3], 1 => [0, 1], 2 => state.FirstDps, _ => [] };
-        for (var i = 0; i < incoming.Length; i++) state.SwapTarget[incoming[i]] = targets[i];
+        for (var i = 0; i < incoming.Length; i++)
+        {
+            state.SwapTarget[incoming[i]] = targets[i];
+            state.SwapWaitPosition[targets[i]] = world!.Party.Get(targets[i])!.Position;
+        }
         state.DiveCount++;
     }
 
@@ -221,7 +232,11 @@ public sealed partial class DsrP4EyesScenario : IScenario
         state.Time = elapsed;
         for (var role = 0; role < 8; role++)
         {
-            state.SwapCooldown[role] = MathF.Max(0, state.SwapCooldown[role] - delta);
+            if (state.SwapCooldown[role] > 0)
+            {
+                state.SwapCooldown[role] = MathF.Max(0, state.SwapCooldown[role] - delta);
+                if (state.SwapCooldown[role] == 0) world.Party.Get(role)?.RemoveStatus(DsrP4EyesConstants.SwapLock);
+            }
             state.Piercing[role] = MathF.Max(0, state.Piercing[role] - delta);
         }
         RefreshPositions();
