@@ -5,7 +5,7 @@ namespace AnoMech.Scenarios.Dsr.P7DragonKing;
 
 internal sealed class DsrP7DragonKingAi : IScenarioAi
 {
-    public string Name=>"中文攻略／Tuuf 3－3－2";
+    public string Name=>"中文攻略／Tuuf（可選踩塔配置）";
     public static void Tick(DsrP7DragonKingState state,SimWorld world)
     {
         if(state.Complete)return;

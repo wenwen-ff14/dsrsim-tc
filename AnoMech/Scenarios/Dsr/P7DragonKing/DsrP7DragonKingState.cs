@@ -15,7 +15,10 @@ internal sealed class DsrP7DragonKingState
     public readonly float[] ExaflareRotations=new float[3];
     public bool Fire,Complete,Failed,ManualTanks,FaceTank=true,Enrage;
     public bool AlignForExaflares;
-    public int NorthTank;
+    public int TankSide=-1;
+    public int TowerPlan,TowerRound;
+    public bool SoloTowers=>TowerPlan==1&&TowerRound==3||TowerPlan==2&&TowerRound>=2;
+    public int BlueTowerTank=>TowerPlan==2&&TowerRound==3?1:0;
     public int MainTank,ExpectedTank,TrinityRole=4,TrinityHits,MechanicIndex,SwordChoice;
     public float Time,Facing=MathF.PI,MechanicFacing=MathF.PI;
     public string Hint="讓一仇坦克把托爾丹面向北方或南方。";
@@ -25,8 +28,8 @@ internal sealed class DsrP7DragonKingState
         Random=new(seed);
         Array.Fill(LastDestinations,new Vector3(float.NaN));
         SetTrinity(4);
-        Destinations[0]=new(0,0,-10);
-        Destinations[1]=new(7,0,-7);
+        Destinations[0]=new(0,0,-6);
+        Destinations[1]=new(0,0,-10);
     }
     public Vector3 Relative(Vector3 p)=>Rotate(p,MechanicFacing-MathF.PI);
     public static Vector3 Rotate(Vector3 p,float angle)=>new(p.X*MathF.Cos(angle)+p.Z*MathF.Sin(angle),0,p.Z*MathF.Cos(angle)-p.X*MathF.Sin(angle));
@@ -42,28 +45,29 @@ internal sealed class DsrP7DragonKingState
         Destinations[role]=Relative(new(0,0,1.5f));
         SetTankPositions();
         Hint=$"三劍一體：{RoleName(role)} 進目標圈；兩坦與人群保持 3 碼間距。";
-        if(AlignForExaflares)Hint+=" 下一輪地火：雙坦分站 A／C，接手一仇後保持南北面向。";
+        if(AlignForExaflares)Hint+=" 下一輪地火：雙坦同側靠 A 或 C，接手一仇後保持南北面向。";
     }
     public void SetTankPositions()
     {
         if(AlignForExaflares)
         {
-            Destinations[NorthTank]=new(0,0,-10);
-            Destinations[1-NorthTank]=new(0,0,10);
+            Destinations[0]=new(0,0,TankSide*6);
+            Destinations[1]=new(0,0,TankSide*10);
             return;
         }
-        Destinations[0]=Relative(new(-7,0,0));
-        Destinations[1]=Relative(new(7,0,0));
+        Destinations[0]=Relative(new(0,0,-6));
+        Destinations[1]=Relative(new(0,0,-10));
     }
     public void SetTowerPositions(bool inner)
     {
         for(var r=0;r<8;r++)
         {
-            var tower=r<2?2:r%2;
+            var tower=TowerForRole(r);
             var p=Towers[tower];
             Destinations[r]=Vector3.Normalize(p)*(inner?6.2f:Fire?9.2f:6.5f);
         }
     }
+    public int TowerForRole(int role)=>SoloTowers?(role>=2?0:role==BlueTowerTank?2:1):role<2?2:role%2;
     public void ExpireStatuses()
     {
         for(var r=0;r<8;r++)

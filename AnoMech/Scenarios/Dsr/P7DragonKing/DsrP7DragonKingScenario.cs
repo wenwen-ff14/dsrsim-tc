@@ -23,11 +23,12 @@ public sealed partial class DsrP7DragonKingScenario : IScenario
     private int? validationSeed=null;
     private bool manualTanks=true;
     private int swordChoice;
+    private int towerPlan;
     private static readonly ushort[] StatusIds=[3135,3136,2940];
 
     public void Run(SimWorld simWorld,int? selectedAi)
     {
-        world=simWorld;state=new(validationSeed??Random.Shared.Next()){ManualTanks=manualTanks,SwordChoice=swordChoice};
+        world=simWorld;state=new(validationSeed??Random.Shared.Next()){ManualTanks=manualTanks,SwordChoice=swordChoice,TowerPlan=towerPlan};
         actors.Clear();
         boss=Spawn(0x3148,true);
         boss?.SetTargetable(true);boss?.HoldFacing(MathF.PI);
@@ -245,10 +246,13 @@ public sealed partial class DsrP7DragonKingScenario : IScenario
     private void BeginTowers(float fireDelay)
     {
         Begin(28051,5.7f);
+        state!.TowerRound++;
         SetTowers();
         for(var i=0;i<3;i++)towers[i]?.Cast(29452u+(uint)i,castSeconds:6.4f,fireDelay:fireDelay);
         state!.SetTowerPositions(false);
-        state.Hint+=" 死亡輪迴劍：左前 H1/D1/D3，右前 H2/D2/D4，後方雙坦；劍判定後向內。";
+        state.Hint+=state.SoloTowers
+            ?$" 第 {state.TowerRound} 輪 116：左前六人，右前 {DsrP7DragonKingState.RoleName(1-state.BlueTowerTank)}，後方藍塔 {DsrP7DragonKingState.RoleName(state.BlueTowerTank)}；劍判定後向內。"
+            :$" 第 {state.TowerRound} 輪 332：左前 H1/D1/D3，右前 H2/D2/D4，後方雙坦；劍判定後向內。";
     }
     private void SetTowers()
     {
@@ -266,7 +270,10 @@ public sealed partial class DsrP7DragonKingScenario : IScenario
             if(hit>0)towers[i]?.Cast(i==2?28055u:28054u,castSeconds:0);
             var roles=Enumerable.Range(0,8).Where(r=>world!.Party.Get(r).IsAlive()&&Vector3.DistanceSquared(world.Party.Get(r)!.Position,state!.Towers[i])<=16).ToArray();
             var required=i==2?2:3;
-            if(roles.Length<required||(i==2&&roles.Any(r=>r>=2)))
+            var valid=state!.SoloTowers
+                ? roles.Order().SequenceEqual(Enumerable.Range(0,8).Where(r=>state.TowerForRole(r)==i))
+                : roles.Length>=required&&!(i==2&&roles.Any(r=>r>=2));
+            if(!valid)
                 FailAll($"死亡輪迴劍第 {hit+1} 下：{(i==2?"雙坦":i==0?"左前":"右前")}塔人數或職能錯誤");
         }
         for(var r=0;r<8;r++)
@@ -303,7 +310,7 @@ public sealed partial class DsrP7DragonKingScenario : IScenario
         if(role==2)
         {
             state!.AlignForExaflares=true;
-            state.NorthTank=world!.Party.Get(0)!.Position.Z<=world.Party.Get(1)!.Position.Z?0:1;
+            state.TankSide=world!.Party.Get(0)!.Position.Z+world.Party.Get(1)!.Position.Z<=0?-1:1;
         }
         state!.SetTrinity(role);
     }
