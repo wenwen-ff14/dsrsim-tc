@@ -3,7 +3,7 @@
     "Author": "Anomek / wenwen-ff14",
     "Name": "dsrsim-tc｜絕龍詩模擬器",
     "InternalName": "dsrsim-tc",
-    "AssemblyVersion": "0.4.0.54",
+    "AssemblyVersion": "0.4.0.55",
     "Description": "API 13 繁中版。依 tuuf／Elemental 分工模擬七名隊友，練習 P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍與死刻。P3 可指定自己的麻將與箭頭。P5 包含旋風、八方劍、綠標龍衝、地火、雷光鏈與月環；死刻包含死亡宣告、PS 標記、擊退斷鏈、白圈解除及 D4 隕石 LB2 練習。使用 /dsrsim 或 /dsrsim-tc 開啟；視窗可收合。",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/wenwen-ff14/test",
@@ -23,12 +23,12 @@
     "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/test/main/images/dsrsim-tc.png",
     "Punchline": "DSR P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍／死刻練習。",
     "AcceptsFeedback": true,
-    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.54.zip",
-    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.54.zip",
-    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.54.zip",
+    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.55.zip",
+    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.55.zip",
+    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.55.zip",
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": 1790159136,
-    "Changelog": "十字火新增 24 種火球及白龍俯衝配置，NPC 等命中特效後走 L 型並依場面轉向；修正 P3/P4 方形場地邊界，出界訊息加入座標。"
+    "LastUpdate": 1790160073,
+    "Changelog": "修正 P6 第二次坦死刑翼安全區，人群及雙坦往中央線收；依中文固定式圖校正冰火 2 職能標點，驗證所有線色不改變非坦克固定位置。"
   }
 ]

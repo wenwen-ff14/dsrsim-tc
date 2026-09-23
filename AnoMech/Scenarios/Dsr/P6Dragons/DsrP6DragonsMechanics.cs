@@ -243,12 +243,12 @@ public sealed partial class DsrP6DragonsScenario
     {
         if(wings)
         {
-            Effect(27948,new(-22,0,-17.5f),new(30,0,-17.5f));
-            Effect(27948,new(-22,0,17.5f),new(30,0,17.5f));
+            Effect(27948,new(-22,0,-14.5f),new(30,0,-14.5f));
+            Effect(27948,new(-22,0,14.5f),new(30,0,14.5f));
         }
         else Effect(27950,DsrP6DragonsState.Nidhogg,new(30,0,0));
         foreach(var member in world!.Party.ActiveMembers())
-            if(wings?MathF.Abs(member.Position.Z)>7:MathF.Abs(member.Position.Z)<8)Hit(member,wings?"燃燒之翼：靠近中央橫線":"燃燒之尾：離開中央橫線");
+            if(wings?MathF.Abs(member.Position.Z)>=4:MathF.Abs(member.Position.Z)<8)Hit(member,wings?"燃燒之翼：靠近中央橫線":"燃燒之尾：離開中央橫線");
     }
     private void ResolveFlames()
     {

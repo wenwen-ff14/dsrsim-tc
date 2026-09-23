@@ -83,6 +83,7 @@ foreach(var acting in new[]{false,true})
 }
 Console.WriteLine("PASS: native thermal conversion, action penalty and post-dive removal.");
 var fixedCases=0;
+Vector3[]? fixedRolePositions=null;
 foreach(var glow in Enum.GetValues<DsrP6Glow>())
 for(var mask=0;mask<64;mask++)
 {
@@ -94,6 +95,11 @@ for(var mask=0;mask<64;mask++)
  {
   var time=frame/60f;SimCharacter.Time=time;
   w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
+  if(time>3&&time<9.3f)
+  {
+   fixedRolePositions??=s.State.Destinations.Skip(2).ToArray();
+   Check(s.State.Destinations.Skip(2).SequenceEqual(fixedRolePositions),"fixed-role destinations must not depend on tether colours or glow branch");
+  }
  }
  Check(SimCharacter.Failures.Count==0,$"fixed {glow} {mask}: {string.Join(";",SimCharacter.Failures.Take(5))}");
  var actions=w.Enemies.SelectMany(e=>e.Casts).Select(c=>c.Action).ToArray();
@@ -116,6 +122,19 @@ foreach(var glow in Enum.GetValues<DsrP6Glow>())
  Check(s.State.Failed,$"{glow}: incorrect tank stack/spread must fail");
 }
 Console.WriteLine("PASS: split tanks fail the double-glow stack; central solo tank cleaves fail both single-glow branches.");
+foreach(var z in new[]{2f,3.8f,4.2f,6f,-2f})
+{
+ var s=new DsrP6DragonsScenario(DsrP6Section.Wings2);var w=new SimWorld();
+ w.Party.Slots[2]=new SimPlayer{Role=2,Position=new(15,0,z)};
+ SimCharacter.Failures.Clear();s.Run(w,0);
+ for(var frame=1;frame<=11.8f*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;
+  w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
+ }
+ Check(s.State.Failed==(z<0||z>=4),$"second wings narrow south safe strip at Z={z}");
+}
+Console.WriteLine("PASS: second wings accepts the inner safe strip and rejects old Z=6 position and wrong half.");
 for(var first=1;first<=5;first++)for(var last=first;last<=5;last++)
 {
  var s=new DsrP6DragonsScenario();s.SetRange((DsrP6Section)first,(DsrP6Section)last);

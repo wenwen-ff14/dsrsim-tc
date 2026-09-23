@@ -10,6 +10,13 @@ internal enum DsrP6Glow { Nidhogg, Hraesvelgr, Both }
 internal sealed class DsrP6DragonsState
 {
     public static readonly Vector3 Nidhogg=new(-22,0,0), Hraesvelgr=new(22,0,0);
+    private static readonly Vector3[] FixedBreathPositions=
+    [
+        new(-14.8f,0,-12.7f),new(14.8f,0,12.7f),
+        new(0,0,-19.7f),new(0,0,19.7f),
+        new(-3.8f,0,9.6f),new(3.8f,0,-9.6f),
+        new(-7.8f,0,18.3f),new(7.8f,0,-18.3f),
+    ];
     public readonly Vector3[] Destinations=new Vector3[8];
     public readonly Vector3?[] LastDestinations=new Vector3?[8];
     public readonly bool[] Fire=new bool[8];
@@ -57,14 +64,8 @@ internal sealed class DsrP6DragonsState
         else
         {
             SecondFire.CopyTo(Fire,0);
-            Destinations[0]=SecondGlow==DsrP6Glow.Both?Vector3.Zero:new(-14.8f,0,-12.7f);
-            Destinations[1]=SecondGlow==DsrP6Glow.Both?Vector3.Zero:new(14.8f,0,12.7f);
-            Destinations[2]=new(0,0,-19.7f);
-            Destinations[3]=new(0,0,19.7f);
-            Destinations[4]=new(-3.8f,0,9.6f);
-            Destinations[5]=new(3.8f,0,-9.6f);
-            Destinations[6]=new(-8.4f,0,18);
-            Destinations[7]=new(8.4f,0,-18);
+            FixedBreathPositions.CopyTo(Destinations,0);
+            if(SecondGlow==DsrP6Glow.Both)Destinations[0]=Destinations[1]=Vector3.Zero;
         }
         Hint=second?"固定式冰火：H1 北／H2 南，D2／D4 東北，D1／D3 西南；雙龍發光時雙坦場中分攤，否則 MT 西北、ST 東南。":"冰火一：兩人一組，讓每人同時受到冰與火；ST 遠離人群承受單坦死刑。";
     }
@@ -87,10 +88,10 @@ internal sealed class DsrP6DragonsState
         }
         else
         {
-            Destinations[0]=new(-18,0,6);Destinations[1]=new(-4,0,6);
-            for(var r=2;r<8;r++)Destinations[r]=new(15,0,6);
+            Destinations[0]=new(-18,0,2);Destinations[1]=new(-4,0,2);
+            for(var r=2;r<8;r++)Destinations[r]=new(15,0,2);
         }
-        Hint=second?"第二次坦死刑：躲北半場與燃燒之翼；雙坦保持最遠並彼此拉開。":"第一次坦死刑：躲南半場與東半場俯衝；雙坦保持最遠並彼此拉開。";
+        Hint=second?"第二次坦死刑：貼近中央東西線的南側窄帶；雙坦保持最遠並彼此拉開，人群靠白龍。":"第一次坦死刑：躲南半場與東半場俯衝；雙坦保持最遠並彼此拉開。";
     }
     public void SetVowPass(int receiver,bool preserveOthers=false)
     {
