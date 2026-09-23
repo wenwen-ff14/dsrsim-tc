@@ -13,12 +13,13 @@ public sealed partial class DsrP5WrathScenario
         ImGui.Checkbox("顯示站位提示",ref showHints);
         ImGui.SameLine();
         ImGui.Checkbox("顯示戰術圖",ref showMap);
-        ImGui.Combo("我的練習點名",ref practiceTarget,"隨機\0藍標跳躍\0交叉連線一\0交叉連線二\0綠標引導龍衝\0白龍五連吐火\0聖壇火光\0雷光鏈\0全程無點名\0");
-        ImGui.TextWrapped("指定自己的練習點名；其他可共存點名仍隨機分配。開始或重置後生效。");
-        ImGui.Checkbox("固定隨機種子",ref fixedSeed);
-        if(fixedSeed) ImGui.InputInt("種子",ref seed);
+        if(ImGui.Combo("第一組點名",ref practiceTarget,"隨機\0放大圈\0龍連線1\0龍連線2\0龍衝引導\0") && practiceTarget != 0 && followupTarget == 2)
+            followupTarget = 0;
+        if(ImGui.Combo("第二組點名",ref followupTarget,"隨機\0雷點名\0五火\0四火\0") && followupTarget == 2)
+            practiceTarget = 0;
+        ImGui.TextWrapped("兩組可分別指定，開始或重置後生效。五火不能與第一組指定點名重疊，選五火會將第一組改為隨機。");
         if(state==null || world==null) return;
-        ImGui.TextUnformatted($"P5-風槍　{state.Time:F1} 秒　種子 {state.Seed}");
+        ImGui.TextUnformatted($"P5-風槍　{state.Time:F1} 秒");
         if(state.Complete) ImGui.TextUnformatted(state.Failed?"本輪有失誤，可重置重練。":"風槍練習完成。");
         else if(showHints)
         {

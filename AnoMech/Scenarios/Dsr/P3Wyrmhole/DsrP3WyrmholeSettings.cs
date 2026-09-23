@@ -28,11 +28,9 @@ public sealed partial class DsrP3WyrmholeScenario
         ImGui.Checkbox("顯示站位提示", ref showHints);
         ImGui.SameLine();
         ImGui.Checkbox("顯示戰術圖", ref showMap);
-        ImGui.Checkbox("固定隨機種子", ref fixedSeed);
-        if (fixedSeed) { ImGui.SetNextItemWidth(150); ImGui.InputInt("種子", ref seed); }
         if (state == null || world == null) return;
         ImGui.Separator();
-        ImGui.TextUnformatted($"P3-尼德霍格　{state.Time:F1} 秒　種子 {state.Seed}");
+        ImGui.TextUnformatted($"P3-尼德霍格　{state.Time:F1} 秒");
         if (state.Complete) ImGui.TextUnformatted(state.Failed ? "本輪有失誤，可重置重練。" : "本輪完成！");
         if (showHints && !state.Complete)
         {

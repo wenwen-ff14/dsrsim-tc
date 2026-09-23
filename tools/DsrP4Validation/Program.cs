@@ -41,6 +41,6 @@ namespace AnoMech.Scenarios.Dsr.P4Eyes
     public sealed partial class DsrP4EyesScenario
     {
         internal DsrP4EyesState State => state!;
-        public void UseSeed(int value) { fixedSeed = true; seed = value; }
+        public void UseSeed(int value) { validationSeed = value; }
     }
 }

@@ -21,8 +21,6 @@ public sealed partial class DsrP4EyesScenario
         ImGui.Checkbox("顯示站位提示", ref showHints);
         ImGui.SameLine();
         ImGui.Checkbox("顯示戰術圖", ref showMap);
-        ImGui.Checkbox("固定隨機種子", ref fixedSeed);
-        if (fixedSeed) ImGui.InputInt("種子", ref seed);
         if (state == null || world == null) return;
         ImGui.Separator();
         ImGui.TextUnformatted($"P4-雙眼　{state.Time:F1} 秒　幻象俯衝 {state.DiveCount}/4");

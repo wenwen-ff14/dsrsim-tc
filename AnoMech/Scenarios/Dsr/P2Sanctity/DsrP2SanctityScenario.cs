@@ -31,14 +31,15 @@ public sealed partial class DsrP2SanctityScenario : IScenario
     private readonly List<(Vector3 Position, int Role, int Number)> landedMeteors = [];
     private int meteorSnapshotCount;
     private readonly HashSet<int> puddleHits = [];
-    private bool showHints = true, showMap = true, fixedSeed;
-    private int seed = 1, direction, meteorPreference, meteorAngleSelection;
+    private bool showHints = true, showMap = true;
+    private int? validationSeed = null;
+    private int direction, meteorPreference, meteorAngleSelection;
     private float time, puddleGrace, iceGrace;
 
     public void Run(SimWorld simWorld, int? selectedAi)
     {
         world = simWorld;
-        state = new(fixedSeed ? seed : Random.Shared.Next(), direction, meteorPreference, (int)world.Party.PlayerRole,
+        state = new(validationSeed ?? Random.Shared.Next(), direction, meteorPreference, (int)world.Party.PlayerRole,
             meteorAngleSelection switch { 1 => 120, 2 => 150, 3 => 180, 4 => 210, 5 => 240, _ => 0 });
         for (var role = 0; role < 8; role++)
             if (world.Party.Get(role) is SimPartyNpc npc)

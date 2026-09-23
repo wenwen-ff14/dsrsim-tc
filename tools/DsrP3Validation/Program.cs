@@ -122,6 +122,6 @@ namespace AnoMech.Scenarios.Dsr.P3Wyrmhole
     public sealed partial class DsrP3WyrmholeScenario
     {
         internal DsrP3WyrmholeState State => state!;
-        internal void UseSeed(int value) { fixedSeed = true; seed = value; }
+        internal void UseSeed(int value) { validationSeed = value; }
     }
 }

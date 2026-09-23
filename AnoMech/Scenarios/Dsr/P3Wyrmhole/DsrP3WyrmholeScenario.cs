@@ -19,14 +19,14 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
     private readonly SimEnemy?[][] drakes = [new SimEnemy?[3], new SimEnemy?[2], new SimEnemy?[3]];
     private readonly SimEnemy?[] finalDrakes = new SimEnemy?[4];
     private readonly List<(int Wave, Vector3 Source, Vector3 Direction)> lines = [];
-    private bool fixedSeed, showHints = true, showMap = true;
-    private int seed = 1;
+    private bool showHints = true, showMap = true;
+    private int? validationSeed = null;
     private int playerNumber, playerArrows;
 
     public void Run(SimWorld simWorld, int? selectedAi)
     {
         world = simWorld;
-        state = new(fixedSeed ? seed : Random.Shared.Next());
+        state = new(validationSeed ?? Random.Shared.Next());
         state.SetPlayerAssignment((int)world.Party.PlayerRole, playerNumber, playerArrows);
         for (var role = 0; role < 8; role++)
             if (world.Party.Get(role) is SimPartyNpc npc)

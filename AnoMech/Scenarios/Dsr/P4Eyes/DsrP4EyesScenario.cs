@@ -19,13 +19,13 @@ public sealed partial class DsrP4EyesScenario : IScenario
     private readonly SimEnemy?[] orbs = new SimEnemy?[6];
     private readonly SimEnemy?[] divers = new SimEnemy?[8];
     private readonly SimTether?[] tethers = new SimTether?[8];
-    private bool fixedSeed, showMap = true, showHints = true;
-    private int seed = 1;
+    private bool showMap = true, showHints = true;
+    private int? validationSeed = null;
 
     public void Run(SimWorld simWorld, int? selectedAi)
     {
         world = simWorld;
-        state = new(fixedSeed ? seed : Random.Shared.Next());
+        state = new(validationSeed ?? Random.Shared.Next());
         Array.Clear(tethers);
         redEye = Spawn(DsrP4EyesConstants.RedEye, 11317, DsrP4EyesState.RedEye, false);
         blueEye = Spawn(DsrP4EyesConstants.BlueEye, 11318, DsrP4EyesState.BlueEye, false);

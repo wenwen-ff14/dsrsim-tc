@@ -26,8 +26,6 @@ public sealed partial class DsrP2SanctityScenario
         ImGui.TextDisabled("配樂與隕石音效使用遊戲的背景音樂／音效音量設定。");
         ImGui.Checkbox("顯示站位提示", ref showHints);
         ImGui.SameLine(); ImGui.Checkbox("顯示戰術圖", ref showMap);
-        ImGui.Checkbox("固定隨機種子（重複同一組點名）", ref fixedSeed);
-        if (fixedSeed) { ImGui.SetNextItemWidth(150); ImGui.InputInt("種子", ref seed); }
         ImGui.SetNextItemWidth(180);
         ImGui.Combo("騎士方向", ref direction, ["隨機", "順時針", "逆時針"], 3);
         ImGui.SetNextItemWidth(180);
@@ -37,12 +35,12 @@ public sealed partial class DsrP2SanctityScenario
         ImGui.SetNextItemWidth(180);
         ImGui.Combo("自己隕石跑動角度", ref meteorAngleSelection, ["隨機", "120°", "150°", "180°", "210°", "240°"], 6);
         ImGui.TextDisabled("指定角度會保證點名自己；角度是你沿外圈順時針跑的路線。");
-        ImGui.TextDisabled("種子、方向、點名與跑動角度選項於下次開始生效。");
+        ImGui.TextDisabled("方向、點名與跑動角度選項於下次開始生效。");
         ImGui.TextDisabled("外圈擊退請使用親疏自行／沉穩詠唱，並啟用「模擬自身技能效果」。");
         if (state == null || world?.Party.Player == null) return;
         ImGui.Separator();
         string[] stages = ["準備", "分攤劍與雙視線", "騎士衝鋒與白球", "隕石換位、兩人冰圈", "第一輪踩塔", "順時針放隕石、準備擊退", "第二輪踩塔完成", "聖仗練習結束"];
-        ImGui.TextUnformatted($"{stages[(int)state.Stage]}　{time:F1} 秒　種子 {state.Seed}");
+        ImGui.TextUnformatted($"{stages[(int)state.Stage]}　{time:F1} 秒");
         if (state.FirstTowersVisible || state.Stage >= SanctityStage.FirstTowers)
             ImGui.TextUnformatted(state.HasMeteor((int)world.Party.PlayerRole)
                 ? $"本輪自己隕石跑動角度：{state.MeteorArc((int)world.Party.PlayerRole):F0}°（順時針）"

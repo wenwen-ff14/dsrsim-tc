@@ -19,37 +19,47 @@ internal sealed class DsrP5WrathState
     public bool GreenAssigned, MercyLocked, MercyResolved, DiveLocked, FinaleResolved;
     public Vector3 DiveTarget;
     public readonly Vector3[] MercyTargets = new Vector3[8];
-    public DsrP5WrathState(int seed, int playerRole = -1, int practiceTarget = 0)
+    public DsrP5WrathState(int seed, int playerRole = -1, int practiceTarget = 0, int followupTarget = 0)
     {
         Seed = seed;
         var random = new Random(seed);
         Rotation = random.Next(4) * MathF.PI / 2;
         GrinnauxNorth = random.Next(2) == 0;
+        if(practiceTarget is < 0 or > 4 || followupTarget is < 0 or > 3 || (practiceTarget != 0 && followupTarget == 2))
+            throw new ArgumentException("五火需搭配第一組隨機，不能與放大圈、連線或龍衝引導重疊。");
         var roles = Enumerable.Range(0,8).ToArray();
-        random.Shuffle(roles);
-        Blue = roles[0];
-        TetherRoles = [roles[1],roles[2]];
-        EastRoles = roles.Skip(3).Order().ToArray();
-        Green = EastRoles[random.Next(5)];
-        Altar = new[]{Blue,TetherRoles[0],TetherRoles[1],Green}[random.Next(4)];
-        var candidates = roles.Where(r => r != Altar).ToArray();
-        random.Shuffle(candidates);
-        Thunder = candidates.Take(2).ToArray();
-        Liquid = EastRoles.Where(r => r != Green && !Thunder.Contains(r)).OrderByDescending(r => Vector3.Distance(SpreadPosition(r), Grinnaux)).First();
-        if(playerRole is < 0 or > 7 || practiceTarget == 0) return;
-        var candidatesForPlayer = roles.Where(r => practiceTarget switch
+        int[] candidatesForPlayer;
+        do
         {
-            1 => r == Blue,
-            2 => r == TetherRoles[0],
-            3 => r == TetherRoles[1],
-            4 => r == Green,
-            5 => r == Liquid,
-            6 => r == Altar,
-            7 => Thunder.Contains(r),
-            8 => r != Blue && !TetherRoles.Contains(r) && r != Green && r != Liquid && r != Altar && !Thunder.Contains(r),
-            _ => false,
-        }).ToArray();
-        if(candidatesForPlayer.Length == 0) throw new ArgumentOutOfRangeException(nameof(practiceTarget));
+            Liquid = -1;
+            random.Shuffle(roles);
+            Blue = roles[0];
+            TetherRoles = [roles[1],roles[2]];
+            EastRoles = roles.Skip(3).Order().ToArray();
+            Green = EastRoles[random.Next(5)];
+            Altar = new[]{Blue,TetherRoles[0],TetherRoles[1],Green}[random.Next(4)];
+            var candidates = roles.Where(r => r != Altar).ToArray();
+            random.Shuffle(candidates);
+            Thunder = candidates.Take(2).ToArray();
+            Liquid = EastRoles.Where(r => r != Green && !Thunder.Contains(r)).OrderByDescending(r => Vector3.Distance(SpreadPosition(r), Grinnaux)).First();
+            if(playerRole is < 0 or > 7 || (practiceTarget == 0 && followupTarget == 0)) return;
+            candidatesForPlayer = roles.Where(r => (practiceTarget switch
+            {
+                0 => true,
+                1 => r == Blue,
+                2 => r == TetherRoles[0],
+                3 => r == TetherRoles[1],
+                4 => r == Green,
+                _ => false,
+            }) && (followupTarget switch
+            {
+                0 => true,
+                1 => Thunder.Contains(r),
+                2 => r == Liquid,
+                3 => r == Altar,
+                _ => false,
+            })).ToArray();
+        } while(candidatesForPlayer.Length == 0);
         var selected = candidatesForPlayer[random.Next(candidatesForPlayer.Length)];
         int Remap(int role) => role == selected ? playerRole : role == playerRole ? selected : role;
         Blue = Remap(Blue);

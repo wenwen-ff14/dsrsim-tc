@@ -17,14 +17,14 @@ public sealed partial class DsrP5WrathScenario : IScenario
     private readonly SimEnemy?[] chargeKnights = new SimEnemy?[2];
     private readonly SimTether?[] tethers = new SimTether?[2];
     private readonly List<SimEventObject> twisterObjects = [];
-    private bool fixedSeed, showHints = true, showMap = true;
-    private int seed = 1;
-    private int practiceTarget;
+    private bool showHints = true, showMap = true;
+    private int? validationSeed = null;
+    private int practiceTarget, followupTarget;
 
     public void Run(SimWorld simWorld, int? selectedAi)
     {
         world = simWorld;
-        state = new(fixedSeed ? seed : Random.Shared.Next(), (int)world.Party.PlayerRole, practiceTarget);
+        state = new(validationSeed ?? Random.Shared.Next(), (int)world.Party.PlayerRole, practiceTarget, followupTarget);
         twisterObjects.Clear();
         mercyHelpers.Clear();
         liquidObjects.Clear();

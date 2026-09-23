@@ -331,7 +331,7 @@ namespace AnoMech.Scenarios.Dsr.P2Sanctity
     {
         internal void UseSeed(int value, int angle = 0)
         {
-            fixedSeed = true; seed = value; direction = 0; meteorPreference = 0;
+            validationSeed = value; direction = 0; meteorPreference = 0;
             meteorAngleSelection = angle switch { 120 => 1, 150 => 2, 180 => 3, 210 => 4, 240 => 5, _ => 0 };
         }
         internal DsrP2SanctityState CurrentState => state!;
