@@ -166,7 +166,7 @@ public abstract unsafe class SimCharacter(Coordinates coordinates) : ISimObject,
     // Status Subsystem
     // -------------------------
 
-    public SimStatus? AddStatus(ushort statusId, float duration = 0f, int stacks = 1, bool overrideStacks = false)
+    public SimStatus? AddStatus(ushort statusId, float duration = 0f, int stacks = 1, bool overrideStacks = false, bool playEffects = true)
     {
         if (FindStatus(statusId) is {} status)
         {
@@ -184,7 +184,7 @@ public abstract unsafe class SimCharacter(Coordinates coordinates) : ISimObject,
 
         // No existing status: a non-positive request has nothing to remove.
         if (stacks <= 0) return null;
-        var s = new SimStatus(this, statusId, duration, (ushort)stacks);
+        var s = new SimStatus(this, statusId, duration, (ushort)stacks, playEffects);
         statusList.Add(s);
         return s;
     }

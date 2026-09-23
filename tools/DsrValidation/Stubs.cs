@@ -64,7 +64,7 @@ namespace AnoMech.Core.SimObjects
             knockbackRemaining = Math.Max(0, knockbackRemaining - dt);
         }
         public void Face(Vector3 p) => Rotation = MathF.Atan2(p.X - Position.X, p.Z - Position.Z);
-        public void AddStatus(ushort status, float duration) => statuses[status] = duration;
+        public void AddStatus(ushort status, float duration, bool playEffects = true) => statuses[status] = duration;
         public bool HasStatus(ushort status) => statuses.GetValueOrDefault(status) > 0;
         public void RemoveStatus(ushort status) => statuses.Remove(status);
         public readonly List<(float Time,string Path)> Vfx = [];

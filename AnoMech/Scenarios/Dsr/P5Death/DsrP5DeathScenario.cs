@@ -62,7 +62,15 @@ public sealed partial class DsrP5DeathScenario : IScenario
         world.Events.Add(39.840f,ResolveFlames);
         world.Events.Add(40.5f,CheckChains);
         world.Events.Add(41.3f,CheckDooms);
-        world.Events.Add(42f,Complete);
+        world.Events.Add(42.24f,SpawnMeteors);
+        world.Events.Add(46f,AutoLimitBreak);
+        world.Events.Add(49f,()=>DestroyMeteor(2));
+        world.Events.Add(50f,()=>DestroyMeteor(3));
+        world.Events.Add(51f,()=>DestroyMeteor(4));
+        world.Events.Add(52f,()=>DestroyMeteor(5));
+        world.Events.Add(53f,()=>DestroyMeteor(6));
+        world.Events.Add(57.04f,ResolveMeteors);
+        world.Events.Add(58f,Complete);
         DsrP5DeathAi.Tick(state,world);
     }
     private SimEnemy? Spawn(uint npc,uint name,Vector3 position,bool visible)
@@ -90,7 +98,8 @@ public sealed partial class DsrP5DeathScenario : IScenario
     private void AssignDoom(int index,float time)
     {
         var role=state!.Dooms[index];state.Assigned=true;
-        world!.Party.Get(role)?.AddStatus(2976,26);
+        world!.Party.Get(role)?.AddStatus(2976,26,playEffects:false);
+        world.Party.Get(role)?.AddVfx("vfx/common/eff/dk05ht_dth0t.avfx",1.5f);
         doomExpires[role]=time+26;
     }
     private void StartCharges()
@@ -250,10 +259,11 @@ public sealed partial class DsrP5DeathScenario : IScenario
         {
             if(doomExpires[role]==0||state.Cleansed[role])continue;
             var member=world.Party.Get(role)!;
-            if(cleansesActive&&state.CleansePositions.Any(p=>Vector3.DistanceSquared(p,member.Position)<16))
+            if(cleansesActive&&state.CleansePositions.Any(p=>Vector3.DistanceSquared(p,member.Position)<=DsrP5DeathState.CleanseRadius*DsrP5DeathState.CleanseRadius))
             {state.Cleansed[role]=true;member.RemoveStatus(2976);}
             else if(elapsed>=doomExpires[role])Hit(member,"死亡宣告到期：未進入白圈");
         }
+        TickLimitBreak(delta);
         DsrP5DeathAi.Tick(state,world);
     }
 }

@@ -6,7 +6,7 @@ foreach(var fps in new[]{30,60,144})
 for(var seed=0;seed<100;seed++)
 {
     var s=new DsrP5DeathScenario();s.UseSeed(seed);var w=new SimWorld();SimCharacter.Failures.Clear();s.Run(w,0);
-    for(var f=1;f<=43*fps;f++)
+    for(var f=1;f<=59*fps;f++)
     {
         var t=f/(float)fps;SimCharacter.Time=t;
         var before=w.Party.Slots.Select(m=>m.Position).ToArray();
@@ -15,6 +15,7 @@ for(var seed=0;seed<100;seed++)
     }
     Check(SimCharacter.Failures.Count==0,$"seed={seed} fps={fps}: {string.Join(";",SimCharacter.Failures.Take(10))}");
     Check(s.State.Complete&&w.Events.IsEmpty,"incomplete timeline");
+    Check(s.State.LimitBreakUsed&&s.State.MeteorDestroyed.All(x=>x),"NPC meteor clear");
     Check(s.State.Dooms.All(r=>s.State.Cleansed[r]),"uncleansed doom");
     Check(w.Party.Slots.All(m=>!m.HasStatus(2976)&&!m.HasStatus(769)),"status cleanup");
     Check(w.Enemies.All(e=>!e.Active)&&w.EventObjects.Count==12&&w.EventObjects.All(o=>!o.Active),"actor cleanup");
@@ -24,7 +25,7 @@ Console.WriteLine("PASS: Death of the Heavens 100 seeds at 30/60/144 FPS; NPC ro
 for(var role=0;role<8;role++)
 {
     var s=new DsrP5DeathScenario();s.UseSeed(role*11);var w=new SimWorld();w.Party.Slots[role]=new SimPlayer{Role=role,Position=new(0,0,16)};SimCharacter.Failures.Clear();s.Run(w,0);
-    for(var f=1;f<=43*60;f++)
+    for(var f=1;f<=59*60;f++)
     {
         var t=f/60f;SimCharacter.Time=t;var member=w.Party.Slots[role];
         if(!s.State.Knocked||t>=38.7f)
@@ -32,6 +33,7 @@ for(var role=0;role<8;role++)
             var target=DsrP5DeathAi.Destination(s.State,role);
             member.MoveTo(target,6,s.State.SymbolsAssigned&&!s.State.Knocked?s.State.SafeFacing(target):null);
         }
+        if(role==7&&t>46&&!s.State.LimitBreakUsed&&!s.State.LimitBreakCasting)s.TryLimitBreak(s.State.MeteorPositions[0]);
         var commands=member.MoveCommands;
         w.Events.Tick(1f/60);foreach(var m in w.Party.Slots)m.Advance(1f/60);s.Tick(1f/60,t);
         Check(member.MoveCommands==commands,"scenario moved player");
@@ -41,7 +43,7 @@ for(var role=0;role<8;role++)
 foreach(var failure in new[]{"ring","charge","spread","twister","gaze","wall","flame","doom","chain"})
 {
     var s=new DsrP5DeathScenario();s.UseSeed(7);var w=new SimWorld();SimCharacter.Failures.Clear();s.Run(w,0);
-    for(var f=1;f<=43*60;f++)
+    for(var f=1;f<=59*60;f++)
     {
         var t=f/60f;SimCharacter.Time=t;
         if(failure=="ring"&&t>22.1f&&t<22.3f)w.Party.Slots[0].Position=s.State.Hammer;
@@ -59,6 +61,45 @@ foreach(var failure in new[]{"ring","charge","spread","twister","gaze","wall","f
     Check(SimCharacter.Failures.Any(x=>x.Contains(message)),"missing failure: "+failure);
 }
 Console.WriteLine("PASS: all 8 scripted player roles; player ownership; nine mechanic failure cases.");
+foreach(var mode in new[]{"correct","miss","interrupt","retry","unused","late"})
+{
+    var s=new DsrP5DeathScenario();s.UseSeed(12);var w=new SimWorld();
+    var player=new SimPlayer{Role=7,Position=new(0,0,16)};w.Party.Slots[7]=player;
+    SimCharacter.Failures.Clear();s.Run(w,0);var started=false;var interrupted=false;
+    for(var f=1;f<=59*60;f++)
+    {
+        var t=f/60f;SimCharacter.Time=t;
+        if(!s.State.Knocked||t>=38.7f)
+            player.MoveTo(DsrP5DeathAi.Destination(s.State,7),6,s.State.SymbolsAssigned&&!s.State.Knocked?s.State.SafeFacing(player.Position):null);
+        if(mode!="unused"&&!started&&t>=(mode=="late"?54:46))
+        {
+            Check(!s.TryLimitBreak(new(100,0,100)),"out-of-range LB accepted");
+            Check(s.TryLimitBreak(s.State.MeteorPositions[mode=="miss"?4:0]),"LB not started");started=true;
+            Check(!s.TryLimitBreak(s.State.MeteorPositions[0]),"duplicate cast accepted");
+        }
+        if((mode=="interrupt"||mode=="retry")&&!interrupted&&t>46.5f)
+        {player.Position+=new Vector3(1,0,0);interrupted=true;}
+        if(mode=="retry"&&interrupted&&t>48&&!s.State.LimitBreakCasting&&!s.State.LimitBreakUsed)
+            Check(s.TryLimitBreak(s.State.MeteorPositions[0]),"retry rejected");
+        w.Events.Tick(1f/60);foreach(var m in w.Party.Slots)m.Advance(1f/60);s.Tick(1f/60,t);
+    }
+    var success=mode=="correct"||mode=="retry";
+    Check(s.State.MeteorDestroyed.All(x=>x)==success,"meteor result: "+mode);
+    Check(SimCharacter.Failures.Any(x=>x.Contains("隕石未擊破"))==!success,"meteor failure: "+mode);
+    Check(!s.State.LimitBreakCasting&&w.Enemies.All(e=>!e.Active),"LB cleanup: "+mode);
+}
+Console.WriteLine("PASS: manual D4 LB hit/miss, movement interruption/retry, no cast, late cast, range and duplicate-cast checks.");
+{
+    var s=new DsrP5DeathScenario();s.UseSeed(4);var w=new SimWorld();s.Run(w,0);
+    for(var f=1;f<=2050;f++)
+    {w.Events.Tick(1f/60);foreach(var m in w.Party.Slots)m.Advance(1f/60);s.Tick(1f/60,f/60f);}
+    var role=s.State.Dooms[0];var member=w.Party.Slots[role];
+    member.Position=s.State.CleansePositions[0]+new Vector3(1.2f,0,0);s.Tick(0,34.2f);
+    Check(!s.State.Cleansed[role]&&member.HasStatus(2976),"cleansed outside small white circle");
+    member.Position=s.State.CleansePositions[0]+new Vector3(.8f,0,0);s.Tick(0,34.2f);
+    Check(s.State.Cleansed[role]&&!member.HasStatus(2976),"did not cleanse inside white circle");
+}
+Console.WriteLine("PASS: doom remains outside the small white circle and clears only after stepping inside.");
 namespace AnoMech.Scenarios.Dsr.P5Death
 {
     public sealed partial class DsrP5DeathScenario

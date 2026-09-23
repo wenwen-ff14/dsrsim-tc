@@ -14,14 +14,15 @@ public sealed unsafe class SimStatus : ISimObject
     public bool IsActive { get; private set; }
     public ushort Stacks { get; private set; }
 
-    internal SimStatus(SimCharacter target, ushort statusId, float duration, ushort stacks)
+    internal SimStatus(SimCharacter target, ushort statusId, float duration, ushort stacks, bool playEffects = true)
     {
         this.target = target;
         this.duration = duration;
         StatusId = statusId;
         IsActive = true;
         Stacks = stacks;
-        Statuses.AddStatusInit((Character*)target.BattleCharaPtr, statusId, stacks);
+        if(playEffects)Statuses.AddStatusInit((Character*)target.BattleCharaPtr, statusId, stacks);
+        else Statuses.Apply((Character*)target.BattleCharaPtr, statusId, duration, stacks);
     }
 
     public void Reapply(float duration, int stacks)

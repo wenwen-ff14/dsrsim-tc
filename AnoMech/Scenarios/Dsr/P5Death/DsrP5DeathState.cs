@@ -15,6 +15,13 @@ internal sealed class DsrP5DeathState
     public readonly bool[] Cleansed = new bool[8];
     public readonly Random Random;
     public float Time;
+    public const float CleanseRadius=1f;
+    public readonly Vector3[] MeteorPositions=Enumerable.Range(0,8).Select(i=>Polar(i*45,18)).ToArray();
+    public readonly bool[] MeteorDestroyed=new bool[8];
+    public bool MeteorsActive, LimitBreakUsed, LimitBreakCasting;
+    public float LimitBreakElapsed;
+    public Vector3 LimitBreakOrigin, LimitBreakTarget;
+    public string LimitBreakMessage="";
     public bool Assigned, SpreadsResolved, SymbolsAssigned, Knocked, Failed, Complete;
     public DsrP5DeathState(int seed)
     {
@@ -41,7 +48,7 @@ internal sealed class DsrP5DeathState
     {
         var i=Array.IndexOf(Dooms,role);
         if(i>=0)return Rotate(i switch{0=>new(-11,0,0),1=>new(-2.5f,0,3),2=>new(2.5f,0,3),_=>new(11,0,0)});
-        return Rotate(new((Array.IndexOf(Clean,role)-1.5f)*2,0,-4));
+        return Rotate(new((Array.IndexOf(Clean,role)-1.5f)*2.8f,0,-4));
     }
     public Vector3 FinalDirection(int role)=>FinalDirections[role];
     public float SafeFacing(Vector3 position)

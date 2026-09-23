@@ -4,6 +4,6 @@
 <Compile Include="../DsrValidation/Stubs.cs" Link="Stubs.cs" />
 <Compile Include="../../AnoMech/Core/Game/EventScheduler.cs" />
 <Compile Include="../../AnoMech/Scenarios/Dsr/DsrConstants.cs" />
-<Compile Include="../../AnoMech/Scenarios/Dsr/P5Death/*.cs" Exclude="../../AnoMech/Scenarios/Dsr/P5Death/*Settings.cs" />
+<Compile Include="../../AnoMech/Scenarios/Dsr/P5Death/*.cs" Exclude="../../AnoMech/Scenarios/Dsr/P5Death/*Settings.cs;../../AnoMech/Scenarios/Dsr/P5Death/*Overlay.cs" />
 </ItemGroup>
 </Project>
