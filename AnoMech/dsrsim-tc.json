@@ -1,8 +1,8 @@
 {
   "Author": "Anomek / wenwen-ff14",
   "Name": "dsrsim-tc｜絕龍詩模擬器",
-  "Punchline": "DSR P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍練習。",
-  "Description": "API 13 繁中版。依 tuuf／Elemental 分工模擬七名隊友，練習 P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍。P3 可指定自己的麻將與箭頭。P5 包含旋風、八方劍、綠標龍衝、地火、雷光鏈與月環。使用 /dsrsim 或 /dsrsim-tc 開啟；視窗可收合。",
+  "Punchline": "DSR P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍／死刻練習。",
+  "Description": "API 13 繁中版。依 tuuf／Elemental 分工模擬七名隊友，練習 P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍與死刻。P3 可指定自己的麻將與箭頭。P5 包含旋風、八方劍、綠標龍衝、地火、雷光鏈與月環；死刻包含死亡宣告、PS 標記、擊退斷鏈與白圈解除。使用 /dsrsim 或 /dsrsim-tc 開啟；視窗可收合。",
   "RepoUrl": "https://github.com/wenwen-ff14/test",
   "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/test/main/images/dsrsim-tc.png",
   "Tags": [

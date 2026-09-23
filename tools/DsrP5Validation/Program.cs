@@ -95,13 +95,13 @@ foreach(var error in new[]{"mercy","dive","moon","lightning","liquid","altar"})
 Console.WriteLine("PASS: full Wrath at 3 frame rates; all followup failure checks, deferred dragon spawning, green/thunder combinations and actor cleanup.");
 {
     var s=new DsrP5WrathScenario();s.UseSeed(7);var w=new SimWorld();SimCharacter.Failures.Clear();s.Run(w,0);
-    for(var f=1;f<=28*60;f++)
+    for(var f=1;f<=29*60;f++)
     {
         var t=f/60f;SimCharacter.Time=t;
         w.Events.Tick(1f/60);foreach(var m in w.Party.Slots)m.Advance(1f/60);
         if(t>26.32f && w.EventObjects.Count>8)w.Party.Get(s.State.Liquid)!.Position=w.EventObjects[8].Config.Placement.Position;
         s.Tick(1f/60,t);
-        if(t<27.394f)Check(!SimCharacter.Failures.Any(f=>f.Contains("蒼天火液")),"ground hit during landing grace period");
+        if(t<28.36f)Check(!SimCharacter.Failures.Any(f=>f.Contains("蒼天火液")),"ground hit during landing grace period");
     }
     Check(SimCharacter.Failures.Any(f=>f.Contains("蒼天火液")),"standing in active liquid must fail");
 }
@@ -122,11 +122,34 @@ for(var seed=0;seed<100;seed++)
     Check(s.Blue==repeated.Blue&&s.Green==repeated.Green&&s.Liquid==repeated.Liquid&&s.Thunder.SequenceEqual(repeated.Thunder),"seed must reproduce target assignments");
 }
 Console.WriteLine("PASS: both assignment groups for all 8 player roles and valid combinations.");
+foreach(var fps in new[]{30,60,144})
+{
+    var s=new DsrP5WrathScenario();var w=new SimWorld();s.UseSeed(0);s.Run(w,0);s.PrepareContactCheck(w);
+    SimCharacter.Failures.Clear();
+    for(var f=0;f<fps/2;f++)s.ContactTick(1f/fps);
+    Check(SimCharacter.Failures.Count==0,"overlapping circles accelerated contact damage");
+    w.Party.Slots[0].Position=new(30,0,0);s.ContactTick(1f/fps);
+    w.Party.Slots[0].Position=Vector3.Zero;
+    for(var f=0;f<fps*.6f;f++)s.ContactTick(1f/fps);
+    Check(SimCharacter.Failures.Count==0,"leaving fire did not reset contact grace");
+    for(var f=0;f<fps*.5f;f++)s.ContactTick(1f/fps);
+    Check(SimCharacter.Failures.Any(x=>x.Contains("蒼天火液")),"continuous fire exposure did not fail");
+    SimCharacter.Failures.Clear();s.State.Time=8;s.ContactTick(1f/fps);
+    Check(SimCharacter.Failures.Count==0,"expired fire still caused damage");
+}
+Console.WriteLine("PASS: short contact, overlapping fires, exit/reentry, continuous contact and expiry at 30/60/144 FPS.");
 namespace AnoMech.Scenarios.Dsr.P5Wrath
 {
     public sealed partial class DsrP5WrathScenario
     {
         internal DsrP5WrathState State=>state!;
+        internal void PrepareContactCheck(SimWorld simWorld)
+        {
+            state!.Time=2;groundHazards.Clear();Array.Clear(liquidContact);
+            groundHazards.Add((Vector3.Zero,0,true));groundHazards.Add((Vector3.Zero,0,true));
+            for(var r=0;r<8;r++)simWorld.Party.Slots[r].Position=r==0?Vector3.Zero:new(30,0,0);
+        }
+        internal void ContactTick(float dt)=>CheckGround(dt);
         internal void UseSeed(int value){validationSeed=value;}
         internal void UsePracticeTarget(int first, int second){practiceTarget=second==2?0:first;followupTarget=second;}
     }

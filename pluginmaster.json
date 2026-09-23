@@ -3,8 +3,8 @@
     "Author": "Anomek / wenwen-ff14",
     "Name": "dsrsim-tc｜絕龍詩模擬器",
     "InternalName": "dsrsim-tc",
-    "AssemblyVersion": "0.4.0.42",
-    "Description": "API 13 繁中版。依 tuuf／Elemental 分工模擬七名隊友，練習 P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍。P3 可指定自己的麻將與箭頭。P5 包含旋風、八方劍、綠標龍衝、地火、雷光鏈與月環。使用 /dsrsim 或 /dsrsim-tc 開啟；視窗可收合。",
+    "AssemblyVersion": "0.4.0.43",
+    "Description": "API 13 繁中版。依 tuuf／Elemental 分工模擬七名隊友，練習 P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍與死刻。P3 可指定自己的麻將與箭頭。P5 包含旋風、八方劍、綠標龍衝、地火、雷光鏈與月環；死刻包含死亡宣告、PS 標記、擊退斷鏈與白圈解除。使用 /dsrsim 或 /dsrsim-tc 開啟；視窗可收合。",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/wenwen-ff14/test",
     "Tags": [
@@ -21,14 +21,14 @@
     "CanUnloadAsync": false,
     "LoadPriority": 0,
     "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/test/main/images/dsrsim-tc.png",
-    "Punchline": "DSR P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍練習。",
+    "Punchline": "DSR P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍／死刻練習。",
     "AcceptsFeedback": true,
-    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.42.zip",
-    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.42.zip",
-    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.42.zip",
+    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.43.zip",
+    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.43.zip",
+    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.43.zip",
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": 1790139949,
-    "Changelog": "P5 点名改為前後兩組選項，移除 P2～P5 固定種子設定與顯示。"
+    "LastUpdate": 1790140789,
+    "Changelog": "五連火新增連續接觸緩衝，避免擦邊立刻判死；新增 P5 死刻練習至白圈解除死亡宣告。"
   }
 ]

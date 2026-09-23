@@ -18,6 +18,8 @@ public sealed partial class DsrP5WrathScenario
         if(ImGui.Combo("第二組點名",ref followupTarget,"隨機\0雷點名\0五火\0四火\0") && followupTarget == 2)
             practiceTarget = 0;
         ImGui.TextWrapped("兩組可分別指定，開始或重置後生效。五火不能與第一組指定點名重疊，選五火會將第一組改為隨機。");
+        ImGui.SliderFloat("火圈接觸緩衝",ref liquidContactGrace,.5f,2f,"%.1f 秒");
+        ImGui.TextDisabled("連續停留超過緩衝才判定失敗；離開火圈重算。此為練習容錯。");
         if(state==null || world==null) return;
         ImGui.TextUnformatted($"P5-風槍　{state.Time:F1} 秒");
         if(state.Complete) ImGui.TextUnformatted(state.Failed?"本輪有失誤，可重置重練。":"風槍練習完成。");

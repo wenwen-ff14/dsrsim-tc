@@ -10,6 +10,8 @@ public sealed partial class DsrP5WrathScenario
     private readonly List<SimEnemy> mercyHelpers = [];
     private readonly List<SimEventObject> liquidObjects = [];
     private readonly Queue<Vector3> liquidImpacts = [];
+    private readonly float[] liquidContact = new float[8];
+    private float liquidContactGrace = 1f;
     private readonly List<(Vector3 Position,float At,bool Liquid)> groundHazards = [];
 
     private void ApplyThunder()
@@ -94,8 +96,10 @@ public sealed partial class DsrP5WrathScenario
         groundHazards.Add((target.Position,state.Time+3.983f,false));
     }
 
-    private void CheckGround()
+    private void CheckGround(float delta)
     {
+        Span<bool> touchingLiquid = stackalloc bool[8];
+        touchingLiquid.Clear();
         for(var i=groundHazards.Count-1;i>=0;i--)
         {
             var hazard=groundHazards[i];
@@ -105,9 +109,19 @@ public sealed partial class DsrP5WrathScenario
                 continue;
             }
             if(state!.Time<hazard.At) continue;
-            foreach(var member in world!.Party.ActiveMembers())
-                if(Vector3.Distance(member.Position,hazard.Position)<(hazard.Liquid?6:8)) Hit(member,hazard.Liquid?"踩入蒼天火液：連續移動引導五次地火":"未躲開聖壇火光");
+            for(var role=0;role<8;role++)
+                if(world!.Party.Get(role) is {} member && member.IsAlive() && Vector3.Distance(member.Position,hazard.Position)<(hazard.Liquid?6:8))
+                {
+                    if(hazard.Liquid) touchingLiquid[role]=true;
+                    else Hit(member,"未躲開聖壇火光");
+                }
             if(!hazard.Liquid) groundHazards.RemoveAt(i);
+        }
+        for(var role=0;role<8;role++)
+        {
+            liquidContact[role]=touchingLiquid[role]?liquidContact[role]+delta:0;
+            if(liquidContact[role]>=liquidContactGrace && world!.Party.Get(role) is {} member && member.IsAlive())
+                Hit(member,"停留於蒼天火液：連續移動引導五次地火");
         }
     }
 

@@ -11,8 +11,9 @@
 - **P3-尼德霍格**：可指定自己的麻將與箭頭；包含跳躍、分攤、內外圈、踩塔、引導槍、最後四塔、坦克接線、普攻與騰龍槍。
 - **P4-雙眼**：思念增益、紅藍換線、雙人黃球、單人藍球及四輪幻象俯衝。雙眼擊破自動推進，尚未包含救奧爾什方。
 - **P5-風槍**：FFLogs 校時；包含交叉衝鋒、旋風、八方劍、綠標龍衝、連續地火、雷光鏈、月環與古代爆震。詳見 [DSR-P5.md](DSR-P5.md)。
+- **P5-死刻**：死亡宣告分組、沉重衝擊、百雷／衝鋒／旋風、PS 標記、雙視線、擊退斷鏈及白圈解死宣；目前練習至解死宣，不含隕石擊破與後續坦克連擊。詳見 [DSR-P5-Death.md](DSR-P5-Death.md)。
 
-打法參考 tuuf／Elemental 的 [P2](https://ffxiv.tuufless.com/elemental/dsr/02_thordan/)、[P3](https://ffxiv.tuufless.com/elemental/dsr/03_nidhogg/) 與 [P4](https://ffxiv.tuufless.com/elemental/dsr/04_eyes/) 攻略。
+打法參考 tuuf／Elemental 的 [P2](https://ffxiv.tuufless.com/elemental/dsr/02_thordan/)、[P3](https://ffxiv.tuufless.com/elemental/dsr/03_nidhogg/) 、[P4](https://ffxiv.tuufless.com/elemental/dsr/04_eyes/) 與 [P5](https://ffxiv.tuufless.com/elemental/dsr/05_alternate_thordan/) 攻略。
 
 ## 安裝
 
@@ -35,9 +36,9 @@ https://raw.githubusercontent.com/wenwen-ff14/test/main/pluginmaster.json
 3. 可開啟無敵練習、站位提示與戰術圖。P3 麻將及箭頭選項於下一輪生效。
 4. P4 換線需實際接觸；NPC 等交換成功才離開，雙方有三秒不可再換線的減益。
 5. 指令支援 `config`、`start`、`reset`、`leave`，例如 `/dsrsim reset`。
-6. 「離開模擬」返回旅館。機制中可收合視窗；固定種子可重練同一組點名。
+6. 「離開模擬」返回旅館。機制中可收合視窗；各階段每輪重新隨機，P5 可分組指定玩家點名。
 
-外圈擊退需使用親疏自行／沉穩詠唱，並啟用「模擬自身技能效果」。配樂使用遊戲 BGM 音量。
+P2 外圈擊退需使用親疏自行／沉穩詠唱，並啟用「模擬自身技能效果」。P5 死刻需要正常吃擊退，不能開防擊退。配樂使用遊戲 BGM 音量。
 所有關卡保留背景音樂開關，不再顯示重新播放音樂按鈕。
 
 模擬時會暫時隔離伺服器封包，因此隊伍加入／離開與準備確認等更新可能無法正常顯示，直到離開模擬。

@@ -29,6 +29,7 @@ public sealed partial class DsrP5WrathScenario : IScenario
         mercyHelpers.Clear();
         liquidObjects.Clear();
         liquidImpacts.Clear();
+        Array.Clear(liquidContact);
         groundHazards.Clear();
         Array.Clear(tethers);
         boss = Spawn(DsrP5WrathConstants.Thordan, 3632, Vector3.Zero, true);
@@ -204,7 +205,7 @@ public sealed partial class DsrP5WrathScenario : IScenario
         if(state==null || world==null || state.Complete) return;
         state.Time=elapsed;
         CheckTwisters();
-        CheckGround();
+        CheckGround(delta);
         DsrP5WrathAi.Tick(state,world);
     }
 }
