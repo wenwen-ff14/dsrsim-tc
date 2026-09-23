@@ -18,12 +18,12 @@ for(var seed=0;seed<100;seed++)
     Check(!s.State.Complete&&s.State.MeteorsActive&&w.Events.IsEmpty,"incomplete timeline");
     Check(!s.State.LimitBreakUsed&&!s.State.MeteorDestroyed.Any(x=>x),"NPC meteor clear");
     Check(s.State.MeteorPositions.All(p=>MathF.Abs(p.Length()-13)<.001f),"meteor ring radius");
-    Check(MathF.Abs(s.State.Boss.Length()-40)<.001f,"Thordan outside arena");
+    Check(MathF.Abs(s.State.Boss.Length()-23)<.001f,"Thordan outside arena");
     Check(s.State.MeteorPositions.Count(p=>Vector3.Distance(p,s.State.MeteorPositions[0])<=10)==3,"LB2 must cover three adjacent meteors");
     Check(s.State.MeteorPositions.All(p=>p.Length()>10),"LB2 centered in arena must not clear the meteor ring");
     Check(w.Enemies.SelectMany(e=>e.Casts).Count(c=>c.Action==204)==0&&!w.Enemies.SelectMany(e=>e.Casts).Any(c=>c.Action==205),"native LB2 action, not LB3");
-    Check(w.Enemies.Any(e=>e.Vfx.Any(v=>v.Path=="vfx/common/eff/mon_eisyo01et.avfx")),"native Dragon's Gaze cast VFX");
-    Check(w.Enemies.Any(e=>e.Vfx.Any(v=>v.Path=="vfx/common/eff/mon_eisyo01et.avfx"&&MathF.Abs(v.Time-10.1f)<.05f)),"gaze must appear immediately after Thordan's departure");
+    Check(!w.Enemies.Any(e=>e.Vfx.Any(v=>v.Path=="vfx/common/eff/mon_eisyo01et.avfx")),"no extra Thordan eye VFX");
+    Check(!w.Enemies.SelectMany(e=>e.Casts).Any(c=>c.Action is 25552 or 25553),"no Thordan eye cast or release effect");
     Check(w.Enemies.SelectMany(e=>e.Casts).Count(c=>c.Action==27540)==5,"Deathstorm cast plus four native target hits");
     Check(w.Party.Slots.All(m=>m.LockonVfx.Contains(s.State.Symbols[m.Role])),"native Playstation markers");
     Check(s.State.Dooms.All(r=>s.State.Cleansed[r]),"uncleansed doom");

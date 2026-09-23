@@ -131,12 +131,12 @@ for(var first=1;first<=5;first++)for(var last=first;last<=5;last++)
  var hasWroth=first<=3&&last>=3;
  Check(w.Enemies.Count(e=>e.BNpcBaseId==0x33B6)==(hasWroth?9:0),"nine fireballs only in selected Wroth window");
  Check(w.Enemies.SelectMany(e=>e.Casts).Count(c=>c.Action==26409)==(hasWroth?9:0),"three waves of native cross casts");
- if(first==1||hasWroth)Check(w.Party.Slots[2].LockonVfx.Contains(62)&&w.Party.Slots[3].LockonVfx.Contains(62),"healer stack markers");
+ Check(w.Party.Slots.All(m=>!m.LockonVfx.Contains(62)),"no stack markers in any P6 range");
 }
 var invalidRange=false;
 try{new DsrP6DragonsScenario().SetRange(DsrP6Section.Breath2,DsrP6Section.Breath1);}catch(ArgumentOutOfRangeException){invalidRange=true;}
 Check(invalidRange,"reversed range rejected");
-Console.WriteLine("PASS: all 15 start/end windows, targetable dragons, healer stack markers, nine fireballs, native cross casts and cleanup.");
+Console.WriteLine("PASS: all 15 start/end windows, targetable dragons, no stack markers, nine fireballs, native cross casts and cleanup.");
 {
  var s=new DsrP6DragonsScenario(DsrP6Section.Wroth);s.UseSeed(0);var w=new SimWorld();
  var player=new SimPlayer{Role=2,Position=new(0,0,16)};w.Party.Slots[2]=player;
@@ -151,6 +151,32 @@ Console.WriteLine("PASS: all 15 start/end windows, targetable dragons, healer st
  Check(SimCharacter.Failures.Any(f=>f.Contains("第 1 組烈焰十字爆")),"first cross must hit its vertical lane");
 }
 Console.WriteLine("PASS: entering a fireball cross lane fails at its scheduled explosion.");
+{
+ var s=new DsrP6DragonsScenario(DsrP6Section.Breath1);s.UseSeed(0);var w=new SimWorld();s.Run(w,0);
+ for(var frame=1;frame<=16*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;
+  w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
+  if(time>8&&time<14.7f)for(var r=2;r<8;r++)Check(w.Party.Slots[r].HasStatus(s.State.Fire[r]?(ushort)2898:(ushort)2899),"first breath tether debuff");
+  if(time>15)Check(w.Party.Slots.All(m=>!m.HasStatus(2898)&&!m.HasStatus(2899)),"opposite breaths clear first-breath statuses");
+ }
+}
+{
+ var s=new DsrP6DragonsScenario(DsrP6Section.Wroth);s.UseSeed(0);var w=new SimWorld();s.Run(w,0);
+ var black=w.Enemies[0];var white=w.Enemies[1];
+ for(var frame=1;frame<=21*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;
+  w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
+  Check(black.Visible&&black.Targetable&&black.Position==DsrP6DragonsState.Nidhogg&&black.Departures.Count==0,"black dragon stays attackable at home through Wroth");
+  if(time<4.1f)Check(white.Position==DsrP6DragonsState.Hraesvelgr&&white.Targetable,"white dragon waits for Wroth cast end");
+  if(time>4.2f&&time<15.49f)Check(!white.Targetable,"white dragon untargetable during departure and dive");
+  if(time>15.6f)Check(white.Visible&&white.Targetable&&white.Position==DsrP6DragonsState.Hraesvelgr,"white dragon returns attackable after dive");
+ }
+ Check(black.Casts.Count(c=>c.Action is 27974 or 27975)==4,"four black dragon stack hits");
+ Check(white.Departures.Count==1&&white.Casts.Count(c=>c.Action==27967)==1,"only white dragon departs and dives once");
+}
+Console.WriteLine("PASS: first-breath status lifecycle and white-only Wroth departure, dive, return and targetability.");
 namespace AnoMech.Scenarios.Dsr.P6Dragons
 {
  public sealed partial class DsrP6DragonsScenario

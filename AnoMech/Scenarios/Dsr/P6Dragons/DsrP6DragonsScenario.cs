@@ -84,7 +84,10 @@ public sealed partial class DsrP6DragonsScenario(DsrP6Section section=DsrP6Secti
         world.Events.Add(56.109f,()=>PassVow(0));
         world.Events.Add(58f,PrepareWroth);
         world.Events.Add(59.148f,()=>nidhogg?.Cast(27973,castSeconds:2.2f,fireDelay:.259f));
+        world.Events.Add(62.107f,DepartWrothHraesvelgr);
+        world.Events.Add(62.8f,()=>hraesvelgr?.SetVisible(false));
         world.Events.Add(63f,ApplyFlames);
+        world.Events.Add(63.407f,ShowWrothDive);
         world.Events.Add(64.468f,BeginAkhMorn);
         world.Events.Add(65f,()=>SpawnFireballs(0));
         world.Events.Add(67f,()=>SpawnFireballs(1));
@@ -94,6 +97,7 @@ public sealed partial class DsrP6DragonsScenario(DsrP6Section section=DsrP6Secti
         world.Events.Add(72.435f,()=>ResolveAkhMorn(0));
         world.Events.Add(72.479f,()=>ResolveLine(new(11,0,-34),new(11,0,40),11,"聖力俯衝"));
         world.Events.Add(72.720f,()=>BeginFireballs(1));
+        world.Events.Add(73.5f,ReturnWrothHraesvelgr);
         world.Events.Add(74.090f,()=>ResolveAkhMorn(1));
         world.Events.Add(75.654f,()=>ResolveAkhMorn(2));
         world.Events.Add(75.754f,()=>ResolveFireballs(0));

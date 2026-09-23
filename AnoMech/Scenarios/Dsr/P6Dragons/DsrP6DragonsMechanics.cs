@@ -16,7 +16,11 @@ public sealed partial class DsrP6DragonsScenario
         Spawn(DsrConstants.Npc.Helper,4954,Vector3.Zero,false)?.Cast(27960,castSeconds:6.7f,fireDelay:.277f);
         foreach(var tether in tethers)tether.Despawn();tethers.Clear();
         for(var r=2;r<8;r++)
-            if(world!.Party.Get(r) is {} member)tethers.Add(world.Tether(member,state.Fire[r]?nidhogg:hraesvelgr,state.Fire[r]?(ushort)194:(ushort)195));
+            if(world!.Party.Get(r) is {} member)
+            {
+                tethers.Add(world.Tether(member,state.Fire[r]?nidhogg:hraesvelgr,state.Fire[r]?(ushort)194:(ushort)195));
+                if(!second)member.AddStatus(state.Fire[r]?(ushort)2898:(ushort)2899,7.066f);
+            }
     }
     private void ResolveBlizzard()
     {
@@ -50,7 +54,16 @@ public sealed partial class DsrP6DragonsScenario
                 if(fire+ice!=1)Hit(member,"冰火二：散開，避免重疊吐息");
                 member.AddStatus(state!.Fire[r]?(ushort)2898:(ushort)2899,10.956f);
             }
-            else if(fire!=1||ice!=1)Hit(member,"冰火一：必須各承受一次冰與火");
+            else
+            {
+                member.RemoveStatus(2898);member.RemoveStatus(2899);
+                if(fire!=1||ice!=1)
+                {
+                    if(fire>0&&ice==0)member.AddStatus(2898,10.956f);
+                    if(ice>0&&fire==0)member.AddStatus(2899,10.956f);
+                    Hit(member,"冰火一：必須各承受一次冰與火");
+                }
+            }
         }
         ResolveBreathTanks(second?state!.SecondGlow:DsrP6Glow.Nidhogg);
     }
@@ -85,8 +98,6 @@ public sealed partial class DsrP6DragonsScenario
     private void BeginStacks()
     {
         state!.SetStacks();
-        world!.Party.Get(2)?.AttachLockonVfx(62,8.186f);
-        world.Party.Get(3)?.AttachLockonVfx(62,8.186f);
         nidhogg?.Cast(27971,castSeconds:7.7f,fireDelay:.262f);
         hraesvelgr?.Cast(27969,castSeconds:7.7f,fireDelay:.262f);
     }
@@ -207,8 +218,6 @@ public sealed partial class DsrP6DragonsScenario
     {
         state!.Hint="十字火：西南集合，死亡輪迴每次命中後一起移動，依序躲三組十字爆。";
         ClearFireballs();
-        hraesvelgr?.SetTargetable(false);
-        hraesvelgr?.SetPosition(new Vector3(11,0,-34));hraesvelgr?.HoldFacing(0);
         for(var r=0;r<8;r++)state.Destinations[r]=new(-19,0,13);
     }
     private void ResolveAkhMorn(int hit)

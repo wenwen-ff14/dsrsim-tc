@@ -39,7 +39,6 @@ public sealed partial class DsrP5DeathScenario : IScenario
             boss?.HoldFacing(MathF.Atan2(-state.Boss.X,-state.Boss.Z));
             boss?.SetVisible(true);
             boss?.Cast(DsrConstants.Action.Reappear,castSeconds:0,targetId:boss.GameObjectId);
-            boss?.AddVfx("vfx/common/eff/mon_eisyo01et.avfx",27.281f);
         });
         world.Events.Add(11.6f,SpawnFormation);
         world.Events.Add(13.956f,()=>dark?.Cast(27540,castSeconds:0));
@@ -65,7 +64,6 @@ public sealed partial class DsrP5DeathScenario : IScenario
         world.Events.Add(32.239f,()=>
         {
             charibert?.Cast(25310,castSeconds:6.7f,fireDelay:.275f);
-            boss?.Cast(25552,castSeconds:3.7f,fireDelay:.280f);
         });
         world.Events.Add(33.357f,()=>grinnaux?.Cast(25308,castSeconds:3.7f,fireDelay:.280f));
         world.Events.Add(34.117f,ShowCleanses);
@@ -211,7 +209,6 @@ public sealed partial class DsrP5DeathScenario : IScenario
             var facing=new Vector3(MathF.Sin(member.Rotation),0,MathF.Cos(member.Rotation));
             if(Vector3.Dot(facing,Vector3.Normalize(state!.Eye-member.Position))>.7071f||Vector3.Dot(facing,Vector3.Normalize(state.Boss-member.Position))>.7071f)Hit(member,"死刻雙視線：背對托爾丹與龍眼");
         }
-        boss?.Cast(25553,state!.Boss,0);
         Spawn(DsrConstants.Npc.Helper,3632,state!.Eye,false)?.Cast(25554,state.Eye,0);
         world!.Map.AddEffect(0x00080004,(byte)state.EyeIndex);
     }

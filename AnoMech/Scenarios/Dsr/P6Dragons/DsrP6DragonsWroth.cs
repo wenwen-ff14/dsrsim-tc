@@ -14,6 +14,27 @@ public sealed partial class DsrP6DragonsScenario
     ];
     private readonly SimEnemy?[,] fireballs=new SimEnemy?[3,3];
 
+    private void DepartWrothHraesvelgr()
+    {
+        hraesvelgr?.SetTargetable(false);
+        hraesvelgr?.PlayDeparture(DsrConstants.Timeline.KnightDeparture);
+    }
+    private void ShowWrothDive()
+    {
+        hraesvelgr?.SetPosition(new Vector3(11,0,-34));
+        hraesvelgr?.HoldFacing(0);
+        hraesvelgr?.QueueEntrance(DsrConstants.Timeline.KnightEntrance,.65f);
+        hraesvelgr?.SetVisible(true);
+    }
+    private void ReturnWrothHraesvelgr()
+    {
+        hraesvelgr?.SetPosition(DsrP6DragonsState.Hraesvelgr);
+        hraesvelgr?.HoldFacing(-MathF.PI/2);
+        hraesvelgr?.QueueEntrance(DsrConstants.Timeline.KnightEntrance,.65f);
+        hraesvelgr?.SetVisible(true);
+        hraesvelgr?.SetTargetable(true);
+    }
+
     private void ApplyFlames()
     {
         for(var i=0;i<6;i++)world!.Party.Get(state!.Flames[i])?.AddStatus(i<4?(ushort)2758:(ushort)2759,23.212f);
@@ -22,7 +43,6 @@ public sealed partial class DsrP6DragonsScenario
     private void BeginAkhMorn()
     {
         var target=world!.Party.Get(state!.AkhMornTarget)!;
-        target.AttachLockonVfx(62,12.752f);
         nidhogg?.Cast(27974,target.Position,7.7f,targetId:target.GameObjectId,fireDelay:.267f);
     }
     private void SpawnFireballs(int wave)
