@@ -52,7 +52,7 @@ internal sealed class DamageDebugWindow : Window, IDisposable
     private IDalamudTextureWrap? tex;
 
     public DamageDebugWindow(Plugin plugin)
-        : base("Damage Debug##AnoMechDamageDebug")
+        : base("Damage Debug##dsrsim-tc-damage-debug")
     {
         this.plugin = plugin;
         IsOpen = false;
@@ -208,7 +208,7 @@ internal sealed class DamageDebugWindow : Window, IDisposable
             pixels[o + 3] = (byte)(MathF.Min(1f, v) * 255f);
         }
         tex?.Dispose();
-        tex = Plugin.TextureProvider.CreateFromRaw(RawImageSpecification.Rgba32(Res, Res), pixels, "AnoMech.DamageDebug");
+        tex = Plugin.TextureProvider.CreateFromRaw(RawImageSpecification.Rgba32(Res, Res), pixels, "dsrsim-tc.DamageDebug");
     }
 
     private void EnsureGrid()

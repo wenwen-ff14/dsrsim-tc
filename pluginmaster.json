@@ -1,10 +1,10 @@
 [
   {
     "Author": "Anomek / wenwen-ff14",
-    "Name": "絕龍詩模擬器",
-    "InternalName": "AnoMech",
-    "AssemblyVersion": "0.4.0.35",
-    "Description": "API 13 繁中版。於旅館內模擬七名隊友，練習 P2 聖仗、P3 尼德霍格與 P4 雙眼。P3 可指定自己的麻將與箭頭，包含最後四塔、坦克接線、五次普攻及固定 C 點騰龍槍。P4 包含思念增益、紅藍換線、黃球與藍球、四輪幻象俯衝；雙眼擊破自動推進。使用 /anomech 或 /ano 開啟；視窗可收合。",
+    "Name": "dsrsim-tc｜絕龍詩模擬器",
+    "InternalName": "dsrsim-tc",
+    "AssemblyVersion": "0.4.0.36",
+    "Description": "API 13 繁中版。於旅館內模擬七名隊友，練習 P2 聖仗、P3 尼德霍格與 P4 雙眼。P3 可指定自己的麻將與箭頭，包含最後四塔、坦克接線、五次普攻及固定 C 點騰龍槍。P4 包含思念增益、紅藍換線、黃球與藍球、四輪幻象俯衝；雙眼擊破自動推進。使用 /dsrsim 或 /dsrsim-tc 開啟；視窗可收合。",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/wenwen-ff14/test",
     "Tags": [
@@ -20,15 +20,15 @@
     "LoadSync": false,
     "CanUnloadAsync": false,
     "LoadPriority": 0,
-    "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/test/main/images/icon.png",
+    "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/test/main/images/dsrsim-tc.png",
     "Punchline": "DSR P2 聖仗、P3 尼德霍格、P4 雙眼練習，使用 tuuf／Elemental 打法。",
     "AcceptsFeedback": true,
-    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.35.zip",
-    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.35.zip",
-    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/AnoMech/0.4.0.35.zip",
+    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.36.zip",
+    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.36.zip",
+    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.36.zip",
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": 1790135163,
-    "Changelog": "修正 P4 NPC 換線等待：黃球交換成功後才前往下一站，坦補交線後離開避免三秒後換回；俯衝交線者原地等待接線完成。雙方三秒爪牙不變減益與換線鎖定同步解除。"
+    "LastUpdate": 1790135521,
+    "Changelog": "更名為 dsrsim-tc，使用獨立 InternalName、DLL、設定目錄與視窗識別。指令改為 /dsrsim 或 /dsrsim-tc。更新 DSR 圖示及 README 來源說明。請停用舊版絕龍詩模擬器後，在插件安裝器搜尋 dsrsim-tc 重新安裝；舊設定不自動搬移。"
   }
 ]

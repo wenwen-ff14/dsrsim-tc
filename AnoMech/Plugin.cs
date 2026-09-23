@@ -38,13 +38,13 @@ public sealed class Plugin : IDalamudPlugin
     [PluginService] internal static IDutyState DutyState { get; private set; } = null!;
     [PluginService] internal static ICondition Condition { get; private set; } = null!;
 
-    private const string CommandName = "/anomech";
-    private const string CommandAlias = "/ano";
+    private const string CommandName = "/dsrsim-tc";
+    private const string CommandAlias = "/dsrsim";
 
     public Configuration Configuration { get; init; }
     internal static Configuration Config { get; private set; } = null!;
 
-    public readonly WindowSystem WindowSystem = new("AnoMech");
+    public readonly WindowSystem WindowSystem = new("dsrsim-tc");
     public Game Game { get; }
     // SimObjects reach engine singletons through these statics (mirrors the
     // Plugin.* PluginService pattern).
@@ -100,7 +100,7 @@ public sealed class Plugin : IDalamudPlugin
         });
         CommandManager.AddHandler(CommandAlias, new CommandInfo(OnCommand)
         {
-            HelpMessage = "/anomech 的簡短指令"
+            HelpMessage = "/dsrsim-tc 的簡短指令"
         });
 
         PluginInterface.UiBuilder.Draw += WindowSystem.Draw;

@@ -15,9 +15,9 @@ internal sealed class LogManager : IDisposable
     {
         if (writer != null) return;
         Directory.CreateDirectory(LogsDir);
-        var path = Path.Combine(LogsDir, $"anomech-{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.log");
+        var path = Path.Combine(LogsDir, $"dsrsim-tc-{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.log");
         writer = new StreamWriter(path, append: false, System.Text.Encoding.UTF8) { AutoFlush = true };
-        writer.WriteLine($"# AnoMech event log — {DateTime.Now:O}");
+        writer.WriteLine($"# dsrsim-tc event log — {DateTime.Now:O}");
     }
 
     internal void Close()

@@ -244,7 +244,7 @@ public sealed class Game : IDisposable
         Plugin.ChatGui.Print(new XivChatEntry
         {
             Type = XivChatType.SystemMessage,
-            Message = new SeStringBuilder().AddText($"[AnoMech] 開始：{FullName(scenario)}{(solo ? "（單人）" : "")}").Build(),
+            Message = new SeStringBuilder().AddText($"[dsrsim-tc] 開始：{FullName(scenario)}{(solo ? "（單人）" : "")}").Build(),
         });
     }
 
@@ -352,7 +352,7 @@ public sealed class Game : IDisposable
         Plugin.ChatGui.Print(new XivChatEntry
         {
             Type = XivChatType.SystemMessage,
-            Message = new SeStringBuilder().AddText($"[AnoMech] {DescribeName(target)} 倒下：{cause}").Build(),
+            Message = new SeStringBuilder().AddText($"[dsrsim-tc] {DescribeName(target)} 倒下：{cause}").Build(),
         });
     }
 

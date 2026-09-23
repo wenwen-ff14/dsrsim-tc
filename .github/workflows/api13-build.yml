@@ -37,7 +37,7 @@ jobs:
         run: dotnet build AnoMech.sln --configuration Release -p:RestoreLockedMode=true
       - uses: actions/upload-artifact@v4
         with:
-          name: AnoMech-API13
-          path: AnoMech/bin/x64/Release/AnoMech/*
+          name: dsrsim-tc-API13
+          path: AnoMech/bin/x64/Release/dsrsim-tc/*
           if-no-files-found: error
           retention-days: 7

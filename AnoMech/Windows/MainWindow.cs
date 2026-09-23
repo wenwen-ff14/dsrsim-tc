@@ -65,7 +65,7 @@ public unsafe class MainWindow : Window, IDisposable
     {
         var v = Assembly.GetExecutingAssembly().GetName().Version;
         var version = v is null ? "" : $" v{v.Major}.{v.Minor}.{v.Build}.{v.Revision}";
-        return $"絕龍詩模擬器{version}###MainWindow";
+        return $"dsrsim-tc｜絕龍詩模擬器{version}###dsrsim-tc-main";
     }
 
     public MainWindow(Plugin plugin)
@@ -82,7 +82,7 @@ public unsafe class MainWindow : Window, IDisposable
         if (plugin.Game.Scenarios.Count > 0) SelectScenario(plugin.Game.Scenarios[0]);
         IsOpen = false;
 
-        // Small gear in the title bar opens the settings window (same toggle as /anomech config).
+        // Small gear in the title bar opens the settings window (same toggle as /dsrsim config).
         TitleBarButtons.Add(new TitleBarButton
         {
             Icon = FontAwesomeIcon.Cog,

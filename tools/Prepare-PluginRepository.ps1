@@ -8,7 +8,7 @@ $projectXml = [xml](Get-Content -Raw -LiteralPath $project)
 $version = [string]$projectXml.Project.PropertyGroup.Version
 if ($version -notmatch '^\d+\.\d+\.\d+\.\d+$') { throw 'Expected a four-part plugin version.' }
 
-$packageRelativePath = "packages/AnoMech/$version.zip"
+$packageRelativePath = "packages/dsrsim-tc/$version.zip"
 $packagePath = Join-Path $repoRoot $packageRelativePath
 if (Test-Path -LiteralPath $packagePath) {
     throw "Version $version is already packaged. Increase the project version before preparing an update."
@@ -19,21 +19,21 @@ $buildOutput = Join-Path $repoRoot "AnoMech/bin/Repository/$version-$([Guid]::Ne
 & dotnet build $project -c Release -p:RestoreLockedMode=true "-p:OutputPath=$buildOutput"
 if ($LASTEXITCODE -ne 0) { throw 'Plugin build failed.' }
 
-$manifestPath = Join-Path $buildOutput 'AnoMech/AnoMech.json'
-$zipPath = Join-Path $buildOutput 'AnoMech/latest.zip'
+$manifestPath = Join-Path $buildOutput 'dsrsim-tc/dsrsim-tc.json'
+$zipPath = Join-Path $buildOutput 'dsrsim-tc/latest.zip'
 $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json -AsHashtable
-$assemblyVersion = [Reflection.AssemblyName]::GetAssemblyName((Join-Path $buildOutput 'AnoMech.dll')).Version.ToString()
-if ($manifest.InternalName -ne 'AnoMech' -or $manifest.DalamudApiLevel -ne 13 -or
+$assemblyVersion = [Reflection.AssemblyName]::GetAssemblyName((Join-Path $buildOutput 'dsrsim-tc.dll')).Version.ToString()
+if ($manifest.InternalName -ne 'dsrsim-tc' -or $manifest.DalamudApiLevel -ne 13 -or
     $manifest.AssemblyVersion -ne $version -or $assemblyVersion -ne $version) {
     throw 'Manifest, assembly version or Dalamud API level mismatch.'
 }
 
 $zip = [IO.Compression.ZipFile]::OpenRead($zipPath)
 try {
-    foreach ($required in @('AnoMech.dll', 'AnoMech.json', 'AnoMech.deps.json')) {
+    foreach ($required in @('dsrsim-tc.dll', 'dsrsim-tc.json', 'dsrsim-tc.deps.json')) {
         if ($null -eq $zip.GetEntry($required)) { throw "Missing package entry: $required" }
     }
-    $reader = [IO.StreamReader]::new($zip.GetEntry('AnoMech.json').Open())
+    $reader = [IO.StreamReader]::new($zip.GetEntry('dsrsim-tc.json').Open())
     try { $packedManifest = $reader.ReadToEnd() | ConvertFrom-Json }
     finally { $reader.Dispose() }
     if ($packedManifest.AssemblyVersion -ne $version -or $packedManifest.DalamudApiLevel -ne 13) {

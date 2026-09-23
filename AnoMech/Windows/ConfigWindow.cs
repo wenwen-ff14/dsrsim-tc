@@ -10,7 +10,7 @@ public class ConfigWindow : Window, IDisposable
 {
     private readonly Configuration configuration;
 
-    public ConfigWindow(Plugin plugin) : base("絕龍詩模擬器設定###AnoMechConfig")
+    public ConfigWindow(Plugin plugin) : base("絕龍詩模擬器設定###dsrsim-tc-config")
     {
         Flags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse;
 

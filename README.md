@@ -1,170 +1,75 @@
+# dsrsim-tc
 
-# ![AnoMech](images/icon.png) AnoMech
+![dsrsim-tc 圖示](images/dsrsim-tc.png)
 
-*Another FFXIV mechanics simulator*
+繁中版 FF14 絕龍詩戰爭機制模擬器，使用 Dalamud API 13（.NET 9 / C# 13）。
+本專案**參考並衍生自 AnoMech**（Anomek 與原專案貢獻者），沿用其本機模擬引擎，專注製作繁中版 DSR 練習內容，並非原版 AnoMech 的官方版本。
 
-本分支目標為繁中 Dalamud API 13（.NET 9 / C# 13），目前以本機
-Dalamud 13.0.0.16 的函式庫編譯。主選單提供絕龍詩 P2 聖仗、P3 尼德霍格與 P4 雙眼，
-使用 tuuf／Elemental 的 [P2 打法](https://ffxiv.tuufless.com/elemental/dsr/02_thordan/)、
-[P3 Easthogg 打法](https://ffxiv.tuufless.com/elemental/dsr/03_nidhogg/)
-及 [P4 雙眼打法](https://ffxiv.tuufless.com/elemental/dsr/04_eyes/)。
-其他關卡保留原始碼，暫時從選單隱藏。
+目前提供：
 
-## 使用本分支
+- **P2-聖仗**：分攤劍、雙視線、騎士衝鋒、白球、冰火圈、塔、隕石與擊退。
+- **P3-尼德霍格**：可指定自己的麻將與箭頭；包含跳躍、分攤、內外圈、踩塔、引導槍、最後四塔、坦克接線、普攻與騰龍槍。
+- **P4-雙眼**：思念增益、紅藍換線、雙人黃球、單人藍球及四輪幻象俯衝。雙眼擊破自動推進，尚未包含救奧爾什方。
 
-在繁中版 Dalamud 的設定中，找到「自訂插件庫／Custom Plugin Repositories」，新增並啟用：
+打法參考 tuuf／Elemental 的 [P2](https://ffxiv.tuufless.com/elemental/dsr/02_thordan/)、[P3](https://ffxiv.tuufless.com/elemental/dsr/03_nidhogg/) 與 [P4](https://ffxiv.tuufless.com/elemental/dsr/04_eyes/) 攻略。
+
+## 安裝
+
+在 Dalamud 設定的「自訂插件庫／Custom Plugin Repositories」新增並啟用：
 
 ```text
 https://raw.githubusercontent.com/wenwen-ff14/test/main/pluginmaster.json
 ```
 
-儲存設定後，在插件安裝器搜尋「絕龍詩模擬器」並安裝。此插件庫適用於 **Dalamud API 13**。
-如果曾透過 Dev Plugins 載入本機 AnoMech，請先停用該項目，避免同時載入兩份。
+於插件安裝器搜尋 **dsrsim-tc** 並安裝。
 
-1. 確認「絕龍詩模擬器」已安裝並啟用。
-2. 進入旅館房間，輸入 `/ano` 或 `/anomech`。
-3. 選擇職責後按「開始」。七名模擬隊友會依 tuuf 分工行動，玩家自行走位。
-4. 初次練習可開啟「無敵練習」、「顯示站位提示」與「顯示戰術圖」。
-5. 外圈擊退需使用親疏自行／沉穩詠唱；設定內須啟用「模擬自身技能效果」。
-6. 「重置」清除本輪，「離開模擬」回到旅館。固定種子可重練同一組點名。
-7. 機制進行中可按「收合視窗」，只保留展開、重置與離開；也可使用標題列的收合功能。
+自 0.4.0.36 起，InternalName、DLL 與更新套件皆改為 `dsrsim-tc`，設定與日誌使用獨立的插件目錄，視窗識別也與 AnoMech 分離。指令為 `/dsrsim` 或 `/dsrsim-tc`，不再註冊 `/ano`、`/anomech`。
 
-聖仗包含分攤劍、雙視線、騎士衝鋒、白球、冰火圈、第一輪塔、七次隕石、擊退與第二輪塔。
-本關卡不包含 P2 的聖劍、後續終極結局與揮劍。
-目前是可建置的練習實作，尚未完成繁中遊戲內驗收；精確時間與部分地面幾何仍需校正。
-詳細設定與驗證限制見 [DSR-P2.md](DSR-P2.md)。
+**從本分支舊版遷移：**請先停用原先的「絕龍詩模擬器」（InternalName 為 AnoMech），再安裝 dsrsim-tc；Dalamud 會將新識別視為另一個插件，舊版不會自動改名，設定也不會自動搬移。若用 Dev Plugins，請改載入 `dsrsim-tc.dll`。原版 AnoMech 可以保留，但兩個模擬器請勿同時啟動場景；兩者仍會操作同一個遊戲場地與原生物件。
 
-P3「尼德霍格」可選自己的麻將（一／二／三號）及箭頭（無／有／上／下，皆可隨機），選項於下一輪生效。涵蓋三輪數字跳躍、箭頭面向、五人分攤、
-內外圈、踩塔、分身直線、兩次普攻、隨機龍槍與最後四座人數塔。四塔依 tuuf 坦近戰順時針、逆時針、對角補位，補遠留原塔；接著練習 MT 接本體線、ST 接分身線、五次普攻及固定朝 C 點的騰龍槍。
-P3 原生動畫、特效和精確時序尚待遊戲內確認，詳見 [DSR-P3.md](DSR-P3.md)。
+## 使用
 
-P4「雙眼」包含南側取得思念增益、紅藍換線、坦補雙人撞黃球、DPS 單人撞藍球，以及四輪幻象俯衝換線。使用雙眼場地設定與 Contention 配樂；模擬器自動推進雙眼擊破，尚未包含接續的救奧爾什方。詳見 [DSR-P4.md](DSR-P4.md)。
+1. 進入旅館房間，輸入 `/dsrsim`。
+2. 選擇關卡與職責，按「開始」；七名 NPC 依 tuuf 分工走位，玩家自行操作。
+3. 可開啟無敵練習、站位提示與戰術圖。P3 麻將及箭頭選項於下一輪生效。
+4. P4 換線需實際接觸；NPC 等交換成功才離開，雙方有三秒不可再換線的減益。
+5. 指令支援 `config`、`start`、`reset`、`leave`，例如 `/dsrsim reset`。
+6. 「離開模擬」返回旅館。機制中可收合視窗；固定種子可重練同一組點名。
 
-## 建置
+外圈擊退需使用親疏自行／沉穩詠唱，並啟用「模擬自身技能效果」。配樂使用遊戲 BGM 音量。
 
-安裝 .NET 9 SDK 後，在此目錄執行：
+模擬時會暫時隔離伺服器封包，因此隊伍加入／離開與準備確認等更新可能無法正常顯示，直到離開模擬。
+原生動畫、特效、場地與 BGM 仍需在繁中遊戲內驗收；離線測試與編譯不能替代實機確認。
+機制範圍與時序限制詳見 [P2](DSR-P2.md)、[P3](DSR-P3.md)、[P4](DSR-P4.md)。
+
+## 建置與發布
 
 ```powershell
 dotnet build AnoMech.sln -c Release -p:RestoreLockedMode=true
 ```
 
-會優先使用 `%APPDATA%/FFXIVSimpleLauncher/Dalamud/Injector`。其他安裝位置請設定
-`DALAMUD_HOME`，或傳入 `-p:DalamudLibPath=你的繁中SDK目錄/`。
-建置會檢查 Dalamud 組件版本，拒絕引用 API 14 / 15。
-輸出 DLL：`AnoMech/bin/x64/Release/AnoMech.dll`；打包檔在同層 `AnoMech/` 目錄。
+保留原始碼目錄與 solution 名稱以減少無關搬移；輸出的插件識別為 `dsrsim-tc`。
+SDK 優先使用 `%APPDATA%/FFXIVSimpleLauncher/Dalamud/Injector`，亦可設定 `DALAMUD_HOME` 或 `-p:DalamudLibPath=...`；建置會檢查 API 13。
 
-GitHub Actions 使用指定的繁中 API 13 SDK 壓縮檔，不下載國際服 `latest.zip`。
-PR 建置需設定 repository variable `DALAMUD_API13_SDK_URL`；手動建置需輸入 SDK URL。
-工作流程只產出 artifact，不再呼叫原作者的自動發布工作流程。
+- 本機 DLL：`AnoMech/bin/x64/Release/dsrsim-tc.dll`
+- 打包輸出：`AnoMech/bin/x64/Release/dsrsim-tc/latest.zip`
+- 插件庫套件：`packages/dsrsim-tc/<版本>.zip`
 
-## 更新自訂插件庫
-
-提高 `AnoMech/AnoMech.csproj` 的四段版本號後，用 PowerShell 7 執行：
+調高 csproj 的四段版本號後，執行：
 
 ```powershell
-pwsh -File tools/Prepare-PluginRepository.ps1
+pwsh -File tools/Prepare-PluginRepository.ps1 -Changelog '本次更新內容'
 ```
 
-腳本會編譯、核對 DLL 與清單版本，產生 `packages/AnoMech/<版本>.zip` 和 `pluginmaster.json`。
-將原始碼、這兩個發布檔案一併提交並推送到 `main`，使用者便能沿用同一插件庫網址更新。
-已發布版本的 ZIP 保留不覆寫；`bin/`、`obj/` 和本機 SDK 不需上傳。
+將原始碼、套件與 `pluginmaster.json` 一併提交並推送。已發布的舊版套件保留，不覆寫。
+GitHub Actions 需指定繁中 API 13 SDK，設定方式見工作流程與 [API13-MIGRATION.md](API13-MIGRATION.md)。
 
-API 13 移植包含原生函式相容層。編譯與離線簽章匹配不代表遊戲內驗證完成。
-可用 PowerShell 7 執行 `tools/Check-NativeSignatures.ps1 -GameExe <繁中ffxiv_dx11.exe路徑>`
-檢查簽章匹配。遊戲內仍需在旅館載入 Dev Plugin，驗證 `/ano`、開始場景、讀條、
-特效、隊友狀態、重置及離開後回復。API 13 的副本事件只支援四個 payload 參數；
-新增場景若需要第五、第六個非零參數會明確拒絕派送。
+## 來源、授權與致謝
 
----
- 
-Simulate FFXIV raid mechanics client-side for solo practice. Go to any Inn, open the plugin with `/anomech` and start practicing!
+- **AnoMech / Anomek**：本專案的原始碼與模擬引擎來源；[原作者插件庫](https://github.com/anomek/MyDalamudPlugins)。
+- **WorstAquaPlayer、Wydox、RoarkGit**：原版引擎、機制及修正貢獻。
+- **tuuf／Elemental**：DSR 攻略與職責分工。
+- **Hyperborea、FFXIV-RaidsRewritten、BossMod**：原專案採用的場地載入、戰鬥特效及機制時序參考。
 
-
-Thanks to improvemnts by [WorstAquaPlayer](https://github.com/WorstAquaPlayer) plugin is quite stable now! No more 
-crashes after training session.
-
-**WARNING!!!**
-
-**You are cut off from server traffic while in the sim zone.** To keep the
-fake zone stable, the plugin firewalls incoming packets from the server.  
-While simulating:
-  * Players joining or leaving your party will not appear in the party list
-  until you leave the sim zone.
-  * Ready checks will not pop.
- 
-
-### Beta: Advanced Simulation Resolution
-
-The simulator now includes a beta feature that properly resolves most skills, triggers, and gauges during simulation. 
-As this feature is still in beta, some edge cases and less common interactions may not yet resolve correctly.
-
-
-## Installation
-
-See: https://github.com/anomek/MyDalamudPlugins
-
-## 原有關卡（本分支暫時隱藏）
-- Dancing Mad (Ultimate)
-    - P2 Forsaken
-      - NA
-        - [Kroxy-Rinon 341 (Center/N Stacks) melee adjust](https://raidplan.io/plan/UATE__aDcw1-bgVv)
-        - [South Adjust 341](https://raidplan.io/plan/uq7zdjvuu7uuw8fj)
-        - diamond markers or week one positions
-      - EU _by [Wydox](https://github.com/Wydox)_
-        - [\[LPDU\] Buddies](https://raidplan.io/plan/142oXOZpPc_jh3dd)
-        - [\[Old\] p3Z Buddy Meow](https://raidplan.io/plan/lZWqxfxvyhF9sp3Z)
-        - [\[Old\] zP6 South adjust](https://raidplan.io/plan/rtc1FcuZFMuyBzP6)
-    - P3 Black Hole _old bh (DSA, single tethers, n/s stomps)_
-    - P4 Kefka Says _kefkabin_
-    - P5 Exaflares _by [Wydox](https://github.com/Wydox)_
-    - P5 Celestriad _by [RoarkGit](https://github.com/RoarkGit)_
-    - P5 Forsaken Null _no ai or damage_
-- The Omega Protocol (Ultimate): _NA pf strats_
-    - P2 Party Synergy
-    - P5 Delta
-    - P5 Sigma
-    - P5 Omega
-    - P6 Exasquares / Wave Cannon 2
-- The Weapon's Refrain (Ultimate) _by [WorstAquaPlayer](https://github.com/WorstAquaPlayer)_
-    - Ultimate Predaction
-    - Ultimate Suppression
-- The Unending Coil of Bahamut (Ultimate) _by [RoarkGit](https://github.com/RoarkGit)_
-    - Exaflares
-
-## Details
-
-* Spawns fake party members and boss NPCs into the live game client
-* Drives their positions, cast bars, tethers, and VFX so mechanics play out visually
-* Your fake party members are full fledged bots that will do mechanics.  
-  Some scanarios also have solo mode where you can practice without disctractions.
-
-
-## How to help
-1. Please provide feedback and report any issues in scenarios: bad timing, damage, config not working at it supposed
-2. Bot AI currently only covers strategies from my region. Adding strategies for other regions requires little coding.
-   Feel free to create pull request or contact me.
-3. Adding new scenario is more involved. `tools/parser.py` generates a baseline scenario from a log, which still
-   needs randomization, mechanic-failure logic and bot AI added by hand.
-4. Plugin-development or reverse-engineering help, and improvement ideas, are also welcome.
-
-
-## Known issues
-* Minor visual and timing issues may occur
-* In scenarios for Top Omega Protocol (Ultimate):
-  * Tether distance threshold are very rough estimations
-  * Line AOE from Optiocal Unit (eye) doesn't render
-* Not all skills will resolve properly
-
-#  Acknowledgments
-
-Thanks for contributors:
-* [WorstAquaPlayer](https://github.com/WorstAquaPlayer) - rewriting core & fixing crashes, scenarios for uwu
-* [Wydox](https://github.com/Wydox) - EU strats for Forsaken, UMAD Exaflares, core improvements
-* [RoarkGit](https://github.com/RoarkGit) - UMAD Celestriad, UCOB exas, win streaks
-
-AnoMech leans heavily on the work of other Dalamud plugins. Huge thanks to their authors!  
-Without them, the following would not be possible:
-
-* **Hyperborea** — solo duty arena loading.
-* **FFXIV-RaidsRewritten** — stunning the player on death and playing raid VFX.
-* **bossmod** — mechanics timings and positions.
+保留原版著作權與 [AGPL-3.0-or-later 授權](LICENSE.md)。本分支由 wenwen-ff14 維護。
+新圖示為本專案生成的龍眼與騎士主題圖案，並非遊戲官方圖示。
