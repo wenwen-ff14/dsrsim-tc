@@ -23,11 +23,6 @@ public sealed partial class DsrP2SanctityScenario
             Plugin.Config.SuppressBgm = !playMusic;
             Plugin.Config.Save();
         }
-        if (playMusic && Plugin.GameInstance.Bgm.IsActive)
-        {
-            ImGui.SameLine();
-            if (ImGui.Button("重新播放音樂")) Plugin.GameInstance.Bgm.Restart();
-        }
         ImGui.TextDisabled("配樂與隕石音效使用遊戲的背景音樂／音效音量設定。");
         ImGui.Checkbox("顯示站位提示", ref showHints);
         ImGui.SameLine(); ImGui.Checkbox("顯示戰術圖", ref showMap);

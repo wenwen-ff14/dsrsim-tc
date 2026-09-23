@@ -10,6 +10,7 @@ using AnoMech.Scenarios.Dsr;
 using AnoMech.Scenarios.Dsr.P2Sanctity;
 using AnoMech.Scenarios.Dsr.P3Wyrmhole;
 using AnoMech.Scenarios.Dsr.P4Eyes;
+using AnoMech.Scenarios.Dsr.P5Wrath;
 using AnoMech.Scenarios.Top.P2PartySynergy;
 using AnoMech.Scenarios.Top.P5Delta;
 using AnoMech.Scenarios.Top.P5Omega;
@@ -110,6 +111,7 @@ public sealed class Game : IDisposable
             new DsrP2SanctityScenario(),
             new DsrP3WyrmholeScenario(),
             new DsrP4EyesScenario(),
+            new DsrP5WrathScenario(),
             new UmadP2ForsakenScenario(),
             new UmadP3BlackHoleScenario(),
             new UmadP4KefkaSaysScenario(),
@@ -124,7 +126,7 @@ public sealed class Game : IDisposable
             new UltimatePredationScenario(),
             new UltimateSuppressionScenario(),
             new UcobP5ExaflaresScenario()
-        }.Where(scenario => scenario is DsrP2SanctityScenario or DsrP3WyrmholeScenario or DsrP4EyesScenario).ToArray();
+        }.Where(scenario => scenario is DsrP2SanctityScenario or DsrP3WyrmholeScenario or DsrP4EyesScenario or DsrP5WrathScenario).ToArray();
 
         // Derive the zone tree from the flat registry (first-appearance order).
         var zoneOrder = new List<IZone>();

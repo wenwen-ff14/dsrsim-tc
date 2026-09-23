@@ -3,8 +3,8 @@
     "Author": "Anomek / wenwen-ff14",
     "Name": "dsrsim-tc｜絕龍詩模擬器",
     "InternalName": "dsrsim-tc",
-    "AssemblyVersion": "0.4.0.36",
-    "Description": "API 13 繁中版。於旅館內模擬七名隊友，練習 P2 聖仗、P3 尼德霍格與 P4 雙眼。P3 可指定自己的麻將與箭頭，包含最後四塔、坦克接線、五次普攻及固定 C 點騰龍槍。P4 包含思念增益、紅藍換線、黃球與藍球、四輪幻象俯衝；雙眼擊破自動推進。使用 /dsrsim 或 /dsrsim-tc 開啟；視窗可收合。",
+    "AssemblyVersion": "0.4.0.37",
+    "Description": "API 13 繁中版。依 tuuf／Elemental 分工模擬七名隊友，練習 P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍前半。P3 可指定自己的麻將與箭頭。P5 第一版包含藍標跳躍、交叉衝鋒、白龍旋風衝與旋風，後半機制尚未加入。使用 /dsrsim 或 /dsrsim-tc 開啟；視窗可收合。",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/wenwen-ff14/test",
     "Tags": [
@@ -21,14 +21,14 @@
     "CanUnloadAsync": false,
     "LoadPriority": 0,
     "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/test/main/images/dsrsim-tc.png",
-    "Punchline": "DSR P2 聖仗、P3 尼德霍格、P4 雙眼練習，使用 tuuf／Elemental 打法。",
+    "Punchline": "DSR P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍前半練習。",
     "AcceptsFeedback": true,
-    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.36.zip",
-    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.36.zip",
-    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.36.zip",
+    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.37.zip",
+    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.37.zip",
+    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.37.zip",
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": 1790135521,
-    "Changelog": "更名為 dsrsim-tc，使用獨立 InternalName、DLL、設定目錄與視窗識別。指令改為 /dsrsim 或 /dsrsim-tc。更新 DSR 圖示及 README 來源說明。請停用舊版絕龍詩模擬器後，在插件安裝器搜尋 dsrsim-tc 重新安裝；舊設定不自動搬移。"
+    "LastUpdate": 1790136667,
+    "Changelog": "移除所有關卡的重新播放音樂按鈕，保留 BGM 開關。新增 P5-風槍前半：P5 場地、Heavensward 配樂、繁中托爾丹／騎士／龍名稱，以及藍標跳躍、交叉衝鋒、旋風衝與旋風判定。後半機制尚未加入；場地與特效待實機驗收。"
   }
 ]

@@ -13,6 +13,9 @@ internal static class DsrConstants
         public const uint Zephirin = 0x3130;
         public const uint Adelphel = 0x3139;
         public const uint Janlenoux = 0x3158;
+        public const uint Vellguine = 0x3159;
+        public const uint Paulecrain = 0x315A;
+        public const uint Ignasse = 0x315B;
         public const uint Grinnaux = 0x313A;
         public const uint Charibert = 0x313B;
         public const uint Hermenost = 0x315C;
@@ -29,6 +32,9 @@ internal static class DsrConstants
         Npc.Zephirin => 3633,
         Npc.Adelphel => 3634,
         Npc.Janlenoux => 3635,
+        Npc.Vellguine => 3636,
+        Npc.Paulecrain => 3637,
+        Npc.Ignasse => 3638,
         Npc.Grinnaux => 3639,
         Npc.Hermenost => 3640,
         Npc.Charibert => 3642,

@@ -20,11 +20,6 @@ public sealed partial class DsrP3WyrmholeScenario
             Plugin.Config.SuppressBgm = !playMusic;
             Plugin.Config.Save();
         }
-        if (playMusic && Plugin.GameInstance.Bgm.IsActive)
-        {
-            ImGui.SameLine();
-            if (ImGui.Button("重新播放音樂")) Plugin.GameInstance.Bgm.Restart();
-        }
         ImGui.TextDisabled("配樂使用遊戲的背景音樂音量設定。");
         ImGui.TextDisabled("本關練習尼德霍格麻將、兩次普攻、隨機龍槍與最後四座人數塔。");
         ImGui.TextDisabled("四塔：坦近戰依順時針 → 逆時針 → 對角補位；補遠留原塔。");

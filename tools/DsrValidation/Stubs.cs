@@ -8,7 +8,7 @@ namespace AnoMech.Scenarios
 }
 namespace AnoMech.Scenarios.Dsr
 {
-    public static class DsrZone { public static IPhase P2 => null!; public static IPhase P3 => null!; public static IPhase P4 => null!; }
+    public static class DsrZone { public static IPhase P2 => null!; public static IPhase P3 => null!; public static IPhase P4 => null!; public static IPhase P5 => null!; }
 }
 namespace AnoMech.Core.Game.Ai
 {
@@ -122,6 +122,8 @@ namespace AnoMech.Core.SimObjects
     public class SimTether { public void Despawn() { } }
     public class SimWorld
     {
+        public readonly List<SimEventObject> EventObjects = [];
+        public SimEventObject SpawnEventObject(EventObjectSpawnConfig config) { var obj = new SimEventObject { Config = config }; EventObjects.Add(obj); return obj; }
         public SimTether Tether(SimCharacter? a, SimCharacter? b, ushort id) => new();
         public readonly Game.EventScheduler Events = new();
         public readonly SimParty Party = new();
@@ -140,4 +142,10 @@ namespace AnoMech.Core.SimObjects
         public void SpawnOmen(string path, Game.Placement p, Vector3 scale, float duration) { }
         public void SpawnGroundEffect(string path, Game.Placement p, float duration, float scale = 1) { }
     }
+}
+
+namespace AnoMech.Core.SimObjects
+{
+    public class EventObjectSpawnConfig { public uint EObjId {get;init;} public Game.Placement Placement {get;init;} public float Lifetime {get;init;} }
+    public class SimEventObject { public EventObjectSpawnConfig Config = new(); public bool Active = true; public void Despawn() => Active = false; }
 }
