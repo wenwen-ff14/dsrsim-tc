@@ -15,12 +15,24 @@ for(var seed=0;seed<100;seed++)
         world.Events.Tick(1f/fps);
         foreach(var m in world.Party.Slots)m.Advance(1f/fps);
         scenario.Tick(1f/fps,SimCharacter.Time);
+        if(SimCharacter.Time<26.294f)
+        {
+            Check(world.EventObjects.Count<=8,"Liquid Heaven ground appeared before projectile impact");
+            Check(!world.Party.Get(scenario.State.Liquid)!.HasStatus(DsrP5WrathConstants.FireResistanceDown),"early fire vulnerability");
+        }
+        if(SimCharacter.Time>30.97f && SimCharacter.Time<33.9f)
+            Check(world.Party.Get(scenario.State.Liquid)!.HasStatus(DsrP5WrathConstants.FireResistanceDown),"fire vulnerability missing after last impact");
+        if(SimCharacter.Time>34f)
+            Check(!world.Party.Get(scenario.State.Liquid)!.HasStatus(DsrP5WrathConstants.FireResistanceDown),"fire vulnerability did not expire");
         for(var r=0;r<8;r++)Check(Vector3.Distance(before[r],world.Party.Slots[r].Position)<=6f/fps+.001f,"teleport");
     }
     if(SimCharacter.Failures.Count>0) Console.WriteLine($"roles blue={scenario.State.Blue} green={scenario.State.Green} liquid={scenario.State.Liquid} altar={scenario.State.Altar} north={scenario.State.GrinnauxNorth} first={string.Join(";",SimCharacter.Failures.Take(8))}");
     Check(SimCharacter.Failures.Count==0,$"seed {seed}, fps {fps}: {string.Join(";",SimCharacter.Failures.Select(f=>f[(f.IndexOf("role"))..]).Distinct())}");
     var dragon=world.Enemies.Single(e=>e.BNpcBaseId==DsrP5WrathConstants.Vedrfolnir);
     Check(dragon.Casts.Count(c=>c.Action==27537)==5,"white dragon must cast all five Liquid Heaven attacks");
+    var liquidCasts=dragon.Casts.Where(c=>c.Action==27537).ToArray();
+    var loggedCasts=new[]{25.219f,26.384f,27.548f,28.711f,29.874f};
+    for(var i=0;i<5;i++)Check(MathF.Abs(liquidCasts[i].Time-loggedCasts[i])<=1f/fps+.001f,"Liquid Heaven cast differs from log interval");
     Check(world.Enemies.Where(e=>e!=dragon).All(e=>e.Casts.All(c=>c.Action!=27537)),"wrong Liquid Heaven source");
     Check(world.Enemies.Where(e=>e.BNpcBaseId is DsrP5WrathConstants.Vedrfolnir or DsrP5WrathConstants.Darkscale or DsrP5WrathConstants.Vidofnir).All(e=>e.Entrances.Count==1),"dragon entrance missing");
     Check(world.Enemies.SelectMany(e=>e.Omens).Any(o=>o.Action==25306 && o.Delay==4.2f),"moon omen timing");
@@ -81,6 +93,19 @@ foreach(var error in new[]{"mercy","dive","moon","lightning","liquid","altar"})
     Check(SimCharacter.Failures.Any(f=>f.Contains(expected)),"missing followup failure "+error);
 }
 Console.WriteLine("PASS: full Wrath at 3 frame rates; all followup failure checks, deferred dragon spawning, green/thunder combinations and actor cleanup.");
+{
+    var s=new DsrP5WrathScenario();s.UseSeed(7);var w=new SimWorld();SimCharacter.Failures.Clear();s.Run(w,0);
+    for(var f=1;f<=28*60;f++)
+    {
+        var t=f/60f;SimCharacter.Time=t;
+        w.Events.Tick(1f/60);foreach(var m in w.Party.Slots)m.Advance(1f/60);
+        if(t>26.32f && w.EventObjects.Count>8)w.Party.Get(s.State.Liquid)!.Position=w.EventObjects[8].Config.Placement.Position;
+        s.Tick(1f/60,t);
+        if(t<27.394f)Check(!SimCharacter.Failures.Any(f=>f.Contains("蒼天火液")),"ground hit during landing grace period");
+    }
+    Check(SimCharacter.Failures.Any(f=>f.Contains("蒼天火液")),"standing in active liquid must fail");
+}
+Console.WriteLine("PASS: log cast intervals, delayed landing, vulnerability refresh/expiry and ground activation grace.");
 namespace AnoMech.Scenarios.Dsr.P5Wrath
 {
     public sealed partial class DsrP5WrathScenario

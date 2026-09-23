@@ -27,6 +27,7 @@ public sealed partial class DsrP5WrathScenario : IScenario
         twisterObjects.Clear();
         mercyHelpers.Clear();
         liquidObjects.Clear();
+        liquidImpacts.Clear();
         groundHazards.Clear();
         Array.Clear(tethers);
         boss = Spawn(DsrP5WrathConstants.Thordan, 3632, Vector3.Zero, true);
@@ -78,14 +79,19 @@ public sealed partial class DsrP5WrathScenario : IScenario
         world.Events.Add(25.176f, DropAltar);
         world.Events.Add(25.219f, DropLiquid);
         world.Events.Add(26.07f, LockDives);
+        world.Events.Add(26.294f, () => ResolveLiquid(26.294f));
         world.Events.Add(26.384f, DropLiquid);
         world.Events.Add(26.697f, DropAltar);
         world.Events.Add(27.279f, () => grinnaux?.Cast(25306,castSeconds:4.7f,omenDelay:4.2f,fireDelay:.267f));
+        world.Events.Add(27.457f, () => ResolveLiquid(27.457f));
         world.Events.Add(27.548f, DropLiquid);
         world.Events.Add(28.219f, DropAltar);
+        world.Events.Add(28.622f, () => ResolveLiquid(28.622f));
         world.Events.Add(28.711f, DropLiquid);
         world.Events.Add(29.74f, DropAltar);
+        world.Events.Add(29.785f, () => ResolveLiquid(29.785f));
         world.Events.Add(29.874f, DropLiquid);
+        world.Events.Add(30.948f, () => ResolveLiquid(30.948f));
         world.Events.Add(31.2f, () => { whiteDragon?.Despawn(); whiteDragon=null; });
         world.Events.Add(32.066f, ResolveDives);
         world.Events.Add(32.246f, ResolveFinale);
@@ -182,7 +188,12 @@ public sealed partial class DsrP5WrathScenario : IScenario
         foreach(var actor in chargeKnights.Concat(new[]{boss,whiteDragon,darkDragon,vidofnir,leapKnight,grinnaux,charibert})) actor?.Despawn();
         foreach(var helper in mercyHelpers) helper.Despawn();
         foreach(var obj in liquidObjects) obj.Despawn();
-        foreach(var member in world!.Party.ActiveMembers()) member.RemoveStatus(466);
+        foreach(var member in world!.Party.ActiveMembers())
+        {
+            member.RemoveStatus(466);
+            member.RemoveStatus(DsrP5WrathConstants.FireResistanceDown);
+        }
+        liquidImpacts.Clear();
         groundHazards.Clear();
     }
     private void Hit(SimCharacter member,string reason) { state!.Failed=true; member.Die(reason); }
