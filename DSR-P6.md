@@ -8,11 +8,38 @@
 
 - 基準：[V4F6z9GCthdf2Ppq／fight 42，P6 敵方施法事件](https://www.fflogs.com/reports/V4F6z9GCthdf2Ppq?fight=42&type=casts&hostility=1&phase=7&view=events)。模擬器 0 秒對應整場 `10:50.000`，分段入口扣除各自的起始秒數。
 - 交叉核對：[xCPHfKRndL7tk2gz／fight 7](https://www.fflogs.com/reports/xCPHfKRndL7tk2gz?fight=7&type=casts&hostility=1&phase=7&view=events)。這場有不同的嘴部發光與燃燒之翼組合，不能把兩場的分支時間直接混用。
-- 站位：[TUUF／Elemental P6](https://ffxiv.tuufless.com/elemental/dsr/06_double_dragons/)。站位座標為攻略圖對應的模擬器位置，並非 FFLogs 原始座標。
+- 新增繁中紀錄：[vqjRtKHxcT6YZy4J／fight 8](https://www.fflogs.com/reports/vqjRtKHxcT6YZy4J?fight=8&type=casts&hostility=1&phase=7&view=events)。冰火 1 白龍發光，冰火 2 雙龍發光。
+- 新增獨立團隊紀錄：[2FhKvQ1AyxVbJkL8／fight 4](https://www.fflogs.com/reports/2FhKvQ1AyxVbJkL8?fight=4&type=casts&hostility=1&phase=7&view=events)。兩次冰火均出現 Dark Orb／Holy Orb，並可核對吐息、分攤及俯衝時序。
+- 冰火 2 固定式：[使用者提供的中文攻略](https://docs.google.com/document/d/1FH0xTnmol0Wy0WSsEBME0BKs2lUShaWKKgcCXAXmS7w/edit)。採用「冰火線#2（此處使用固定式，如需5-1請查看Tuufless原文檔）」圖片。原先誤套的 5–1 站位已移除。其餘段落參考 [TUUF／Elemental P6](https://ffxiv.tuufless.com/elemental/dsr/06_double_dragons/)。座標是攻略圖對應的模擬器位置，並非 FFLogs 原始座標。
 - 幾何參考 BossMod 的 `P6Wyrmsbreath`、`P6HallowedWings`、`P6HotWingTail`、`P6Touchdown`；其中吐息角度與落地傷害安全距離仍屬近似判定，參考原始碼亦標有待驗證項目。
 - 模型、動作、狀態與配樂 ID 由本機繁中遊戲資料核對。
 
-兩份 FFLogs 的敵方施法列表與 `26409`（烈焰十字爆）查詢都沒有取得可用事件。這不代表實戰沒有火球，只表示目前資料不足以嚴格重建它的時間。需要原始 ACT／可含無命中動作的戰鬥紀錄補足。
+四場的敵方施法列表均未取得 `26409`（烈焰十字爆）；新增國際服紀錄的該技能傷害事件查詢亦回傳空表。這不代表實戰沒有火球，只表示目前資料不足以嚴格重建它的時間。需要原始 ACT／可含無命中動作的戰鬥紀錄補足。另查閱的舊紀錄 `qgjrJ6yXTBakWQwV` 已封存，沒有計入交叉驗證。
+
+以各場冰火 1 開始讀條為零點，時間單位為秒：
+
+| 紀錄／場次 | 冰火 1 吐息 | 冰火 2 讀條 | 冰火 2 吐息 | 雙龍俯衝釋放 |
+| --- | ---: | ---: | ---: | ---: |
+| V4F6z9GCthdf2Ppq／42 | 7.066 | 120.519 | 127.588 | 140.107 |
+| xCPHfKRndL7tk2gz／7 | 7.080 | 120.380 | 127.472 | 139.988 |
+| vqjRtKHxcT6YZy4J／8 | 7.071 | 120.483 | 127.550 | 140.066 |
+| 2FhKvQ1AyxVbJkL8／4 | 7.085 | 120.380 | 127.467 | 139.992 |
+
+主要節奏相符，保留基準場次的絕對時間；不把不同分支、不同場次的毫秒差混成新的時間軸。
+
+## 冰火 2 固定式
+
+非坦克的職責位置不因連線顏色變動；每輪隨機分配三火、三冰。
+
+| 職責 | 位置 |
+| --- | --- |
+| H1／H2 | 正北／正南，靠近暴雪環內緣 |
+| D2／D4 | 東北內側／東北外側 |
+| D1／D3 | 西南內側／西南外側 |
+| MT／ST，單龍發光 | 西北／東南，由未發光龍對應坦克單吃大型死刑 |
+| MT／ST，雙龍發光 | 場中重疊分攤 |
+
+冰火 2 隨機選擇黑龍、白龍或雙龍發光，套用對應的原版施法與死刑動作。固定式可能承受較短連線的較高傷害，仍需要實戰減傷；本模擬器檢查站位與重疊，不計算完整減傷數值。
 
 ## 已接入的時間
 
@@ -46,14 +73,14 @@
 
 ## 場地與原版效果
 
-- Territory `968`，Weather `59`；方形場地邊界半寬 21。暴雪環是場中半徑 20～35 的環形判定。
+- Territory `968`，Weather `47`；方形場地邊界半寬 21。暴雪環是場中半徑 20～35 的環形判定。由本機場景 OBSB 條件核對：`47` 啟用 `obset_r1fz_bg_01` 的 a00 地板及 `bg_11` 光效；舊值 `59` 啟用 `bg_02` 的 b00 橋段，已修正。場景實際切換仍需遊戲內確認。
 - 原版 BGM `926`，`music/ex4/BGM_EX4_Ban_Nidhogg_01.scd`（Dragonsong）。
 - 尼德霍格：BNpcBase `0x3144`／Name `3458`；赫拉斯瓦爾格：`0x3145`／`4954`。
 - 使用遊戲的動作、連線與狀態特效，沒有以自製圖案代替場上效果。
 
 ## 現階段限制
 
-- 固定重現基準紀錄的黑龍發光、白龍單坦死刑、抬頭最遠誘導及指定左右組合。尚未提供所有分支的隨機組合；冰火連線職責目前固定。
+- 冰火 1 仍固定重現基準紀錄的黑龍發光、白龍單坦死刑；翅膀使用抬頭最遠誘導及指定左右組合。冰火 2 已支援隨機連線與三種發光分支，雙龍俯衝仍固定黑龍西、白龍東。
 - 支援吐息重疊、暴雪環、四人分攤、翅膀半場、雙坦誘導、接毒、熱病動作與雙龍俯衝左右站位判定。尚未模擬雙龍血量差、坦克減傷量及完整傷害／治療數值。
 - 空降以半徑 20 的安全距離作練習判定，沒有重建實際距離衰減公式。連線拉伸距離及各動作的逐目標傷害延遲仍待完善。
 - 十字火草稿中的走位與火圈持續判定未完成驗證，程式會拒絕啟動該段與全流程。
@@ -63,4 +90,4 @@
 
 `dotnet run --project tools/DsrP6Validation`
 
-涵蓋四段在 30／60／144 FPS 的 NPC 步行及清理、八職責腳本玩家、錯誤站位、熱病期間動作判定、分段排程邊界，以及 P5 死宣分組指定仍維持四對四。
+涵蓋四段在 30／60／144 FPS 的 NPC 步行及清理、八職責腳本玩家、錯誤站位、熱病期間動作判定、分段排程邊界，以及 P5 死宣分組指定仍維持四對四。固定式另窮舉 20 種三火三冰分配 × 3 種發光分支，檢查完整步行流程、原版動作分支及三種錯誤坦克站位。

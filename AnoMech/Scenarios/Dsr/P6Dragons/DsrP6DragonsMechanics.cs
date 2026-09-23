@@ -10,8 +10,9 @@ public sealed partial class DsrP6DragonsScenario
     private void BeginBreath(bool second)
     {
         state!.SetBreath(second);
-        nidhogg?.Cast(27955,castSeconds:6f,fireDelay:second?.263f:.261f);
-        hraesvelgr?.Cast(27956,castSeconds:6f,fireDelay:second?.263f:.261f);
+        var glow=second?state.SecondGlow:DsrP6Glow.Nidhogg;
+        nidhogg?.Cast(glow==DsrP6Glow.Hraesvelgr?27954u:27955u,castSeconds:6f,fireDelay:second?.263f:.261f);
+        hraesvelgr?.Cast(glow==DsrP6Glow.Nidhogg?27956u:27957u,castSeconds:6f,fireDelay:second?.263f:.261f);
         Spawn(DsrConstants.Npc.Helper,4954,Vector3.Zero,false)?.Cast(27960,castSeconds:6.7f,fireDelay:.277f);
         foreach(var tether in tethers)tether.Despawn();tethers.Clear();
         for(var r=2;r<8;r++)
@@ -51,15 +52,34 @@ public sealed partial class DsrP6DragonsScenario
             }
             else if(fire!=1||ice!=1)Hit(member,"冰火一：必須各承受一次冰與火");
         }
-        var tank=world!.Party.Get(1)!;
-        Effect(27965,DsrP6DragonsState.Hraesvelgr,tank.Position,tank);
+        ResolveBreathTanks(second?state!.SecondGlow:DsrP6Glow.Nidhogg);
+    }
+    private void ResolveBreathTanks(DsrP6Glow glow)
+    {
+        if(glow==DsrP6Glow.Both)
+        {
+            for(var r=0;r<2;r++)
+            {
+                var target=world!.Party.Get(r)!;
+                Effect(r==0?27961u:27962u,r==0?DsrP6DragonsState.Nidhogg:DsrP6DragonsState.Hraesvelgr,target.Position,target);
+                if(Vector3.Distance(target.Position,world.Party.Get(1-r)!.Position)>6)Hit(target,"雙龍吐息：雙坦在場中重疊分攤");
+                for(var j=2;j<8;j++)
+                    if(Vector3.Distance(target.Position,world.Party.Get(j)!.Position)<=6)Hit(world.Party.Get(j)!,"雙龍吐息：遠離雙坦分攤");
+            }
+            return;
+        }
+        var nidhoggGlows=glow==DsrP6Glow.Nidhogg;
+        var tank=world!.Party.Get(nidhoggGlows?1:0)!;
+        var origin=nidhoggGlows?DsrP6DragonsState.Nidhogg:DsrP6DragonsState.Hraesvelgr;
+        Effect(27965,nidhoggGlows?DsrP6DragonsState.Hraesvelgr:DsrP6DragonsState.Nidhogg,tank.Position,tank);
         foreach(var member in world.Party.ActiveMembers())
-            if(member!=tank&&Vector3.Distance(member.Position,tank.Position)<15)Hit(member,"交錯吐息：離開 ST 的大型死刑");
-        Effect(27963,DsrP6DragonsState.Nidhogg,Vector3.Zero);
+            if(member!=tank&&Vector3.Distance(member.Position,tank.Position)<15)Hit(member,"交錯吐息：遠離未發光龍的坦克大型死刑");
+        Effect(nidhoggGlows?27963u:27964u,origin,Vector3.Zero);
         foreach(var member in world.Party.ActiveMembers())
         {
-            var offset=member.Position-DsrP6DragonsState.Nidhogg;
-            if(offset.X>=0&&MathF.Abs(offset.Z)<=offset.X*MathF.Tan(MathF.PI/12))Hit(member,"黑暗吐息：離開黑龍正前方");
+            var offset=member.Position-origin;
+            var forward=nidhoggGlows?offset.X:-offset.X;
+            if(forward>=0&&MathF.Abs(offset.Z)<=forward*MathF.Tan(MathF.PI/12))Hit(member,"龍之吐息：離開發光龍正前方");
         }
     }
     private void BeginStacks()

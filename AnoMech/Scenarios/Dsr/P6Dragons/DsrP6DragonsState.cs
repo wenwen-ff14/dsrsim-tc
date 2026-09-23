@@ -5,6 +5,7 @@ using System.Numerics;
 namespace AnoMech.Scenarios.Dsr.P6Dragons;
 
 public enum DsrP6Section { Full, Breath1, Wings1, Wroth, Wings2, Breath2 }
+internal enum DsrP6Glow { Nidhogg, Hraesvelgr, Both }
 
 internal sealed class DsrP6DragonsState
 {
@@ -12,6 +13,8 @@ internal sealed class DsrP6DragonsState
     public readonly Vector3[] Destinations=new Vector3[8];
     public readonly Vector3?[] LastDestinations=new Vector3?[8];
     public readonly bool[] Fire=new bool[8];
+    public readonly bool[] SecondFire=new bool[8];
+    public DsrP6Glow SecondGlow;
     public readonly int[] Flames;
     public readonly int FirstVow;
     public int VowOwner=-1;
@@ -23,6 +26,9 @@ internal sealed class DsrP6DragonsState
         var random=new Random(seed);
         FirstVow=random.Next(4,8);
         Flames=Enumerable.Range(0,8).ToArray();random.Shuffle(Flames);
+        var breathRoles=Enumerable.Range(2,6).ToArray();random.Shuffle(breathRoles);
+        foreach(var role in breathRoles.Take(3))SecondFire[role]=true;
+        SecondGlow=(DsrP6Glow)random.Next(3);
         SetIdle();
     }
     public void SetIdle()
@@ -46,16 +52,17 @@ internal sealed class DsrP6DragonsState
         }
         else
         {
-            int[] fire=[2,4,7],ice=[3,5,6];
-            Vector3[] fireSpots=[new(0,0,-19),new(8,0,-17),new(14,0,-12)];
-            Vector3[] iceSpots=[new(-14,0,-12),new(-9,0,-17),new(-6,0,18)];
-            for(var i=0;i<3;i++)
-            {
-                Fire[fire[i]]=true;Fire[ice[i]]=false;
-                Destinations[fire[i]]=fireSpots[i];Destinations[ice[i]]=iceSpots[i];
-            }
+            SecondFire.CopyTo(Fire,0);
+            Destinations[0]=SecondGlow==DsrP6Glow.Both?Vector3.Zero:new(-14.8f,0,-12.7f);
+            Destinations[1]=SecondGlow==DsrP6Glow.Both?Vector3.Zero:new(14.8f,0,12.7f);
+            Destinations[2]=new(0,0,-19.7f);
+            Destinations[3]=new(0,0,19.7f);
+            Destinations[4]=new(-3.8f,0,9.6f);
+            Destinations[5]=new(3.8f,0,-9.6f);
+            Destinations[6]=new(-8.4f,0,18);
+            Destinations[7]=new(8.4f,0,-18);
         }
-        Hint=second?"固定式冰火：依固定站位散開，保留屬性給雙龍俯衝消除。":"冰火一：兩人一組，讓每人同時受到冰與火；ST 遠離人群承受單坦死刑。";
+        Hint=second?"固定式冰火：H1 北／H2 南，D2／D4 東北，D1／D3 西南；雙龍發光時雙坦場中分攤，否則 MT 西北、ST 東南。":"冰火一：兩人一組，讓每人同時受到冰與火；ST 遠離人群承受單坦死刑。";
     }
     public void SetStacks()
     {

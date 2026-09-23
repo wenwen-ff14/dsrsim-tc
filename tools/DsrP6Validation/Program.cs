@@ -72,6 +72,8 @@ foreach(var acting in new[]{false,true})
  var s=new DsrP6DragonsScenario(DsrP6Section.Breath2);s.UseSeed(0);var w=new SimWorld();
  var player=new SimPlayer{Role=2,Position=new(0,0,16)};w.Party.Slots[2]=player;
  SimCharacter.Failures.Clear();s.Run(w,0);var sawThermal=false;
+ s.State.SecondFire[2]=true;s.State.SecondFire[3]=false;
+ for(var r=4;r<8;r++)s.State.SecondFire[r]=r<6;
  for(var frame=1;frame<=40*60;frame++)
  {
   var time=frame/60f;SimCharacter.Time=time;player.MoveTo(s.State.Destinations[2]);
@@ -86,6 +88,40 @@ foreach(var acting in new[]{false,true})
  Check(sawThermal&&s.State.Failed==acting,"Pyretic must punish actions only while active");
 }
 Console.WriteLine("PASS: native thermal conversion, action penalty and post-dive removal.");
+var fixedCases=0;
+foreach(var glow in Enum.GetValues<DsrP6Glow>())
+for(var mask=0;mask<64;mask++)
+{
+ if(System.Numerics.BitOperations.PopCount((uint)mask)!=3)continue;
+ var s=new DsrP6DragonsScenario(DsrP6Section.Breath2);s.UseSeed(0);var w=new SimWorld();
+ SimCharacter.Failures.Clear();s.Run(w,0);s.State.SecondGlow=glow;
+ for(var r=2;r<8;r++)s.State.SecondFire[r]=(mask&(1<<(r-2)))!=0;
+ for(var frame=1;frame<=40*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;
+  w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
+ }
+ Check(SimCharacter.Failures.Count==0,$"fixed {glow} {mask}: {string.Join(";",SimCharacter.Failures.Take(5))}");
+ var actions=w.Enemies.SelectMany(e=>e.Casts).Select(c=>c.Action).ToArray();
+ Check(actions.Contains(glow==DsrP6Glow.Hraesvelgr?27954u:27955u)&&actions.Contains(glow==DsrP6Glow.Nidhogg?27956u:27957u),"glow cast animations");
+ Check(glow==DsrP6Glow.Both?actions.Contains(27961u)&&actions.Contains(27962u)&&!actions.Contains(27965u):actions.Contains(27965u)&&actions.Contains(glow==DsrP6Glow.Nidhogg?27963u:27964u),"tank branch native actions");
+ Check(s.State.Complete,"fixed strat completion");fixedCases++;
+}
+Console.WriteLine($"PASS: {fixedCases} fixed-strat runs cover all 20 fire/ice assignments and three glow branches.");
+foreach(var glow in Enum.GetValues<DsrP6Glow>())
+{
+ var s=new DsrP6DragonsScenario(DsrP6Section.Breath2);s.UseSeed(0);var w=new SimWorld();
+ var role=glow==DsrP6Glow.Nidhogg?1:0;
+ w.Party.Slots[role]=new SimPlayer{Role=role,Position=glow==DsrP6Glow.Both?new(-14.8f,0,-12.7f):Vector3.Zero};
+ SimCharacter.Failures.Clear();s.Run(w,0);s.State.SecondGlow=glow;
+ for(var frame=1;frame<=10*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;
+  w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
+ }
+ Check(s.State.Failed,$"{glow}: incorrect tank stack/spread must fail");
+}
+Console.WriteLine("PASS: split tanks fail the double-glow stack; central solo tank cleaves fail both single-glow branches.");
 namespace AnoMech.Scenarios.Dsr.P6Dragons
 {
  public sealed partial class DsrP6DragonsScenario
