@@ -16,6 +16,12 @@ for(var seed=0;seed<100;seed++)
     Check(SimCharacter.Failures.Count==0,$"seed={seed} fps={fps}: {string.Join(";",SimCharacter.Failures.Take(10))}");
     Check(s.State.Complete&&w.Events.IsEmpty,"incomplete timeline");
     Check(s.State.LimitBreakUsed&&s.State.MeteorDestroyed.All(x=>x),"NPC meteor clear");
+    Check(s.State.MeteorPositions.All(p=>MathF.Abs(p.Length()-13)<.001f),"meteor ring radius");
+    Check(s.State.MeteorPositions.Count(p=>Vector3.Distance(p,s.State.MeteorPositions[0])<=10)==3,"LB2 must cover three adjacent meteors");
+    Check(s.State.MeteorPositions.All(p=>p.Length()>10),"LB2 centered in arena must not clear the meteor ring");
+    Check(w.Enemies.SelectMany(e=>e.Casts).Count(c=>c.Action==204)==1&&!w.Enemies.SelectMany(e=>e.Casts).Any(c=>c.Action==205),"native LB2 action, not LB3");
+    Check(w.Enemies.Any(e=>e.Vfx.Any(v=>v.Path=="vfx/common/eff/mon_eisyo01et.avfx")),"native Dragon's Gaze cast VFX");
+    Check(w.Party.Slots.All(m=>m.LockonVfx.Contains(s.State.Symbols[m.Role])),"native Playstation markers");
     Check(s.State.Dooms.All(r=>s.State.Cleansed[r]),"uncleansed doom");
     Check(w.Party.Slots.All(m=>!m.HasStatus(2976)&&!m.HasStatus(769)),"status cleanup");
     Check(w.Enemies.All(e=>!e.Active)&&w.EventObjects.Count==12&&w.EventObjects.All(o=>!o.Active),"actor cleanup");
@@ -71,7 +77,7 @@ foreach(var mode in new[]{"correct","miss","interrupt","retry","unused","late"})
         var t=f/60f;SimCharacter.Time=t;
         if(!s.State.Knocked||t>=38.7f)
             player.MoveTo(DsrP5DeathAi.Destination(s.State,7),6,s.State.SymbolsAssigned&&!s.State.Knocked?s.State.SafeFacing(player.Position):null);
-        if(mode!="unused"&&!started&&t>=(mode=="late"?54:46))
+        if(mode!="unused"&&!started&&t>=(mode=="late"?55:46))
         {
             Check(!s.TryLimitBreak(new(100,0,100)),"out-of-range LB accepted");
             Check(s.TryLimitBreak(s.State.MeteorPositions[mode=="miss"?4:0]),"LB not started");started=true;

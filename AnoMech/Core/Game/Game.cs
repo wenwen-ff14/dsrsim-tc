@@ -98,7 +98,6 @@ public sealed class Game : IDisposable
     private bool deathOccurredThisRun;
 
     private IScenario? activeScenario;
-    public void DrawOverlay() => activeScenario?.DrawOverlay();
     public void PracticeLimitBreak()
     {
         if(activeScenario is DsrP5DeathScenario death)death.RequestLimitBreak();

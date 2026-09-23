@@ -39,7 +39,7 @@ public sealed partial class DsrP5DeathScenario
         state.LimitBreakOrigin=caster.Position;
         state.LimitBreakElapsed=0;
         state.LimitBreakCasting=true;
-        state.LimitBreakMessage="隕石流星讀條中，移動會中斷。";
+        state.LimitBreakMessage="小型隕石讀條中，移動會中斷。";
         return true;
     }
 
@@ -60,13 +60,13 @@ public sealed partial class DsrP5DeathScenario
             return;
         }
         state.LimitBreakElapsed+=delta;
-        if(state.LimitBreakElapsed<4.5f)return;
+        if(state.LimitBreakElapsed<3f)return;
         state.LimitBreakCasting=false;
         state.LimitBreakUsed=true;
-        Spawn(DsrConstants.Npc.Helper,3632,state.LimitBreakTarget,false)?.Cast(205,state.LimitBreakTarget,0);
+        Spawn(DsrConstants.Npc.Helper,3632,state.LimitBreakTarget,false)?.Cast(204,state.LimitBreakTarget,0);
         var count=0;
         for(var i=0;i<8;i++)
-            if(!state.MeteorDestroyed[i]&&Vector3.DistanceSquared(state.MeteorPositions[i],state.LimitBreakTarget)<=225)
+            if(!state.MeteorDestroyed[i]&&Vector3.DistanceSquared(state.MeteorPositions[i],state.LimitBreakTarget)<=100)
             {DestroyMeteor(i);count++;}
         state.LimitBreakMessage=$"LB2 擊破 {count} 顆隕石。";
         Array.Clear(state.Destinations);

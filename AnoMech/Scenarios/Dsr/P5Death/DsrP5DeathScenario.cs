@@ -53,7 +53,12 @@ public sealed partial class DsrP5DeathScenario : IScenario
         world.Events.Add(30.2f,()=>{white?.Despawn();dark?.Despawn();spear?.Despawn();hammer?.Despawn();});
         world.Events.Add(31f,()=>{charibert=Spawn(DsrConstants.Npc.Charibert,3642,state.Rotate(new(0,0,24)),true);grinnaux=Spawn(DsrConstants.Npc.Grinnaux,3639,Vector3.Zero,true);});
         world.Events.Add(32.139f,AssignSymbols);
-        world.Events.Add(32.239f,()=>{charibert?.Cast(25310,castSeconds:6.7f,fireDelay:.275f);boss?.Cast(25552,castSeconds:3.7f,fireDelay:.280f);});
+        world.Events.Add(32.239f,()=>
+        {
+            charibert?.Cast(25310,castSeconds:6.7f,fireDelay:.275f);
+            boss?.Cast(25552,castSeconds:3.7f,fireDelay:.280f);
+            boss?.AddVfx("vfx/common/eff/mon_eisyo01et.avfx",5.142f);
+        });
         world.Events.Add(33.357f,()=>grinnaux?.Cast(25308,castSeconds:3.7f,fireDelay:.280f));
         world.Events.Add(34.117f,ShowCleanses);
         world.Events.Add(36.175f,AttachChains);

@@ -24,7 +24,7 @@ public sealed partial class DsrP5DeathScenario
         {
             ImGui.TextWrapped(state.LimitBreakMessage);
             ImGui.TextUnformatted($"隕石判定剩餘：{System.MathF.Max(0,57.04f-state.Time):F1} 秒");
-            if(state.LimitBreakCasting)ImGui.ProgressBar(state.LimitBreakElapsed/4.5f,new Vector2(-1,0),$"隕石流星 {state.LimitBreakElapsed:F1} / 4.5 秒");
+            if(state.LimitBreakCasting)ImGui.ProgressBar(state.LimitBreakElapsed/3f,new Vector2(-1,0),$"小型隕石 {state.LimitBreakElapsed:F1} / 3.0 秒");
             ImGui.BeginDisabled((int)world.Party.PlayerRole!=7||state.LimitBreakUsed||state.LimitBreakCasting);
             if(ImGui.Button("模擬 LB2（目前目標）"))RequestLimitBreak();
             ImGui.EndDisabled();

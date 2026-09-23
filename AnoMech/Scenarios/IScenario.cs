@@ -22,7 +22,6 @@ public interface IScenario
     void Run(SimWorld world, int? selectedAi);
     void Tick(float delta, float elapsed) { }
     void DrawSettings() { }
-    void DrawOverlay() { }
 
     // Whether the scenario has reached its own natural end, for Game's mechanic-streak
     // tracking. Default covers scenarios whose whole timeline lives on world.Events (the
