@@ -34,6 +34,7 @@ public sealed partial class DsrP6DragonsScenario
     {
         for(var i=0;i<6;i++)world!.Party.Get(state!.Flames[i])?.AddStatus(i<4?(ushort)2758:(ushort)2759,23f);
         state!.FlamesAssigned=true;
+        ApplyFlameMarks();
     }
     private void BeginAkhMorn()
     {

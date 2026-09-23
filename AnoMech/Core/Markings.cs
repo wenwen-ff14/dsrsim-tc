@@ -38,6 +38,12 @@ public enum Sign
 internal static unsafe class Markings
 {
     private const int SlotCount = 17;
+    public static bool IsSetOn(Sign sign, GameObjectId target)
+    {
+        var idx=(int)sign;
+        var ctrl=MarkingController.Instance();
+        return idx>=0&&idx<SlotCount&&ctrl!=null&&ctrl->Markers[idx].Equals(target);
+    }
 
     public static void Set(Sign sign, GameObjectId target)
     {

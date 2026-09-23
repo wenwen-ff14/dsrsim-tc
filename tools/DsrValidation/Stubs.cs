@@ -1,5 +1,17 @@
 using System.Numerics;
 
+namespace AnoMech.Core
+{
+    public enum Sign { Attack1,Attack2,Attack3,Attack4,Bind1,Bind2,Ignore1,Ignore2 }
+    internal static class Markings
+    {
+        public static readonly Dictionary<Sign,uint> Values=[];
+        public static void Set(Sign sign,uint target)=>Values[sign]=target;
+        public static void Clear(Sign sign)=>Values.Remove(sign);
+        public static bool IsSetOn(Sign sign,uint target)=>Values.TryGetValue(sign,out var value)&&value==target;
+    }
+}
+
 // Headless movement/ownership doubles. Native rendering, collision meshes and action packets are not exercised.
 namespace AnoMech.Scenarios
 {

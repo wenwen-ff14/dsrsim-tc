@@ -38,6 +38,7 @@ public sealed partial class DsrP6DragonsScenario(DsrP6Section section=DsrP6Secti
     private float startAt,endAt;
     private static readonly ushort[] StatusIds=[2896,2897,2898,2899,960,3480,2758,2759];
     private int? validationSeed=null;
+    private int markingMode,spreadStrategy;
     public void SetRange(DsrP6Section first,DsrP6Section last)
     {
         if(first<DsrP6Section.Breath1||last>DsrP6Section.Breath2||last<first)
@@ -48,6 +49,7 @@ public sealed partial class DsrP6DragonsScenario(DsrP6Section section=DsrP6Secti
     public void Run(SimWorld simWorld,int? selectedAi)
     {
         world=simWorld;state=new(validationSeed??Random.Shared.Next());
+        state.SystemMarks=markingMode==0;state.RelativeSpread=spreadStrategy==1;
         actors.Clear();tethers.Clear();puddles.Clear();puddleHits.Clear();
         var runFirst=firstSection;var runLast=lastSection;
         startAt=runFirst switch{DsrP6Section.Wings1=>35,DsrP6Section.Wroth=>58,DsrP6Section.Wings2=>105,DsrP6Section.Breath2=>126,_=>0};
@@ -114,12 +116,12 @@ public sealed partial class DsrP6DragonsScenario(DsrP6Section section=DsrP6Secti
         world.Events.Add(78.116f,()=>ResolveAkhMorn(3));
         world.Events.Add(78.520f,()=>SpawnAkhMornPuddle(3));
         world.Events.Add(78.8f,()=>HideFireballs(1));
-        world.Events.Add(78.874f,()=>{RestoreDragons();nidhogg?.Cast(27949,castSeconds:5.2f,fireDelay:.261f);});
+        world.Events.Add(78.874f,()=>{RestoreDragons();nidhogg?.Cast(state.WrothHotWing?27947u:27949u,castSeconds:5.2f,fireDelay:.261f);});
         world.Events.Add(80.774f,()=>ResolveFireballs(2));
-        world.Events.Add(80.85f,()=>state.SetFlames());
+        world.Events.Add(80.85f,()=>{state.FlamePositioning=true;UpdateFlamePositions();});
         world.Events.Add(81.8f,()=>HideFireballs(2));
         world.Events.Add(82f,ClearFireballs);
-        world.Events.Add(85.365f,()=>ResolveHot(false));
+        world.Events.Add(85.365f,()=>ResolveHot(state.WrothHotWing));
         world.Events.Add(86.212f,ResolveFlames);
         world.Events.Add(86.4f,()=>state.SetVowPass(1,true));
         world.Events.Add(90.192f,()=>PassVow(1));
@@ -177,6 +179,7 @@ public sealed partial class DsrP6DragonsScenario(DsrP6Section section=DsrP6Secti
     private void Complete()
     {
         state!.Complete=true;
+        ClearFlameMarks();
         ClearFireballs();
         foreach(var tether in tethers)tether.Despawn();
         foreach(var actor in actors)actor.Despawn();
@@ -187,6 +190,7 @@ public sealed partial class DsrP6DragonsScenario(DsrP6Section section=DsrP6Secti
     {
         if(state==null||world==null||state.Complete)return;
         state.Time=elapsed+startAt;
+        if(state.FlamePositioning)UpdateFlamePositions();
         if(state.ThermalActive)
             for(var r=2;r<8;r++)
                 if(state.Fire[r]&&world.Party.Get(r) is SimPlayer { IsActing:true } player)Hit(player,"熱病：俯衝命中解除狀態前停止移動、技能與自動攻擊");

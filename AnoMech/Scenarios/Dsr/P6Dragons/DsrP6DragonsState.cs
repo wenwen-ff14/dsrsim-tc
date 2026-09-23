@@ -26,6 +26,8 @@ internal sealed class DsrP6DragonsState
     public readonly int FirstVow;
     public readonly int AkhMornTarget;
     public DsrP6WrothPattern Wroth;
+    public bool WrothHotWing, SystemMarks=true, RelativeSpread, FlamePositioning;
+    public int[] FlameOrder;
     public int VowOwner=-1;
     public bool Complete, Failed, SecondBreath, FlamesAssigned, ThermalActive;
     public float Time;
@@ -35,11 +37,13 @@ internal sealed class DsrP6DragonsState
         var random=new Random(seed);
         FirstVow=random.Next(4,8);
         Flames=Enumerable.Range(0,8).ToArray();random.Shuffle(Flames);
+        FlameOrder=(int[])Flames.Clone();
         var breathRoles=Enumerable.Range(2,6).ToArray();random.Shuffle(breathRoles);
         foreach(var role in breathRoles.Take(3))SecondFire[role]=true;
         SecondGlow=(DsrP6Glow)random.Next(3);
         AkhMornTarget=random.Next(8);
         Wroth=new(random.Next(24));
+        WrothHotWing=random.Next(2)==0;
         SetIdle();
     }
     public void SetIdle()
@@ -96,15 +100,20 @@ internal sealed class DsrP6DragonsState
     public void SetVowPass(int receiver,bool preserveOthers=false)
     {
         if(!preserveOthers)SetIdle();
+        else for(var r=0;r<8;r++)
+            if(r!=VowOwner&&r!=receiver&&Destinations[r].LengthSquared()<49)
+                Destinations[r]=new(Destinations[r].X,0,-Wroth.StartZ*8);
         if(VowOwner>=0)Destinations[VowOwner]=Vector3.Zero;
         Destinations[receiver]=Vector3.Zero;
         Hint="滅殺的誓言：持有者與接毒者在場中重疊，其餘人遠離。";
     }
     public void SetFlames()
     {
-        for(var i=0;i<4;i++)Destinations[Flames[i]]=new(-18+i*6,0,-Wroth.StartZ*10);
-        for(var i=4;i<8;i++)Destinations[Flames[i]]=new(i%2==0?9:18,0,-Wroth.StartZ*10);
-        Hint="燃燒之尾：離開中央橫線；黑色散開往西，白色與無標各二人分攤往東。";
+        var mirror=RelativeSpread?Wroth.StartZ:1;
+        var z=-Wroth.StartZ*(WrothHotWing?2:10);
+        for(var i=0;i<4;i++)Destinations[FlameOrder[i]]=new(mirror*(-18+i*6),0,z);
+        for(var i=4;i<8;i++)Destinations[FlameOrder[i]]=new(mirror*(i%2==0?9:18),0,z);
+        Hint=(WrothHotWing?"翼：靠中央窄帶。":"尾：遠離中央橫線。")+(RelativeSpread?"面向場中左散右攤，依 123412 排列。":"黑找黑、白找白，依 123412 排列。");
     }
     public void SetDoubleDive()
     {

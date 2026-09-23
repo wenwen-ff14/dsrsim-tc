@@ -252,15 +252,17 @@ public sealed partial class DsrP6DragonsScenario
     }
     private void ResolveFlames()
     {
+        state!.FlamePositioning=false;
         for(var i=0;i<6;i++)
         {
-            var member=world!.Party.Get(state!.Flames[i])!;
+            var member=world!.Party.Get(state!.FlameOrder[i])!;
             Effect(i<4?29739u:29740u,member.Position,member.Position,member);
             var others=world.Party.ActiveMembers().Where(m=>m!=member&&Vector3.Distance(m.Position,member.Position)<(i<4?5:4)).ToArray();
             if(i<4){foreach(var other in others)Hit(other,"復仇之炎：散開");}
-            else if(others.Length!=1||others[0]!=world.Party.Get(state.Flames[i+2]))Hit(member,"同歸於盡之炎：與無標玩家二人分攤");
+            else if(others.Length!=1||others[0]!=world.Party.Get(state.FlameOrder[i+2]))Hit(member,"同歸於盡之炎：與無標玩家二人分攤");
             member.RemoveStatus(i<4?(ushort)2758:(ushort)2759);
         }
         foreach(var puddle in puddles)puddle.Despawn();puddles.Clear();puddleHits.Clear();
+        ClearFlameMarks();
     }
 }

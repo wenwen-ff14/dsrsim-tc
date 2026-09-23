@@ -3,6 +3,7 @@ using AnoMech.Core.SimObjects;
 using AnoMech.Scenarios.Dsr.P6Dragons;
 using AnoMech.Scenarios.Dsr.P5Death;
 using AnoMech.Core.Game;
+using AnoMech.Core;
 void Check(bool condition,string message){if(!condition)throw new Exception(message);}
 var scheduler=new EventScheduler();var fired=new List<int>();
 scheduler.Tick(20);
@@ -256,6 +257,33 @@ for(var variant=0;variant<24;variant++)foreach(var fps in new[]{30,60,144})
  Check(w.Enemies[1].Casts.Count(c=>c.Action==27967)==1,"one white dragon dive for each variant");
 }
 Console.WriteLine("PASS: all 24 Wroth configurations at 30/60/144 FPS, cue-gated movement, L routes, four puddles, square bounds and outcomes.");
+for(var variant=0;variant<24;variant++)foreach(var wing in new[]{false,true})
+foreach(var relative in new[]{false,true})foreach(var manual in new[]{false,true})
+{
+ Markings.Values.Clear();SimCharacter.Failures.Clear();
+ var s=new DsrP6DragonsScenario(DsrP6Section.Wroth);s.UseSeed(variant);var w=new SimWorld();s.Run(w,0);
+ s.State.Wroth=new(variant);s.State.WrothHotWing=wing;s.State.RelativeSpread=relative;s.State.SystemMarks=!manual;
+ var order=manual?new[]{s.State.Flames[3],s.State.Flames[2],s.State.Flames[1],s.State.Flames[0],s.State.Flames[5],s.State.Flames[4],s.State.Flames[7],s.State.Flames[6]}:s.State.Flames;
+ Sign[] signs=[Sign.Attack1,Sign.Attack2,Sign.Attack3,Sign.Attack4,Sign.Bind1,Sign.Bind2,Sign.Ignore1,Sign.Ignore2];
+ for(var frame=1;frame<=46*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;
+  if(manual&&frame==360)for(var i=0;i<8;i++)Markings.Set(signs[i],w.Party.Slots[order[i]].GameObjectId);
+  w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
+  if(manual&&time<6)Check(Markings.Values.Count==0,"manual mode must not write marks");
+  if(time>6.1f&&time<28)for(var i=0;i<8;i++)Check(Markings.IsSetOn(signs[i],w.Party.Slots[order[i]].GameObjectId),"correct original party sign mapping");
+  if(time>26&&time<27)
+  {
+   Check(s.State.FlameOrder.SequenceEqual(order),"manual marker order drives NPC assignments");
+   var mirror=relative?s.State.Wroth.StartZ:1;
+   for(var i=0;i<5;i++)Check(mirror*(s.State.Destinations[order[i+1]].X-s.State.Destinations[order[i]].X)>0,"attack1234 and pair12 are ordered from spread side to stack side");
+   Check(s.State.Destinations[order[4]]==s.State.Destinations[order[6]]&&s.State.Destinations[order[5]]==s.State.Destinations[order[7]],"bind and ignore same-number pairs");
+  }
+ }
+ Check(!s.State.Failed,$"Wroth {variant}, wing={wing}, relative={relative}, manual={manual}: {string.Join(";",SimCharacter.Failures.Take(3))}");
+ Check(Markings.Values.Count==0,"clear phase marks after resolution");
+}
+Console.WriteLine("PASS: all 192 Wroth variant/wing-tail/strategy/marker combinations, manual reordering, 123412 positions and cleanup.");
 namespace AnoMech.Scenarios.Dsr.P6Dragons
 {
  public sealed partial class DsrP6DragonsScenario
