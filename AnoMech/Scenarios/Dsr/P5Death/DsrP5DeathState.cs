@@ -20,6 +20,7 @@ internal sealed class DsrP5DeathState
     public readonly bool[] MeteorDestroyed=new bool[8];
     public bool MeteorsActive, LimitBreakUsed, LimitBreakCasting;
     public float LimitBreakElapsed;
+    public float LimitBreakRefill;
     public Vector3 LimitBreakOrigin, LimitBreakTarget;
     public string LimitBreakMessage="";
     public bool FormationVisible, Assigned, SpreadsResolved, SymbolsAssigned, Knocked, Failed, Complete;

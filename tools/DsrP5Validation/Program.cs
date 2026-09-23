@@ -29,6 +29,8 @@ for(var seed=0;seed<200;seed++)
     if(SimCharacter.Failures.Count>0) Console.WriteLine($"roles blue={scenario.State.Blue} green={scenario.State.Green} liquid={scenario.State.Liquid} altar={scenario.State.Altar} north={scenario.State.GrinnauxNorth} first={string.Join(";",SimCharacter.Failures.Take(8))}");
     Check(SimCharacter.Failures.Count==0,$"seed {seed}, fps {fps}: {string.Join(";",SimCharacter.Failures.Select(f=>f[(f.IndexOf("role"))..]).Distinct())}");
     var dragon=world.Enemies.Single(e=>e.BNpcBaseId==DsrP5WrathConstants.Vedrfolnir);
+    Check(MathF.Abs(scenario.State.Grinnaux.Length()-11)<.001f&&MathF.Abs(scenario.State.Charibert.Length()-12)<.001f,"moon knight radius");
+    Check(world.Enemies.SelectMany(e=>e.ActionTimelines).Count(t=>t.Id==2225)==5,"five original Liquid Heaven impacts");
     Check(dragon.Casts.Count(c=>c.Action==27537)==5,"white dragon must cast all five Liquid Heaven attacks");
     var liquidCasts=dragon.Casts.Where(c=>c.Action==27537).ToArray();
     var loggedCasts=new[]{25.219f,26.384f,27.548f,28.711f,29.874f};

@@ -11,19 +11,19 @@ public sealed partial class DsrP5DeathScenario
         var music=!Plugin.Config.SuppressBgm;
         if(ImGui.Checkbox("背景音樂：Heavensward",ref music)){Plugin.Config.SuppressBgm=!music;Plugin.Config.Save();}
         ImGui.Checkbox("顯示站位提示",ref showHints);ImGui.SameLine();ImGui.Checkbox("顯示戰術圖",ref showMap);
-        ImGui.TextWrapped("包含死刻與隕石擊破；D4 使用熱鍵列的極限爆發，瞄準北側隕石放置 LB2。也可選取隕石後使用 /dsrsim lb。讀條中移動會中斷。");
+        ImGui.TextWrapped("包含死刻與隕石 LB 自由練習；D4 使用熱鍵列的極限爆發，瞄準北側隕石放置 LB2。也可選取隕石後使用 /dsrsim lb。讀條中移動會中斷。");
         if(state==null||world==null)return;
         ImGui.TextUnformatted($"P5-死刻　{state.Time:F1} 秒");
         if(state.Complete)ImGui.TextUnformatted(state.Failed?"本輪有失誤，可重置重練。":"死刻練習完成。");
         else if(showHints)
         {
             var role=(int)world.Party.PlayerRole;
-            ImGui.TextWrapped(state.MeteorsActive?"LB 滿條即可施放，讀條 3 秒；依落點計算命中數，不限制三顆。":state.Knocked?"向外拉斷鏈；有死亡宣告者進入白圈解除。":state.SymbolsAssigned?"同標記站對面，靠中心準備擊退；背對托爾丹與龍眼。":state.Time>=26.1f?"兩側死宣拉開誘導圓形；內側死宣往南；無死宣在中心偏北排隊。":state.SpreadsResolved?"死宣躲進已炸的第二環；無死宣先小幅移動躲旋風，第三環後再進入。":state.Assigned?(state.HasDoom(role)?"死亡宣告：往北分組，依左右順序站位。":"無死亡宣告：往南分組，依左右順序站位。"):"以持錘騎士為北，按職責由西向東排隊。");
+            ImGui.TextWrapped(state.MeteorsActive?"LB 自由練習：讀條 3 秒，施放後自動補滿，不判死或結算隕石。":state.Knocked?"向外拉斷鏈；有死亡宣告者進入白圈解除。":state.SymbolsAssigned?"同標記站對面，靠中心準備擊退；背對托爾丹與龍眼。":state.Time>=26.1f?"兩側死宣拉開誘導圓形；內側死宣往南；無死宣在中心偏北排隊。":state.SpreadsResolved?"死宣躲進已炸的第二環；無死宣先小幅移動躲旋風，第三環後再進入。":state.Assigned?(state.HasDoom(role)?"死亡宣告：往北分組，依左右順序站位。":"無死亡宣告：往南分組，依左右順序站位。"):"以持錘騎士為北，按職責由西向東排隊。");
         }
         if(state.MeteorsActive)
         {
             ImGui.TextWrapped(state.LimitBreakMessage);
-            ImGui.TextUnformatted($"隕石判定剩餘：{System.MathF.Max(0,57.04f-state.Time):F1} 秒");
+            ImGui.TextUnformatted("LB 自由練習：不判死、不結算隕石；重置或離開以結束。");
             if(state.LimitBreakCasting)ImGui.ProgressBar(state.LimitBreakElapsed/3f,new Vector2(-1,0),$"小型隕石 {state.LimitBreakElapsed:F1} / 3.0 秒");
             ImGui.BeginDisabled((int)world.Party.PlayerRole!=7||state.LimitBreakUsed||state.LimitBreakCasting);
             if(ImGui.Button("模擬 LB2（目前目標）"))RequestLimitBreak();

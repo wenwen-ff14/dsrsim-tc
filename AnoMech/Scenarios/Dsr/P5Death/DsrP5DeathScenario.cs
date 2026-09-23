@@ -75,14 +75,6 @@ public sealed partial class DsrP5DeathScenario : IScenario
         world.Events.Add(40.5f,CheckChains);
         world.Events.Add(41.3f,CheckDooms);
         world.Events.Add(42.24f,SpawnMeteors);
-        world.Events.Add(46f,AutoLimitBreak);
-        world.Events.Add(49f,()=>DestroyMeteor(2));
-        world.Events.Add(50f,()=>DestroyMeteor(3));
-        world.Events.Add(51f,()=>DestroyMeteor(4));
-        world.Events.Add(52f,()=>DestroyMeteor(5));
-        world.Events.Add(53f,()=>DestroyMeteor(6));
-        world.Events.Add(57.04f,ResolveMeteors);
-        world.Events.Add(58f,Complete);
         DsrP5DeathAi.Tick(state,world);
     }
     private SimEnemy? Spawn(uint npc,uint name,Vector3 position,bool visible)

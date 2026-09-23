@@ -80,6 +80,9 @@ public sealed partial class DsrP5WrathScenario
     private void ResolveLiquid(float impactTime)
     {
         if(!liquidImpacts.TryDequeue(out var position)) return;
+        var impact=Spawn(DsrConstants.Npc.Helper,3632,position,false);
+        impact?.PlayActionTimeline(2225);
+        if(impact!=null)mercyHelpers.Add(impact);
         world!.Party.Get(state!.Liquid)?.AddStatus(DsrP5WrathConstants.FireResistanceDown,3f);
         var obj=world.SpawnEventObject(new EventObjectSpawnConfig { EObjId=0x1EB684,Placement=new(position,0),Lifetime=8 });
         if(obj!=null) liquidObjects.Add(obj);

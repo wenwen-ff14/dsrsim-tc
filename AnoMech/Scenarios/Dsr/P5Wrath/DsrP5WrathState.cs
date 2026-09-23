@@ -93,7 +93,7 @@ internal sealed class DsrP5WrathState
     public Vector3 SafePosition(int role)
     {
         var index = Array.IndexOf(Thunder,role);
-        return Grinnaux + Rotate(index >= 0 ? new(index==0?-3.8f:3.8f,0,GrinnauxNorth?-2.8f:2.8f) : new(0,0,GrinnauxNorth?3: -3));
+        return Rotate(new(0,0,GrinnauxNorth?-12:12)) + Rotate(index >= 0 ? new(index==0?-3.8f:3.8f,0,GrinnauxNorth?-2.8f:2.8f) : new(0,0,GrinnauxNorth?3: -3));
     }
     public Vector3 BaitDestination(int role)
     {
@@ -135,6 +135,6 @@ internal sealed class DsrP5WrathState
     }
     public Vector3 KnightPosition(int index) => Rotate(new(index==0 ? -10 : 10,0,-21));
     public Vector3 WhiteDragon => Rotate(new(0,0,-24));
-    public Vector3 Grinnaux => Rotate(new(0,0,GrinnauxNorth ? -12 : 12));
-    public Vector3 Charibert => -Grinnaux;
+    public Vector3 Grinnaux => Rotate(new(0,0,GrinnauxNorth ? -11 : 11));
+    public Vector3 Charibert => Rotate(new(0,0,GrinnauxNorth ? 12 : -12));
 }

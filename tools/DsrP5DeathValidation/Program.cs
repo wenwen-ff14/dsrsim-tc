@@ -15,19 +15,19 @@ for(var seed=0;seed<100;seed++)
         if(t<37.95f||t>38.8f)for(var r=0;r<8;r++)Check(Vector3.Distance(before[r],w.Party.Slots[r].Position)<=6f/fps+.001f,"NPC teleport");
     }
     Check(SimCharacter.Failures.Count==0,$"seed={seed} fps={fps}: {string.Join(";",SimCharacter.Failures.Take(10))}");
-    Check(s.State.Complete&&w.Events.IsEmpty,"incomplete timeline");
-    Check(s.State.LimitBreakUsed&&s.State.MeteorDestroyed.All(x=>x),"NPC meteor clear");
+    Check(!s.State.Complete&&s.State.MeteorsActive&&w.Events.IsEmpty,"incomplete timeline");
+    Check(!s.State.LimitBreakUsed&&!s.State.MeteorDestroyed.Any(x=>x),"NPC meteor clear");
     Check(s.State.MeteorPositions.All(p=>MathF.Abs(p.Length()-13)<.001f),"meteor ring radius");
     Check(s.State.MeteorPositions.Count(p=>Vector3.Distance(p,s.State.MeteorPositions[0])<=10)==3,"LB2 must cover three adjacent meteors");
     Check(s.State.MeteorPositions.All(p=>p.Length()>10),"LB2 centered in arena must not clear the meteor ring");
-    Check(w.Enemies.SelectMany(e=>e.Casts).Count(c=>c.Action==204)==1&&!w.Enemies.SelectMany(e=>e.Casts).Any(c=>c.Action==205),"native LB2 action, not LB3");
+    Check(w.Enemies.SelectMany(e=>e.Casts).Count(c=>c.Action==204)==0&&!w.Enemies.SelectMany(e=>e.Casts).Any(c=>c.Action==205),"native LB2 action, not LB3");
     Check(w.Enemies.Any(e=>e.Vfx.Any(v=>v.Path=="vfx/common/eff/mon_eisyo01et.avfx")),"native Dragon's Gaze cast VFX");
     Check(w.Enemies.Any(e=>e.Vfx.Any(v=>v.Path=="vfx/common/eff/mon_eisyo01et.avfx"&&MathF.Abs(v.Time-10.1f)<.05f)),"gaze must appear immediately after Thordan's departure");
     Check(w.Enemies.SelectMany(e=>e.Casts).Count(c=>c.Action==27540)==5,"Deathstorm cast plus four native target hits");
     Check(w.Party.Slots.All(m=>m.LockonVfx.Contains(s.State.Symbols[m.Role])),"native Playstation markers");
     Check(s.State.Dooms.All(r=>s.State.Cleansed[r]),"uncleansed doom");
     Check(w.Party.Slots.All(m=>!m.HasStatus(2976)&&!m.HasStatus(769)),"status cleanup");
-    Check(w.Enemies.All(e=>!e.Active)&&w.EventObjects.Count==12&&w.EventObjects.All(o=>!o.Active),"actor cleanup");
+    Check(w.Enemies.Count(e=>e.Active)==8&&w.EventObjects.Count==12&&w.EventObjects.All(o=>!o.Active),"actor cleanup");
     Check(Enumerable.Range(281,4).All(id=>s.State.Symbols.Count(v=>v==id)==2),"PS pairs");
 }
 Console.WriteLine("PASS: Death of the Heavens 100 seeds at 30/60/144 FPS; NPC routes, rings, dives, spreads, twisters, gaze, knockback, chains, doom cleanse and cleanup.");
@@ -92,10 +92,10 @@ foreach(var mode in new[]{"correct","miss","interrupt","retry","unused","late"})
             Check(s.TryLimitBreak(s.State.MeteorPositions[0]),"retry rejected");
         w.Events.Tick(1f/60);foreach(var m in w.Party.Slots)m.Advance(1f/60);s.Tick(1f/60,t);
     }
-    var success=mode=="correct"||mode=="retry";
-    Check(s.State.MeteorDestroyed.All(x=>x)==success,"meteor result: "+mode);
-    Check(SimCharacter.Failures.Any(x=>x.Contains("隕石未擊破"))==!success,"meteor failure: "+mode);
-    Check(!s.State.LimitBreakCasting&&w.Enemies.All(e=>!e.Active),"LB cleanup: "+mode);
+
+    Check(!s.State.MeteorDestroyed.Any(x=>x),"meteor result: "+mode);
+    Check(!SimCharacter.Failures.Any(x=>x.Contains("隕石未擊破")),"meteor failure: "+mode);
+    Check(!s.State.Complete&&w.Enemies.Count(e=>e.Active)==8,"LB cleanup: "+mode);
 }
 Console.WriteLine("PASS: manual D4 LB hit/miss, movement interruption/retry, no cast, late cast, range and duplicate-cast checks.");
 {
@@ -125,7 +125,7 @@ foreach(var expected in new[]{0,1,2,3})
     s.AdvanceLimitBreak(2.9f);
     Check(s.State.LimitBreakCasting&&!s.State.LimitBreakUsed&&!s.State.MeteorDestroyed.Any(x=>x),"LB resolved before cast finished");
     s.AdvanceLimitBreak(.11f);
-    Check(s.State.LimitBreakUsed&&s.State.MeteorDestroyed.Count(x=>x)==expected,$"LB hit count {expected}");
+    Check(s.State.LimitBreakUsed&&!s.State.MeteorDestroyed.Any(x=>x),$"LB hit count {expected}");
 }
 {
     var s=new DsrP5DeathScenario();s.UseSeed(12);var w=new SimWorld();
@@ -134,8 +134,10 @@ foreach(var expected in new[]{0,1,2,3})
     s.AdvanceLimitBreak(3.01f);
     Check(s.State.LimitBreakUsed&&!s.State.MeteorDestroyed.Any(x=>x),"early LB hit nonexistent meteors");
     Check(!s.TryLimitBreak(Vector3.Zero),"empty LB can be reused");
+    s.AdvanceLimitBreak(1.01f);
+    Check(s.TryLimitBreak(Vector3.Zero),"practice LB did not refill");
 }
-Console.WriteLine("PASS: full LB available before meteors; three-second cast; zero/one/two/three hits; empty gauge rejected.");
+Console.WriteLine("PASS: full LB available before meteors; three-second cast; arbitrary placements leave meteors intact; empty gauge rejected and refilled.");
 namespace AnoMech.Scenarios.Dsr.P5Death
 {
     public sealed partial class DsrP5DeathScenario

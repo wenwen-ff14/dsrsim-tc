@@ -84,6 +84,8 @@ namespace AnoMech.Core.SimObjects
     public class SimPlayer : SimCharacter { }
     public class SimEnemy : SimCharacter
     {
+        public readonly List<(float Time,ushort Id)> ActionTimelines=[];
+        public void PlayActionTimeline(ushort id,ushort loopId=0,ushort baseOverride=0)=>ActionTimelines.Add((Time,id));
         public float Scale = 1;
         public void SetScale(float scale) => Scale = scale;
         public uint BNpcBaseId;
