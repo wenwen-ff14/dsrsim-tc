@@ -1,0 +1,96 @@
+using System.Numerics;
+using AnoMech.Core.SimObjects;
+using AnoMech.Scenarios.Dsr.P6Dragons;
+using AnoMech.Scenarios.Dsr.P5Death;
+using AnoMech.Core.Game;
+void Check(bool condition,string message){if(!condition)throw new Exception(message);}
+var scheduler=new EventScheduler();var fired=new List<int>();
+scheduler.Tick(20);
+scheduler.Add(4,()=>fired.Add(4));scheduler.Add(5,()=>fired.Add(5));
+scheduler.Add(7,()=>fired.Add(7));scheduler.Add(7,()=>fired.Add(70));scheduler.Add(8,()=>fired.Add(8));
+scheduler.SelectWindow(5,7);scheduler.Tick(0);
+Check(fired.SequenceEqual(new[]{5}),"selected window start must fire at current time");
+scheduler.Tick(1.9f);Check(fired.Count==1,"window must preserve relative delay");
+scheduler.Tick(.11f);Check(fired.SequenceEqual(new[]{5,7,70})&&scheduler.IsEmpty,"inclusive end, stable event order, excluded handlers");
+Console.WriteLine("PASS: scheduler windows preserve order and boundaries after a nonzero clock origin.");
+for(var role=0;role<8;role++)for(var preference=1;preference<=2;preference++)for(var seed=0;seed<100;seed++)
+{
+ var s=new DsrP5DeathState(seed,role,preference);
+ Check(s.HasDoom(role)==(preference==1),"doom preference");
+ Check(s.Dooms.Length==4&&s.Clean.Length==4&&s.Dooms.Concat(s.Clean).Distinct().Count()==8,"doom partition");
+}
+Console.WriteLine("PASS: all eight roles, both doom preferences, 100 seeds preserve four/four grouping.");
+foreach(var section in new[]{DsrP6Section.Breath1,DsrP6Section.Wings1,DsrP6Section.Wings2,DsrP6Section.Breath2})
+foreach(var fps in new[]{30,60,144})for(var seed=0;seed<20;seed++)
+{
+ var s=new DsrP6DragonsScenario(section);s.UseSeed(seed);var w=new SimWorld();SimCharacter.Failures.Clear();s.Run(w,0);
+ for(var frame=1;frame<=40*fps;frame++)
+ {
+  var time=frame/(float)fps;SimCharacter.Time=time;var before=w.Party.Slots.Select(m=>m.Position).ToArray();
+  w.Events.Tick(1f/fps);foreach(var member in w.Party.Slots)member.Advance(1f/fps);s.Tick(1f/fps,time);
+  for(var r=0;r<8;r++)Check(Vector3.Distance(before[r],w.Party.Slots[r].Position)<=6f/fps+.002f,"NPC teleport");
+ }
+ Check(SimCharacter.Failures.Count==0,$"{section} {seed} {fps}: {string.Join(";",SimCharacter.Failures.Take(8))}");
+ Check(s.State.Complete&&w.Events.IsEmpty&&w.Enemies.All(e=>!e.Active),"completion and actor cleanup");
+}
+Console.WriteLine("PASS: four P6 sections, 20 seeds at 30/60/144 FPS, walking NPCs, mechanic outcomes and cleanup.");
+foreach(var section in new[]{DsrP6Section.Breath1,DsrP6Section.Wings1,DsrP6Section.Wings2,DsrP6Section.Breath2})
+for(var role=0;role<8;role++)
+{
+ var s=new DsrP6DragonsScenario(section);s.UseSeed(role*11);var w=new SimWorld();
+ w.Party.Slots[role]=new SimPlayer{Role=role,Position=new(0,0,16)};
+ SimCharacter.Failures.Clear();s.Run(w,0);
+ for(var frame=1;frame<=40*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;var player=w.Party.Slots[role];
+  player.MoveTo(s.State.Destinations[role]);var commands=player.MoveCommands;
+  w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
+  Check(player.MoveCommands==commands,"scenario must not move the real player");
+ }
+ Check(SimCharacter.Failures.Count==0,$"{section} scripted role {role}: {string.Join(";",SimCharacter.Failures.Take(5))}");
+}
+Console.WriteLine("PASS: all eight player roles can follow the four supported sections without NPC control of the player.");
+foreach(var section in new[]{DsrP6Section.Breath1,DsrP6Section.Wings1,DsrP6Section.Wings2,DsrP6Section.Breath2})
+{
+ var s=new DsrP6DragonsScenario(section);s.UseSeed(7);var w=new SimWorld();
+ w.Party.Slots[2]=new SimPlayer{Role=2,Position=Vector3.Zero};SimCharacter.Failures.Clear();s.Run(w,0);
+ for(var frame=1;frame<=40*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;
+  w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
+ }
+ Check(s.State.Failed&&SimCharacter.Failures.Count>0,$"{section} stationary player must fail");
+}
+foreach(var section in new[]{DsrP6Section.Full,DsrP6Section.Wroth})
+{
+ var blocked=false;try{new DsrP6DragonsScenario(section).Run(new SimWorld(),0);}catch(InvalidOperationException){blocked=true;}
+ Check(blocked,"unverified Wroth/full timeline must not be runnable");
+}
+Console.WriteLine("PASS: incorrect player positioning fails; incomplete sections cannot run.");
+foreach(var acting in new[]{false,true})
+{
+ var s=new DsrP6DragonsScenario(DsrP6Section.Breath2);s.UseSeed(0);var w=new SimWorld();
+ var player=new SimPlayer{Role=2,Position=new(0,0,16)};w.Party.Slots[2]=player;
+ SimCharacter.Failures.Clear();s.Run(w,0);var sawThermal=false;
+ for(var frame=1;frame<=40*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;player.MoveTo(s.State.Destinations[2]);
+  player.IsActing=acting&&time>20.4f&&time<21;
+  w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
+  if(time>20.4f&&time<21)
+  {
+   sawThermal=true;Check(player.HasStatus(960)&&w.Party.Slots[3].HasStatus(3480),"native Pyretic and Deep Freeze states");
+  }
+  if(time>22.9f)Check(!player.HasStatus(960)&&!w.Party.Slots[3].HasStatus(3480),"dive clears thermal states");
+ }
+ Check(sawThermal&&s.State.Failed==acting,"Pyretic must punish actions only while active");
+}
+Console.WriteLine("PASS: native thermal conversion, action penalty and post-dive removal.");
+namespace AnoMech.Scenarios.Dsr.P6Dragons
+{
+ public sealed partial class DsrP6DragonsScenario
+ {
+  internal DsrP6DragonsState State=>state!;
+  internal void UseSeed(int seed)=>validationSeed=seed;
+ }
+}

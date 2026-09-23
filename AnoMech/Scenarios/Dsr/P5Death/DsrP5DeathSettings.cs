@@ -7,6 +7,8 @@ public sealed partial class DsrP5DeathScenario
     public void DrawSettings()
     {
         ImGui.TextUnformatted("tuuf／死宣北、無死宣南、PS 2-2");
+        ImGui.Combo("我的死宣分組",ref doomPreference,"隨機\0死宣組\0非死宣組\0");
+        ImGui.TextDisabled("開始或重置後生效。");
         ImGui.TextWrapped("以持錘騎士為北，MT ST H1 H2 D1 D2 D3 D4 由西向東排隊。死宣往北、無死宣往南，組內依左右順序散開。");
         var music=!Plugin.Config.SuppressBgm;
         if(ImGui.Checkbox("背景音樂：Heavensward",ref music)){Plugin.Config.SuppressBgm=!music;Plugin.Config.Save();}

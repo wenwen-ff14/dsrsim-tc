@@ -24,13 +24,19 @@ internal sealed class DsrP5DeathState
     public Vector3 LimitBreakOrigin, LimitBreakTarget;
     public string LimitBreakMessage="";
     public bool FormationVisible, Assigned, SpreadsResolved, SymbolsAssigned, Knocked, Failed, Complete;
-    public DsrP5DeathState(int seed)
+    public DsrP5DeathState(int seed,int playerRole=0,int doomPreference=0)
     {
         Random=new(seed);
         Rotation=Random.Next(4)*MathF.PI/2;
         EyeIndex=Random.Next(8);
         BossIndex=(EyeIndex+Random.Next(3,6))%8;
         var roles=Enumerable.Range(0,8).ToArray();Random.Shuffle(roles);
+        if(doomPreference is 1 or 2)
+        {
+            var index=Array.IndexOf(roles,playerRole);
+            var selected=doomPreference==1?0:4;
+            (roles[index],roles[selected])=(roles[selected],roles[index]);
+        }
         Dooms=roles.Take(4).Order().ToArray();Clean=roles.Skip(4).Order().ToArray();
     }
     public bool HasDoom(int role)=>Dooms.Contains(role);

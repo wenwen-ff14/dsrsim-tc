@@ -14,6 +14,7 @@ public sealed partial class DsrP5DeathScenario : IScenario
     private SimWorld? world;
     private DsrP5DeathState? state;
     private int? validationSeed=null;
+    private int doomPreference=0;
     private bool showHints=true,showMap=true,twistersActive,cleansesActive;
     private SimEnemy? boss,hammer,white,dark,spear,charibert,grinnaux;
     private readonly List<SimEnemy> actors=[];
@@ -24,7 +25,7 @@ public sealed partial class DsrP5DeathScenario : IScenario
     private static readonly ushort[] Statuses=[2976,769];
     public void Run(SimWorld simWorld,int? selectedAi)
     {
-        world=simWorld;state=new(validationSeed??Random.Shared.Next());
+        world=simWorld;state=new(validationSeed??Random.Shared.Next(),(int)world.Party.PlayerRole,doomPreference);
         actors.Clear();objects.Clear();chains.Clear();Array.Clear(doomExpires);
         twistersActive=cleansesActive=false;
         boss=Spawn(0x3143,3632,Vector3.Zero,true);

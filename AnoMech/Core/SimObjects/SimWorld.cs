@@ -121,6 +121,16 @@ public sealed class SimWorld : ISimObject, IDisposable
     public void EnforceArenaBoundary(float radius, string cause = "Walked out of arena")
         => children.Add(new SimArenaBoundary(Party, this, radius, cause, showVfx: !Map.IsInInstance));
 
+    public void EnforceSquareArenaBoundary(float halfWidth, string cause)
+    {
+        foreach (var fence in children.OfType<SimArenaBoundary>().ToArray())
+        {
+            fence.Despawn();
+            children.Remove(fence);
+        }
+        children.Add(new SimArenaBoundary(Party, this, halfWidth, cause, showVfx: false, square: true));
+    }
+
     // True when `local` (scenario-local) is outside the active arena fence; false
     // when the current scenario enforces no boundary.
     public bool IsOutsideArena(Vector3 local)

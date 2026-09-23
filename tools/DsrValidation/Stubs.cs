@@ -8,7 +8,7 @@ namespace AnoMech.Scenarios
 }
 namespace AnoMech.Scenarios.Dsr
 {
-    public static class DsrZone { public static IPhase P2 => null!; public static IPhase P3 => null!; public static IPhase P4 => null!; public static IPhase P5 => null!; }
+    public static class DsrZone { public static IPhase P2 => null!; public static IPhase P3 => null!; public static IPhase P4 => null!; public static IPhase P5 => null!; public static IPhase P6 => null!; }
 }
 namespace AnoMech.Core.Game.Ai
 {
@@ -81,7 +81,7 @@ namespace AnoMech.Core.SimObjects
     }
     public static class DeathExtensions { public static bool IsAlive(this SimCharacter? c) => c?.Active == true; }
     public class SimPartyNpc : SimCharacter { }
-    public class SimPlayer : SimCharacter { }
+    public class SimPlayer : SimCharacter { public bool IsActing {get;set;} }
     public class SimEnemy : SimCharacter
     {
         public readonly List<(float Time,ushort Id)> ActionTimelines=[];

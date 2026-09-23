@@ -45,5 +45,15 @@ public sealed class EventScheduler
         elapsed = 0f;
     }
 
+    public void SelectWindow(float start, float end)
+    {
+        if (!float.IsFinite(start) || start < 0) throw new ArgumentOutOfRangeException(nameof(start));
+        if (!float.IsFinite(end) || end < start) throw new ArgumentOutOfRangeException(nameof(end));
+        var origin = elapsed;
+        entries.RemoveAll(e => e.Time < origin + start || e.Time > origin + end);
+        for (var i = 0; i < entries.Count; i++)
+            entries[i] = entries[i] with { Time = entries[i].Time - start };
+    }
+
     private readonly record struct Entry(double Time, Action Action);
 }

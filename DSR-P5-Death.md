@@ -2,6 +2,8 @@
 
 第一版可在 P5 下獨立選擇「死刻」，從讀條開始練到八顆隕石出現，之後保留場地供自由 LB 練習。使用 P5 場地 Territory 968／Weather 46 與 BGM 925。尚未包含後續坦克連擊與托爾丹求饒。
 
+關卡設定可選「隨機／死宣組／非死宣組」，開始或重置後生效。指定只控制自己的分組，仍維持四名死宣與四名無死宣。
+
 ## 參考與範圍
 
 - [TUUF／Elemental 死刻](https://ffxiv.tuufless.com/elemental/dsr/05_alternate_thordan/#death-of-the-heavens)：反向 Komazou、死宣 2-2、兩端死宣誘導圓形、無死宣 X 左北右南、其餘同標記站對面。

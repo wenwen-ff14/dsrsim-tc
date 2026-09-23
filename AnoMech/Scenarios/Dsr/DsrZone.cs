@@ -14,6 +14,8 @@ public sealed class DsrZone : IZone
     public static readonly Phase P3 = new(Instance, "P3", 3, 922);
     public static readonly Phase P4 = new(Instance, "P4", 66, 923);
     public static readonly Phase P5 = new(Instance, "P5", 46, 925);
+    public static readonly Phase P6 = new(Instance, "P6-雙龍", 59, 926,
+        world=>world.EnforceSquareArenaBoundary(21,"超出雙龍方形場地邊界"));
     public string Name => "絕龍詩戰爭";
     public uint TerritoryId => 968;
     public Vector3 Origin => new(100, 0, 100);
