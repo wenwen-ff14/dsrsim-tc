@@ -11,6 +11,16 @@ public sealed partial class DsrP5WrathScenario
     private readonly List<SimEventObject> liquidObjects = [];
     private readonly List<(Vector3 Position,float At,bool Liquid)> groundHazards = [];
 
+    private void ApplyThunder()
+    {
+        foreach(var role in state!.Thunder)
+            if(world!.Party.Get(role) is {} target)
+            {
+                target.AddStatus(466,14.794f);
+                target.AddVfx("vfx/common/eff/dk05th_stdn0t.avfx",2f,false);
+            }
+    }
+
     private void LockMercy()
     {
         state!.MercyLocked = true;
@@ -60,9 +70,7 @@ public sealed partial class DsrP5WrathScenario
     {
         var target=world!.Party.Get(state!.Liquid);
         if(target==null) return;
-        var helper=Spawn(DsrConstants.Npc.Charibert,3642,target.Position,false);
-        helper?.Cast(27537,target.Position,0);
-        if(helper!=null) mercyHelpers.Add(helper);
+        whiteDragon?.Cast(27537,target.Position,0,target.GameObjectId);
         var obj=world.SpawnEventObject(new EventObjectSpawnConfig { EObjId=0x1EB684,Placement=new(target.Position,0),Lifetime=8 });
         if(obj!=null) liquidObjects.Add(obj);
         groundHazards.Add((target.Position,state.Time+1.1f,true));

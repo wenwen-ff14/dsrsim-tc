@@ -237,7 +237,7 @@ public sealed partial class DsrP3WyrmholeScenario : IScenario
             var direction = DsrP3WyrmholeState.AtRadius(target.Position - clone.Position, 1);
             var rotation = MathF.Atan2(direction.X, direction.Z);
             clone.HoldFacing(rotation);
-            clone.Cast(DsrP3WyrmholeConstants.Geirskogul, castSeconds: 4.2f, fireDelay: fireDelay);
+            clone.Cast(DsrP3WyrmholeConstants.Geirskogul, castSeconds: 4.2f, omenDelay: 3.2f, fireDelay: fireDelay);
             lines.Add((wave, clone.Position, direction));
         }
     }

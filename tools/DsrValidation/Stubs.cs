@@ -67,6 +67,8 @@ namespace AnoMech.Core.SimObjects
         public void AddStatus(ushort status, float duration) => statuses[status] = duration;
         public bool HasStatus(ushort status) => statuses.GetValueOrDefault(status) > 0;
         public void RemoveStatus(ushort status) => statuses.Remove(status);
+        public readonly List<(float Time,string Path)> Vfx = [];
+        public void AddVfx(string path,float duration=0,bool persistent=true) => Vfx.Add((Time,path));
         public readonly List<uint> LockonVfx = [];
         public readonly List<(uint Id, float Duration)> LockonDurations = [];
         public void AttachLockonVfx(uint id, float duration)
@@ -95,6 +97,7 @@ namespace AnoMech.Core.SimObjects
         public bool InEnemyList;
         public void SetVisibleInEnemyList(bool visible) => InEnemyList = visible;
         public readonly List<(float Time, uint Action, float? Duration, float FireDelay)> Casts = [];
+        public readonly List<(uint Action,float Delay)> Omens = [];
         public readonly List<uint> Dialogue = [];
         public void ShowDialogue(uint id, float duration) => Dialogue.Add(id);
         public void HoldFacing(float? rotation) { if (rotation.HasValue) SetRotation(rotation.Value); }
@@ -103,9 +106,10 @@ namespace AnoMech.Core.SimObjects
         public void SetWeaponsVisible(bool b) => WeaponsVisible = b;
         public bool Targetable;
         public void SetTargetable(bool b) => Targetable = b;
-        public bool Cast(uint action, Vector3? location = null, float? castSeconds = null, uint? targetId = null, float? fireDelay = null)
+        public bool Cast(uint action, Vector3? location = null, float? castSeconds = null, uint? targetId = null, float? fireDelay = null, float omenDelay = 0)
         {
             Casts.Add((Time, action, castSeconds, fireDelay ?? 0));
+            Omens.Add((action,omenDelay));
             return true;
         }
     }

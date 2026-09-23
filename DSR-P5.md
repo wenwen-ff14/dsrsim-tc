@@ -30,9 +30,11 @@ NPC 用每秒 6 公尺連續走位。白龍作為相對北，藍標西北、連�
 
 ## 場地、音樂與清理
 
-Territory 968、Weather 46 啟用 `obset_r1fz_bg_07` 的 f00 廢墟，替換先前錯用的 c00 騎士場景。音樂改用 BGM 315：`music/ex1/BGM_EX1_Event_Soten.scd`，替換 920 的 EX4 版本。
+Territory 968、Weather 46 啟用 `obset_r1fz_bg_07` 的 f00 廢墟。音樂使用 BGM **925**：`music/ex4/BGM_EX4_Event_27.scd`。曲目名稱依 [Orchestrion 曲目表](https://github.com/perchbirdd/OrchestrionPlugin/blob/main/Orchestrion/Data/xiv_bgm_en.csv) 核對為 P5 的 Heavensward，並驗證繁中客戶端檔案存在；先前的 315 與 920 實際都是 The Heavens' Ward（P1）。
 
-龍在登場時才建立，退場時 Despawn；不再預先生成隱藏龍，也不再僅隱藏退場的龍。機制結束會清除額外施法來源、旋風、地火及雷狀態。
+龍與對應騎士在同一事件登場，先排入登場動畫再顯示。白龍保留至五連蒼天火液施放完，五次都由白龍朝目標吐出，不再用目標腳下的隱藏騎士代放。退場時 Despawn，機制結束清除施法來源、旋風、地火及雷狀態。
+
+雷光鏈於 16.452 秒施放，17.452 秒才套用雷翼與雷擊特效，32.246 秒結算。月環讀條 4.7 秒，提示圈延後 4.2 秒才顯示，保留最後 0.5 秒提示。
 
 ## 驗證
 

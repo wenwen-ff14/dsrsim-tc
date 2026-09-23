@@ -87,7 +87,7 @@ public sealed partial class DsrP3WyrmholeScenario
         {
             if (tower == state!.TetherClone || finalDrakes[tower] is not { } clone) continue;
             var direction = new Vector3(MathF.Sin(clone.Rotation), 0, MathF.Cos(clone.Rotation));
-            clone.Cast(DsrP3WyrmholeConstants.Geirskogul, castSeconds: 4.2f, fireDelay: .272f);
+            clone.Cast(DsrP3WyrmholeConstants.Geirskogul, castSeconds: 4.2f, omenDelay: 3.2f, fireDelay: .272f);
             lines.Add((3, clone.Position, direction));
         }
     }

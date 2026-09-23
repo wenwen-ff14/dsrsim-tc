@@ -519,6 +519,15 @@ public sealed unsafe class SimEnemy : SimNpc
         cast.Tick(deltaSeconds);
         poseRetryRemaining = System.Math.Max(0, poseRetryRemaining - deltaSeconds);
         if (weaponDrawn) ReconcileBattlePose();
+        else if (desiredVisible && entranceTimeline != 0 && BattleCharaPtr != null &&
+                 BattleCharaPtr->IsReadyToDraw() && BattleCharaPtr->Timeline.TimelineSequencer.Parent != null)
+        {
+            PlayActionTimeline(entranceTimeline);
+            entranceTimeline = 0;
+            entranceRemaining = entranceDuration;
+            entrancePlaying = true;
+            entranceRevealRemaining = 1f / 30f;
+        }
         ReconcileVisibility();
         if (disableLookAt) ClearLookAt();
     }

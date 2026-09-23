@@ -44,31 +44,33 @@ public sealed partial class DsrP5WrathScenario : IScenario
         world.Events.Add(10.6f, () =>
         {
             boss?.SetVisible(false);
-            whiteDragon = Spawn(DsrP5WrathConstants.Vedrfolnir, 11314, state.WhiteDragon, true);
+            whiteDragon = Dragon(DsrP5WrathConstants.Vedrfolnir, 11314, state.WhiteDragon);
             foreach(var knight in chargeKnights) knight?.SetVisible(true);
             leapKnight?.SetVisible(true);
         });
         world.Events.Add(12.8f, Assign);
         world.Events.Add(12.876f, () => whiteDragon?.Cast(DsrP5WrathConstants.TwistingDive, state!.Rotate(new(0,0,24)), 5.7f, fireDelay:.289f));
-        world.Events.Add(16.452f, () =>
+        world.Events.Add(15.452f, () =>
         {
             grinnaux?.SetVisible(true);
             charibert?.SetVisible(true);
-            darkDragon = Spawn(DsrP5WrathConstants.Darkscale, 3983, state.Rotate(new(-24,0,0)), true);
-            vidofnir = Spawn(DsrP5WrathConstants.Vidofnir, 3984, state.Rotate(new(24,0,0)), true);
-            foreach(var role in state.Thunder) world.Party.Get(role)?.AddStatus(466,16.1f);
+            darkDragon = Dragon(DsrP5WrathConstants.Darkscale, 3983, state.Rotate(new(-24,0,0)));
+            vidofnir = Dragon(DsrP5WrathConstants.Vidofnir, 3984, state.Rotate(new(24,0,0)));
         });
+        world.Events.Add(16.452f, () =>
+        {
+            foreach(var role in state.Thunder)
+                if(world.Party.Get(role) is {} target) darkDragon?.Cast(27535,target.Position,0,target.GameObjectId);
+        });
+        world.Events.Add(17.452f, ApplyThunder);
         world.Events.Add(18.955f, ResolveCharges);
         world.Events.Add(19.05f, () => { state!.GreenAssigned=true; world.Party.Get(state.Green)?.AttachLockonVfx(20,7.02f); });
         world.Events.Add(20.2f, ShowTwisters);
         world.Events.Add(21f, () =>
         {
-            whiteDragon?.Despawn();
-            whiteDragon = null;
             foreach(var knight in chargeKnights) knight?.SetVisible(false);
             leapKnight?.SetVisible(false);
         });
-        world.Events.Add(22.2f, ClearTwisters);
         world.Events.Add(21.103f, () => { boss?.SetVisible(true); boss?.Cast(25546,castSeconds:3,fireDelay:.268f); });
         world.Events.Add(22.2f, ClearTwisters);
         world.Events.Add(24.371f, LockMercy);
@@ -78,12 +80,13 @@ public sealed partial class DsrP5WrathScenario : IScenario
         world.Events.Add(26.07f, LockDives);
         world.Events.Add(26.384f, DropLiquid);
         world.Events.Add(26.697f, DropAltar);
-        world.Events.Add(27.279f, () => grinnaux?.Cast(25306,castSeconds:4.7f,fireDelay:.267f));
+        world.Events.Add(27.279f, () => grinnaux?.Cast(25306,castSeconds:4.7f,omenDelay:4.2f,fireDelay:.267f));
         world.Events.Add(27.548f, DropLiquid);
         world.Events.Add(28.219f, DropAltar);
         world.Events.Add(28.711f, DropLiquid);
         world.Events.Add(29.74f, DropAltar);
         world.Events.Add(29.874f, DropLiquid);
+        world.Events.Add(31.2f, () => { whiteDragon?.Despawn(); whiteDragon=null; });
         world.Events.Add(32.066f, ResolveDives);
         world.Events.Add(32.246f, ResolveFinale);
         world.Events.Add(33.363f, () => { boss?.SetTargetable(true); boss?.Cast(25542,castSeconds:5.7f,fireDelay:.291f); });
@@ -100,6 +103,13 @@ public sealed partial class DsrP5WrathScenario : IScenario
         var knight = Spawn(npc,DsrConstants.NameId(npc),position,false);
         knight?.QueueEntrance(DsrConstants.Timeline.KnightEntrance, .65f);
         return knight;
+    }
+    private SimEnemy? Dragon(uint npc, uint name, Vector3 position)
+    {
+        var dragon=Spawn(npc,name,position,false);
+        dragon?.QueueEntrance(DsrConstants.Timeline.KnightEntrance,.65f);
+        dragon?.SetVisible(true);
+        return dragon;
     }
     private void Assign()
     {

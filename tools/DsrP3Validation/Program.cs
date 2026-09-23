@@ -42,6 +42,7 @@ for (var seed = 0; seed < 300; seed++)
     Check(world.Events.IsEmpty && scenario.State.Complete, "scenario completes");
     Check(scenario.State.TethersResolved && scenario.State.TetherOwners.SequenceEqual(new[] { 0, 1 }), "MT takes boss tether and ST takes clone tether");
     var mainBoss = world.Enemies.Single(e => e.BNpcBaseId == DsrP3WyrmholeConstants.Nidhogg);
+    Check(world.Enemies.SelectMany(e=>e.Omens).Where(o=>o.Action==DsrP3WyrmholeConstants.Geirskogul).All(o=>o.Delay==3.2f),"Geirskogul omen only in last second");
     Check(mainBoss.Casts.Count(c => c.Action == DsrP3WyrmholeConstants.AutoAttack && c.Time > 71.617f) == 5, "five autos after tethers");
     Check(MathF.Abs(MathF.IEEERemainder(scenario.State.LanceRotation, MathF.Tau)) < .001f, "final lance faces C/south");
     Check(world.Enemies.Where(e => e.BNpcBaseId == DsrP3WyrmholeConstants.Drake).All(e => e.ListMode == EnemyListMode.Manual && !e.InEnemyList), "clone enemy list lifecycle");

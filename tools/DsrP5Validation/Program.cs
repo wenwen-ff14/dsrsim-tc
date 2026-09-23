@@ -10,6 +10,7 @@ for(var seed=0;seed<100;seed++)
     for(var f=1;f<=40*fps;f++)
     {
         SimCharacter.Time=f/(float)fps;
+        if(SimCharacter.Time<17.4f) Check(world.Party.Slots.All(m=>!m.HasStatus(466)),"early thunder status");
         var before=world.Party.Slots.Select(m=>m.Position).ToArray();
         world.Events.Tick(1f/fps);
         foreach(var m in world.Party.Slots)m.Advance(1f/fps);
@@ -18,6 +19,12 @@ for(var seed=0;seed<100;seed++)
     }
     if(SimCharacter.Failures.Count>0) Console.WriteLine($"roles blue={scenario.State.Blue} green={scenario.State.Green} liquid={scenario.State.Liquid} altar={scenario.State.Altar} north={scenario.State.GrinnauxNorth} first={string.Join(";",SimCharacter.Failures.Take(8))}");
     Check(SimCharacter.Failures.Count==0,$"seed {seed}, fps {fps}: {string.Join(";",SimCharacter.Failures.Select(f=>f[(f.IndexOf("role"))..]).Distinct())}");
+    var dragon=world.Enemies.Single(e=>e.BNpcBaseId==DsrP5WrathConstants.Vedrfolnir);
+    Check(dragon.Casts.Count(c=>c.Action==27537)==5,"white dragon must cast all five Liquid Heaven attacks");
+    Check(world.Enemies.Where(e=>e!=dragon).All(e=>e.Casts.All(c=>c.Action!=27537)),"wrong Liquid Heaven source");
+    Check(world.Enemies.Where(e=>e.BNpcBaseId is DsrP5WrathConstants.Vedrfolnir or DsrP5WrathConstants.Darkscale or DsrP5WrathConstants.Vidofnir).All(e=>e.Entrances.Count==1),"dragon entrance missing");
+    Check(world.Enemies.SelectMany(e=>e.Omens).Any(o=>o.Action==25306 && o.Delay==4.2f),"moon omen timing");
+    Check(world.Party.Slots.Sum(m=>m.Vfx.Count(v=>v.Time>=17.452f && v.Path.Contains("dk05th")))==2,"thunder VFX timing");
     Check(scenario.State.Complete&&world.Events.IsEmpty,"incomplete");
     Check(world.EventObjects.Count==13&&world.EventObjects.All(e=>!e.Active),"twister cleanup");
     Check(world.Enemies.All(e=>!e.Active&&e.NameId!=0),"named actor cleanup");
