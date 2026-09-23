@@ -99,6 +99,8 @@ namespace AnoMech.Core.SimObjects
     public class SimPlayer : SimCharacter { public bool IsActing {get;set;} }
     public class SimEnemy : SimCharacter
     {
+        public int EnmityTank;
+        public void SetTankEnmity(SimParty party,int mainTank)=>EnmityTank=mainTank;
         public readonly List<(float Time,ushort Id)> ActionTimelines=[];
         public void PlayActionTimeline(ushort id,ushort loopId=0,ushort baseOverride=0)=>ActionTimelines.Add((Time,id));
         public float Scale = 1;
@@ -115,6 +117,7 @@ namespace AnoMech.Core.SimObjects
         public void SetVisibleInEnemyList(bool visible) => InEnemyList = visible;
         public readonly List<(float Time, uint Action, float? Duration, float FireDelay)> Casts = [];
         public readonly List<(uint Action,float Delay)> Omens = [];
+        public readonly List<(uint Action,uint? Target)> CastTargets = [];
         public readonly List<uint> Dialogue = [];
         public void ShowDialogue(uint id, float duration) => Dialogue.Add(id);
         public void HoldFacing(float? rotation) { if (rotation.HasValue) SetRotation(rotation.Value); }
@@ -129,6 +132,7 @@ namespace AnoMech.Core.SimObjects
         {
             Casts.Add((Time, action, castSeconds, fireDelay ?? 0));
             Omens.Add((action,omenDelay));
+            CastTargets.Add((action,targetId));
             return true;
         }
     }

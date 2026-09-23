@@ -23,6 +23,8 @@ internal sealed class DsrP7DragonKingState
         Random=new(seed);
         Array.Fill(LastDestinations,new Vector3(float.NaN));
         SetTrinity(4);
+        Destinations[0]=new(0,0,-10);
+        Destinations[1]=new(7,0,-7);
     }
     public Vector3 Relative(Vector3 p)=>Rotate(p,MechanicFacing-MathF.PI);
     public static Vector3 Rotate(Vector3 p,float angle)=>new(p.X*MathF.Cos(angle)+p.Z*MathF.Sin(angle),0,p.Z*MathF.Cos(angle)-p.X*MathF.Sin(angle));
@@ -41,8 +43,8 @@ internal sealed class DsrP7DragonKingState
     }
     public void SetTankPositions()
     {
-        Destinations[MainTank]=Relative(new(0,0,-10));
-        Destinations[1-MainTank]=Relative(new(7,0,-7));
+        Destinations[0]=Relative(new(-7,0,0));
+        Destinations[1]=Relative(new(7,0,0));
     }
     public void SetTowerPositions(bool inner)
     {

@@ -55,6 +55,19 @@ public sealed unsafe class SimEnemy : SimNpc
     // Cast bar, action-effect release, omen telegraph, and animation lock live in
     // SimCast. SimEnemy just converts target coords to world space and reads IsBusy.
     private readonly SimCast cast;
+    internal readonly (SimCharacter? Member, int Rank, int Percent)[] Enmity = new (SimCharacter?, int, int)[8];
+    internal bool HasEnmity { get; private set; }
+
+    public void SetTankEnmity(SimParty party, int mainTank)
+    {
+        HasEnmity = true;
+        for (var role = 0; role < 8; role++)
+        {
+            var member = party.Get(role);
+            var rank = role == mainTank ? 1 : role < 2 ? 2 : role + 1;
+            Enmity[role] = member.IsAlive() ? (member, rank, rank == 1 ? 100 : rank == 2 ? 80 : 50 - rank * 5) : (null, 0, 0);
+        }
+    }
 
     // Model and weapon loads finish asynchronously; reapply the scenario's visibility
     // after native casts and weapon initialization, including on the first draw.

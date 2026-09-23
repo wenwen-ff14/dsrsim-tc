@@ -20,6 +20,7 @@ public sealed class SimWorld : ISimObject, IDisposable
     // Ownership
     private readonly List<ISimObject> children = new();
     private readonly EnmityHud enmityHud = new();
+    private readonly SimEnmityHud simEnmityHud = new();
     private readonly PartyHud partyHud = new();
     private readonly Waymarks waymarks;
 
@@ -175,6 +176,7 @@ public sealed class SimWorld : ISimObject, IDisposable
     {
         Map.Tick();
         children.Update(deltaSeconds);
+        simEnmityHud.Refresh(children.OfType<SimEnemy>());
         enmityHud.Refresh(children.OfType<SimEnemy>(), deltaSeconds);
         partyHud.Refresh(Party);
     }
@@ -185,6 +187,7 @@ public sealed class SimWorld : ISimObject, IDisposable
         children.Despawn();
         Party = SimParty.Empty;
         enmityHud.Clear();
+        simEnmityHud.Clear();
         partyHud.Clear();
         Markings.ClearAll();
         waymarks.ClearAll();
@@ -196,6 +199,7 @@ public sealed class SimWorld : ISimObject, IDisposable
     {
         Despawn();
         enmityHud.Dispose();
+        simEnmityHud.Dispose();
         Map.Dispose();
     }
 }

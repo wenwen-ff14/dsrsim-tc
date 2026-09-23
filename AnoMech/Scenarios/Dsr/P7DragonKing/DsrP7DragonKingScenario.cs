@@ -219,7 +219,7 @@ public sealed partial class DsrP7DragonKingScenario : IScenario
             state.ExaflareRotations[i]=state.Random.Next(8)*MathF.PI/4+state.MechanicFacing-MathF.PI;
             exaflares[i]?.SetPosition(state.Exaflares[i]);
             exaflares[i]?.HoldFacing(state.ExaflareRotations[i]);
-            exaflares[i]?.Cast(28060,castSeconds:6.6f,fireDelay:fireDelay);
+            exaflares[i]?.Cast(28060,castSeconds:6.6f,fireDelay:fireDelay,targetId:exaflares[i]!.GameObjectId);
         }
         state!.SetAll(state.Relative(new(0,0,state.Fire?15:1.5f)));
         state.Hint+=" 百京火光：第一下後進後方亮點，第二下後再向後退。";
@@ -283,7 +283,7 @@ public sealed partial class DsrP7DragonKingScenario : IScenario
         {
             state.Gigaflares[i]=DsrP7DragonKingState.Radial(start+direction*i*2*MathF.PI/3,14);
             gigaflares[i]?.SetPosition(state.Gigaflares[i]);
-            gigaflares[i]?.Cast(actions[i],castSeconds:8.7f+4*i,fireDelay:delays[i]);
+            gigaflares[i]?.Cast(actions[i],castSeconds:8.7f+4*i,fireDelay:delays[i],omenDelay:2*i);
         }
         state.SetAll(-Vector3.Normalize(state.Gigaflares[0])*(state.Fire?10:7));
         state.Hint+=" 十億火光：遠離第一個光柱，依序往已爆炸側繞。";
@@ -364,6 +364,7 @@ public sealed partial class DsrP7DragonKingScenario : IScenario
         else return false;
         if(state.FaceTank)state.SetTankPositions();
         boss?.SetTarget(world.Party.Get(state.MainTank),false);
+        boss?.SetTankEnmity(world.Party,state.MainTank);
         return true;
     }
     private void BeginEnrage()
@@ -422,6 +423,7 @@ public sealed partial class DsrP7DragonKingScenario : IScenario
         if(state==null||world==null||state.Complete)return;
         state.Time=elapsed;state.ExpireStatuses();
         boss?.SetTarget(world.Party.Get(state.MainTank),false);
+        boss?.SetTankEnmity(world.Party,state.MainTank);
         if(state.FaceTank&&world.Party.Get(state.MainTank) is {} tank)
         {
             var target=MathF.Atan2(tank.Position.X,tank.Position.Z);

@@ -22,6 +22,11 @@ for(var sword=0;sword<3;sword++)
     Check(scenario.State.Complete&&scenario.State.TrinityHits==16&&world.Events.IsEmpty,"full timeline completion");
     Check(scenario.State.Sacrificed.Count(x=>x)==6&&world.Enemies.All(e=>!e.Active),"enrage sacrifice and cleanup");
     Check(world.Enemies.Count==20,"bounded native actor count");
+    var casts=world.Enemies.SelectMany(e=>e.CastTargets).Where(c=>c.Action==28060).ToArray();
+    Check(casts.Length==9&&casts.All(c=>c.Target.HasValue),"initial Exaflares deliver native effects to a registered actor");
+    var omens=world.Enemies.SelectMany(e=>e.Omens).ToArray();
+    foreach(var (action,delay) in new[]{(28058u,0f),(28114u,2f),(28115u,4f)})
+        Check(omens.Count(o=>o.Action==action&&o.Delay==delay)==2,"Gigaflare hints appear sequentially in both sets");
 }
 Console.WriteLine("PASS: 32 seeds × 3 sword modes × 30/60/144 FPS; walking NPCs, all mechanics, 16 Trinity hits, sacrifices and cleanup.");
 for(var role=0;role<8;role++)
@@ -93,8 +98,10 @@ Console.WriteLine("PASS: all 512 three-way Exaflare orientations with both sword
     foreach(var enemy in world.Enemies)enemy.Role=100+world.Enemies.IndexOf(enemy);
     Check(!scenario.OnTankAction(7537,world.Enemies[0].GameObjectId)&&scenario.State.MainTank==0,"Shirk boss rejected");
     Check(scenario.OnTankAction(7537,1)&&scenario.State.MainTank==1,"Shirk co-tank transfers first aggro");
-    Check(scenario.State.Destinations[1]==new Vector3(0,0,-10)&&scenario.State.Destinations[0]==new Vector3(7,0,-7),"tank destinations follow aggro swap");
+    Check(scenario.State.Destinations[0]==new Vector3(-7,0,0)&&scenario.State.Destinations[1]==new Vector3(7,0,0),"tank destinations remain role-fixed after swap");
+    Check(world.Enemies[0].EnmityTank==1,"Shirk updates enemy enmity");
     Check(scenario.OnTankAction(7533,world.Enemies[0].GameObjectId)&&scenario.State.MainTank==0,"Provoke retakes first aggro");
+    Check(world.Enemies[0].EnmityTank==0,"Provoke updates enemy enmity");
     scenario.State.Complete=true;Check(!scenario.OnTankAction(7533,world.Enemies[0].GameObjectId),"completed scenario ignores actions");
 }
 Console.WriteLine("PASS: Shirk target validation, Provoke retake, tank repositioning and completion guard.");
