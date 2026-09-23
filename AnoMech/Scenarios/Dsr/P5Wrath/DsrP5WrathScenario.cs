@@ -19,11 +19,12 @@ public sealed partial class DsrP5WrathScenario : IScenario
     private readonly List<SimEventObject> twisterObjects = [];
     private bool fixedSeed, showHints = true, showMap = true;
     private int seed = 1;
+    private int practiceTarget;
 
     public void Run(SimWorld simWorld, int? selectedAi)
     {
         world = simWorld;
-        state = new(fixedSeed ? seed : Random.Shared.Next());
+        state = new(fixedSeed ? seed : Random.Shared.Next(), (int)world.Party.PlayerRole, practiceTarget);
         twisterObjects.Clear();
         mercyHelpers.Clear();
         liquidObjects.Clear();

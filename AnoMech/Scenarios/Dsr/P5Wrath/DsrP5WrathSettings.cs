@@ -13,6 +13,8 @@ public sealed partial class DsrP5WrathScenario
         ImGui.Checkbox("顯示站位提示",ref showHints);
         ImGui.SameLine();
         ImGui.Checkbox("顯示戰術圖",ref showMap);
+        ImGui.Combo("我的練習點名",ref practiceTarget,"隨機\0藍標跳躍\0交叉連線一\0交叉連線二\0綠標引導龍衝\0白龍五連吐火\0聖壇火光\0雷光鏈\0全程無點名\0");
+        ImGui.TextWrapped("指定自己的練習點名；其他可共存點名仍隨機分配。開始或重置後生效。");
         ImGui.Checkbox("固定隨機種子",ref fixedSeed);
         if(fixedSeed) ImGui.InputInt("種子",ref seed);
         if(state==null || world==null) return;

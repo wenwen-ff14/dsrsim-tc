@@ -3,9 +3,9 @@ using AnoMech.Core.SimObjects;
 using AnoMech.Scenarios.Dsr.P5Wrath;
 void Check(bool condition,string message){if(!condition){Console.WriteLine(message);Environment.Exit(1);}}
 foreach(var fps in new[]{30,60,144})
-for(var seed=0;seed<100;seed++)
+for(var seed=0;seed<180;seed++)
 {
-    var scenario=new DsrP5WrathScenario(); scenario.UseSeed(seed);
+    var scenario=new DsrP5WrathScenario(); scenario.UseSeed(seed); scenario.UsePracticeTarget(seed / 20);
     var world=new SimWorld(); SimCharacter.Failures.Clear(); scenario.Run(world,0);
     for(var f=1;f<=40*fps;f++)
     {
@@ -41,7 +41,7 @@ for(var seed=0;seed<100;seed++)
     Check(world.EventObjects.Count==13&&world.EventObjects.All(e=>!e.Active),"twister cleanup");
     Check(world.Enemies.All(e=>!e.Active&&e.NameId!=0),"named actor cleanup");
 }
-Console.WriteLine("PASS: 100 seeds at 30/60/144 FPS; rotating cardinal layouts, cross-tethers, blue spread, white dragon line, twister dodge, continuous NPC movement and cleanup.");
+Console.WriteLine("PASS: 180 seeds across all 9 target selections at 30/60/144 FPS; rotating cardinal layouts, cross-tethers, blue spread, white dragon line, twister dodge, continuous NPC movement and cleanup.");
 for(var role=0;role<8;role++)
 {
     var s=new DsrP5WrathScenario();s.UseSeed(role);var w=new SimWorld();w.Party.Slots[role]=new SimPlayer{Role=role,Position=new(0,0,16)};SimCharacter.Failures.Clear();s.Run(w,0);
@@ -106,11 +106,31 @@ Console.WriteLine("PASS: full Wrath at 3 frame rates; all followup failure check
     Check(SimCharacter.Failures.Any(f=>f.Contains("蒼天火液")),"standing in active liquid must fail");
 }
 Console.WriteLine("PASS: log cast intervals, delayed landing, vulnerability refresh/expiry and ground activation grace.");
+for(var selection=0;selection<9;selection++)
+for(var role=0;role<8;role++)
+for(var seed=0;seed<100;seed++)
+{
+    var s=new DsrP5WrathState(seed,role,selection);
+    Check(selection switch
+    {
+        0=>true,1=>s.Blue==role,2=>s.TetherRoles[0]==role,3=>s.TetherRoles[1]==role,
+        4=>s.Green==role,5=>s.Liquid==role,6=>s.Altar==role,7=>s.Thunder.Contains(role),
+        8=>s.Blue!=role&&!s.TetherRoles.Contains(role)&&s.Green!=role&&s.Liquid!=role&&s.Altar!=role&&!s.Thunder.Contains(role),
+        _=>false
+    },"requested player assignment missing");
+    Check(new[]{s.Blue}.Concat(s.TetherRoles).Concat(s.EastRoles).Distinct().Count()==8,"duplicate initial role");
+    Check(s.EastRoles.Contains(s.Green)&&s.EastRoles.Contains(s.Liquid)&&s.Green!=s.Liquid,"invalid east assignments");
+    Check(!s.Thunder.Contains(s.Liquid)&&!s.Thunder.Contains(s.Altar),"incompatible thunder assignment");
+    var repeated=new DsrP5WrathState(seed,role,selection);
+    Check(s.Blue==repeated.Blue&&s.Green==repeated.Green&&s.Liquid==repeated.Liquid&&s.Thunder.SequenceEqual(repeated.Thunder),"seed must reproduce target assignments");
+}
+Console.WriteLine("PASS: all target selections for all 8 player roles, valid combinations and repeatable seeds.");
 namespace AnoMech.Scenarios.Dsr.P5Wrath
 {
     public sealed partial class DsrP5WrathScenario
     {
         internal DsrP5WrathState State=>state!;
         internal void UseSeed(int value){fixedSeed=true;seed=value;}
+        internal void UsePracticeTarget(int value){practiceTarget=value;}
     }
 }
