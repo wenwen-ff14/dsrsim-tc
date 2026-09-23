@@ -85,6 +85,8 @@ public sealed partial class DsrP6DragonsScenario
     private void BeginStacks()
     {
         state!.SetStacks();
+        world!.Party.Get(2)?.AttachLockonVfx(62,8.186f);
+        world.Party.Get(3)?.AttachLockonVfx(62,8.186f);
         nidhogg?.Cast(27971,castSeconds:7.7f,fireDelay:.262f);
         hraesvelgr?.Cast(27969,castSeconds:7.7f,fireDelay:.262f);
     }
@@ -93,7 +95,7 @@ public sealed partial class DsrP6DragonsScenario
         for(var r=2;r<=3;r++)
         {
             var target=world!.Party.Get(r)!;
-            Effect(r==2?27972u:27970u,r==2?DsrP6DragonsState.Nidhogg:DsrP6DragonsState.Hraesvelgr,target.Position,target);
+            (r==2?nidhogg:hraesvelgr)?.Cast(r==2?27972u:27970u,target.Position,0,targetId:target.GameObjectId);
             var members=world.Party.ActiveMembers().Where(m=>Vector3.Distance(m.Position,target.Position)<=4).ToArray();
             if(members.Length!=4)foreach(var member in members)Hit(member,"無盡輪迴：需要四人分攤");
         }
@@ -101,7 +103,7 @@ public sealed partial class DsrP6DragonsScenario
     private void PrepareWings(bool second)
     {
         RestoreDragons();state!.SetWings(second);
-        if(!second){nidhogg?.SetPosition(new Vector3(11,0,-34));nidhogg?.HoldFacing(0);}
+        if(!second){nidhogg?.SetTargetable(false);nidhogg?.SetPosition(new Vector3(11,0,-34));nidhogg?.HoldFacing(0);}
     }
     private void ResolveWings(bool second)
     {
@@ -111,9 +113,9 @@ public sealed partial class DsrP6DragonsScenario
             plumeTargets[i]=targets[i].Position;
             plumeRoles[i]=Enumerable.Range(0,8).First(r=>world.Party.Get(r)==targets[i]);
         }
-        Effect(second?27944u:27941u,new(22,0,second?11:-11),new(-30,0,second?11:-11));
+        Effect(second?27944u:27941u,new(22,0,second?-11:11),new(-30,0,second?-11:11));
         foreach(var member in world.Party.ActiveMembers())
-            if(second?member.Position.Z>=0:member.Position.Z<=0)Hit(member,"神聖之翼：前往未發光翅膀側");
+            if(second?member.Position.Z<=0:member.Position.Z>=0)Hit(member,"神聖之翼：前往未發光翅膀側");
         for(var i=0;i<targets.Length;i++)
         {
             Effect(27945,DsrP6DragonsState.Hraesvelgr,plumeTargets[i],targets[i]);
@@ -135,7 +137,7 @@ public sealed partial class DsrP6DragonsScenario
     {
         state!.VowOwner=role;
         world!.Party.Get(role)?.AddStatus(2896,remaining);
-        if(section==DsrP6Section.Full||section==DsrP6Section.Breath1)
+        if(startAt==0)
         {
             Effect(27952,DsrP6DragonsState.Nidhogg,world.Party.Get(role)!.Position,world.Party.Get(role));
             foreach(var member in world.Party.ActiveMembers())
@@ -156,6 +158,7 @@ public sealed partial class DsrP6DragonsScenario
     }
     private void PrepareDoubleDive()
     {
+        nidhogg?.SetTargetable(false);hraesvelgr?.SetTargetable(false);
         nidhogg?.SetPosition(new Vector3(-10,0,-34));nidhogg?.HoldFacing(0);
         hraesvelgr?.SetPosition(new Vector3(10,0,-34));hraesvelgr?.HoldFacing(0);
         state!.SetDoubleDive();
@@ -202,22 +205,22 @@ public sealed partial class DsrP6DragonsScenario
     }
     private void PrepareWroth()
     {
-        state!.Hint="十字火資料核對中。";
+        state!.Hint="十字火：西南集合，死亡輪迴每次命中後一起移動，依序躲三組十字爆。";
+        ClearFireballs();
+        hraesvelgr?.SetTargetable(false);
         hraesvelgr?.SetPosition(new Vector3(11,0,-34));hraesvelgr?.HoldFacing(0);
-        for(var r=0;r<8;r++)state.Destinations[r]=new(-18,0,16);
-        for(var i=0;i<6;i++)world!.Party.Get(state.Flames[i])?.AddStatus(i<4?(ushort)2758:(ushort)2759,28.212f);
-        state.FlamesAssigned=true;
+        for(var r=0;r<8;r++)state.Destinations[r]=new(-19,0,13);
     }
     private void ResolveAkhMorn(int hit)
     {
-        var target=world!.Party.Get(1)!;var position=target.Position;
+        var target=world!.Party.Get(state!.AkhMornTarget)!;var position=target.Position;
         if(hit>0)nidhogg?.Cast(27975,position,0,targetId:target.GameObjectId);
         foreach(var member in world.Party.ActiveMembers())
             if(Vector3.Distance(member.Position,position)>6)Hit(member,"死亡輪迴：八人集合分攤");
         var puddle=world.SpawnEventObject(new EventObjectSpawnConfig{EObjId=0x1EB683,Placement=new(position,0)});
         if(puddle!=null)puddles.Add(puddle);
         puddleHits.Add((position,state!.Time+1.5f));
-        for(var r=0;r<8;r++)state.Destinations[r]=hit switch{0=>new(-10,0,16),1=>new(-2,0,16),2=>new(-2,0,8),_=>Vector3.Zero};
+        for(var r=0;r<8;r++)state.Destinations[r]=hit switch{0=>new(-12,0,13),1=>new(-12,0,6.5f),2=>new(-5,0,6.5f),_=>new(-5,0,0)};
     }
     private void ResolveHot(bool wings)
     {

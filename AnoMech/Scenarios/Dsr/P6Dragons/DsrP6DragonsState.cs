@@ -17,6 +17,7 @@ internal sealed class DsrP6DragonsState
     public DsrP6Glow SecondGlow;
     public readonly int[] Flames;
     public readonly int FirstVow;
+    public readonly int AkhMornTarget;
     public int VowOwner=-1;
     public bool Complete, Failed, SecondBreath, FlamesAssigned, ThermalActive;
     public float Time;
@@ -29,6 +30,7 @@ internal sealed class DsrP6DragonsState
         var breathRoles=Enumerable.Range(2,6).ToArray();random.Shuffle(breathRoles);
         foreach(var role in breathRoles.Take(3))SecondFire[role]=true;
         SecondGlow=(DsrP6Glow)random.Next(3);
+        AkhMornTarget=random.Next(8);
         SetIdle();
     }
     public void SetIdle()
@@ -42,7 +44,7 @@ internal sealed class DsrP6DragonsState
         if(!second)
         {
             int[][] pairs=[[2,4],[3,5],[7,6]];
-            Vector3[] anchors=[new(-8,0,9),new(8,0,9),new(0,0,-8)];
+            Vector3[] anchors=[new(-6,0,18),new(6,0,18),new(0,0,8)];
             for(var i=0;i<3;i++)
             {
                 Fire[pairs[i][0]]=true;Fire[pairs[i][1]]=false;
@@ -78,27 +80,27 @@ internal sealed class DsrP6DragonsState
     {
         if(!second)
         {
-            Destinations[0]=new(-18,0,18);Destinations[1]=new(-18,0,5);
-            for(var r=2;r<8;r++)Destinations[r]=new(-2,0,9);
+            Destinations[0]=new(-18,0,-18);Destinations[1]=new(-18,0,-5);
+            for(var r=2;r<8;r++)Destinations[r]=new(-2,0,-9);
         }
         else
         {
-            Destinations[0]=new(-18,0,-6);Destinations[1]=new(-4,0,-6);
-            for(var r=2;r<8;r++)Destinations[r]=new(15,0,-6);
+            Destinations[0]=new(-18,0,6);Destinations[1]=new(-4,0,6);
+            for(var r=2;r<8;r++)Destinations[r]=new(15,0,6);
         }
-        Hint=second?"第二次坦死刑：躲南半場與燃燒之翼；雙坦保持最遠並彼此拉開。":"第一次坦死刑：躲北半場與東半場俯衝；雙坦保持最遠並彼此拉開。";
+        Hint=second?"第二次坦死刑：躲北半場與燃燒之翼；雙坦保持最遠並彼此拉開。":"第一次坦死刑：躲南半場與東半場俯衝；雙坦保持最遠並彼此拉開。";
     }
-    public void SetVowPass(int receiver)
+    public void SetVowPass(int receiver,bool preserveOthers=false)
     {
-        SetIdle();
+        if(!preserveOthers)SetIdle();
         if(VowOwner>=0)Destinations[VowOwner]=Vector3.Zero;
         Destinations[receiver]=Vector3.Zero;
         Hint="滅殺的誓言：持有者與接毒者在場中重疊，其餘人遠離。";
     }
     public void SetFlames()
     {
-        for(var i=0;i<4;i++)Destinations[Flames[i]]=new(-18+i*6,0,10);
-        for(var i=4;i<8;i++)Destinations[Flames[i]]=new(i%2==0?9:18,0,10);
+        for(var i=0;i<4;i++)Destinations[Flames[i]]=new(-18+i*6,0,-10);
+        for(var i=4;i<8;i++)Destinations[Flames[i]]=new(i%2==0?9:18,0,-10);
         Hint="燃燒之尾：離開中央橫線；黑色散開往西，白色與無標各二人分攤往東。";
     }
     public void SetDoubleDive()

@@ -20,11 +20,11 @@ for(var role=0;role<8;role++)for(var preference=1;preference<=2;preference++)for
  Check(s.Dooms.Length==4&&s.Clean.Length==4&&s.Dooms.Concat(s.Clean).Distinct().Count()==8,"doom partition");
 }
 Console.WriteLine("PASS: all eight roles, both doom preferences, 100 seeds preserve four/four grouping.");
-foreach(var section in new[]{DsrP6Section.Breath1,DsrP6Section.Wings1,DsrP6Section.Wings2,DsrP6Section.Breath2})
+foreach(var section in new[]{DsrP6Section.Breath1,DsrP6Section.Wings1,DsrP6Section.Wings2,DsrP6Section.Breath2,DsrP6Section.Wroth,DsrP6Section.Full})
 foreach(var fps in new[]{30,60,144})for(var seed=0;seed<20;seed++)
 {
  var s=new DsrP6DragonsScenario(section);s.UseSeed(seed);var w=new SimWorld();SimCharacter.Failures.Clear();s.Run(w,0);
- for(var frame=1;frame<=40*fps;frame++)
+ for(var frame=1;frame<=180*fps;frame++)
  {
   var time=frame/(float)fps;SimCharacter.Time=time;var before=w.Party.Slots.Select(m=>m.Position).ToArray();
   w.Events.Tick(1f/fps);foreach(var member in w.Party.Slots)member.Advance(1f/fps);s.Tick(1f/fps,time);
@@ -33,14 +33,14 @@ foreach(var fps in new[]{30,60,144})for(var seed=0;seed<20;seed++)
  Check(SimCharacter.Failures.Count==0,$"{section} {seed} {fps}: {string.Join(";",SimCharacter.Failures.Take(8))}");
  Check(s.State.Complete&&w.Events.IsEmpty&&w.Enemies.All(e=>!e.Active),"completion and actor cleanup");
 }
-Console.WriteLine("PASS: four P6 sections, 20 seeds at 30/60/144 FPS, walking NPCs, mechanic outcomes and cleanup.");
-foreach(var section in new[]{DsrP6Section.Breath1,DsrP6Section.Wings1,DsrP6Section.Wings2,DsrP6Section.Breath2})
+Console.WriteLine("PASS: all five P6 sections and full sequence, 20 seeds at 30/60/144 FPS, walking NPCs, outcomes and cleanup.");
+foreach(var section in new[]{DsrP6Section.Breath1,DsrP6Section.Wings1,DsrP6Section.Wings2,DsrP6Section.Breath2,DsrP6Section.Wroth,DsrP6Section.Full})
 for(var role=0;role<8;role++)
 {
  var s=new DsrP6DragonsScenario(section);s.UseSeed(role*11);var w=new SimWorld();
  w.Party.Slots[role]=new SimPlayer{Role=role,Position=new(0,0,16)};
  SimCharacter.Failures.Clear();s.Run(w,0);
- for(var frame=1;frame<=40*60;frame++)
+ for(var frame=1;frame<=180*60;frame++)
  {
   var time=frame/60f;SimCharacter.Time=time;var player=w.Party.Slots[role];
   player.MoveTo(s.State.Destinations[role]);var commands=player.MoveCommands;
@@ -49,24 +49,18 @@ for(var role=0;role<8;role++)
  }
  Check(SimCharacter.Failures.Count==0,$"{section} scripted role {role}: {string.Join(";",SimCharacter.Failures.Take(5))}");
 }
-Console.WriteLine("PASS: all eight player roles can follow the four supported sections without NPC control of the player.");
-foreach(var section in new[]{DsrP6Section.Breath1,DsrP6Section.Wings1,DsrP6Section.Wings2,DsrP6Section.Breath2})
+Console.WriteLine("PASS: all eight player roles can follow each section and the full sequence without NPC control of the player.");
+foreach(var section in new[]{DsrP6Section.Breath1,DsrP6Section.Wings1,DsrP6Section.Wings2,DsrP6Section.Breath2,DsrP6Section.Wroth,DsrP6Section.Full})
 {
  var s=new DsrP6DragonsScenario(section);s.UseSeed(7);var w=new SimWorld();
  w.Party.Slots[2]=new SimPlayer{Role=2,Position=Vector3.Zero};SimCharacter.Failures.Clear();s.Run(w,0);
- for(var frame=1;frame<=40*60;frame++)
+ for(var frame=1;frame<=180*60;frame++)
  {
   var time=frame/60f;SimCharacter.Time=time;
   w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
  }
  Check(s.State.Failed&&SimCharacter.Failures.Count>0,$"{section} stationary player must fail");
 }
-foreach(var section in new[]{DsrP6Section.Full,DsrP6Section.Wroth})
-{
- var blocked=false;try{new DsrP6DragonsScenario(section).Run(new SimWorld(),0);}catch(InvalidOperationException){blocked=true;}
- Check(blocked,"unverified Wroth/full timeline must not be runnable");
-}
-Console.WriteLine("PASS: incorrect player positioning fails; incomplete sections cannot run.");
 foreach(var acting in new[]{false,true})
 {
  var s=new DsrP6DragonsScenario(DsrP6Section.Breath2);s.UseSeed(0);var w=new SimWorld();
@@ -74,7 +68,7 @@ foreach(var acting in new[]{false,true})
  SimCharacter.Failures.Clear();s.Run(w,0);var sawThermal=false;
  s.State.SecondFire[2]=true;s.State.SecondFire[3]=false;
  for(var r=4;r<8;r++)s.State.SecondFire[r]=r<6;
- for(var frame=1;frame<=40*60;frame++)
+ for(var frame=1;frame<=180*60;frame++)
  {
   var time=frame/60f;SimCharacter.Time=time;player.MoveTo(s.State.Destinations[2]);
   player.IsActing=acting&&time>20.4f&&time<21;
@@ -96,7 +90,7 @@ for(var mask=0;mask<64;mask++)
  var s=new DsrP6DragonsScenario(DsrP6Section.Breath2);s.UseSeed(0);var w=new SimWorld();
  SimCharacter.Failures.Clear();s.Run(w,0);s.State.SecondGlow=glow;
  for(var r=2;r<8;r++)s.State.SecondFire[r]=(mask&(1<<(r-2)))!=0;
- for(var frame=1;frame<=40*60;frame++)
+ for(var frame=1;frame<=180*60;frame++)
  {
   var time=frame/60f;SimCharacter.Time=time;
   w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
@@ -122,6 +116,41 @@ foreach(var glow in Enum.GetValues<DsrP6Glow>())
  Check(s.State.Failed,$"{glow}: incorrect tank stack/spread must fail");
 }
 Console.WriteLine("PASS: split tanks fail the double-glow stack; central solo tank cleaves fail both single-glow branches.");
+for(var first=1;first<=5;first++)for(var last=first;last<=5;last++)
+{
+ var s=new DsrP6DragonsScenario();s.SetRange((DsrP6Section)first,(DsrP6Section)last);
+ s.UseSeed(first*10+last);var w=new SimWorld();SimCharacter.Failures.Clear();s.Run(w,0);
+ Check(w.Enemies.Take(2).All(e=>e.Targetable),"dragons targetable on entry");
+ for(var frame=1;frame<=180*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;
+  w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
+ }
+ Check(s.State.Complete&&w.Events.IsEmpty&&w.Enemies.All(e=>!e.Active)&&w.EventObjects.All(e=>!e.Active),$"range {first}-{last}: cleanup");
+ Check(SimCharacter.Failures.Count==0,$"range {first}-{last}: {string.Join(";",SimCharacter.Failures.Take(4))}");
+ var hasWroth=first<=3&&last>=3;
+ Check(w.Enemies.Count(e=>e.BNpcBaseId==0x33B6)==(hasWroth?9:0),"nine fireballs only in selected Wroth window");
+ Check(w.Enemies.SelectMany(e=>e.Casts).Count(c=>c.Action==26409)==(hasWroth?9:0),"three waves of native cross casts");
+ if(first==1||hasWroth)Check(w.Party.Slots[2].LockonVfx.Contains(62)&&w.Party.Slots[3].LockonVfx.Contains(62),"healer stack markers");
+}
+var invalidRange=false;
+try{new DsrP6DragonsScenario().SetRange(DsrP6Section.Breath2,DsrP6Section.Breath1);}catch(ArgumentOutOfRangeException){invalidRange=true;}
+Check(invalidRange,"reversed range rejected");
+Console.WriteLine("PASS: all 15 start/end windows, targetable dragons, healer stack markers, nine fireballs, native cross casts and cleanup.");
+{
+ var s=new DsrP6DragonsScenario(DsrP6Section.Wroth);s.UseSeed(0);var w=new SimWorld();
+ var player=new SimPlayer{Role=2,Position=new(0,0,16)};w.Party.Slots[2]=player;
+ SimCharacter.Failures.Clear();s.Run(w,0);
+ for(var frame=1;frame<=19*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;
+  player.MoveTo(s.State.Destinations[2]);
+  if(time>17.7f&&time<17.9f)player.SetPosition(new(0,0,13));
+  w.Events.Tick(1f/60);foreach(var member in w.Party.Slots)member.Advance(1f/60);s.Tick(1f/60,time);
+ }
+ Check(SimCharacter.Failures.Any(f=>f.Contains("第 1 組烈焰十字爆")),"first cross must hit its vertical lane");
+}
+Console.WriteLine("PASS: entering a fireball cross lane fails at its scheduled explosion.");
 namespace AnoMech.Scenarios.Dsr.P6Dragons
 {
  public sealed partial class DsrP6DragonsScenario
