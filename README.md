@@ -10,7 +10,7 @@
 - **P2-聖仗**：分攤劍、雙視線、騎士衝鋒、白球、冰火圈、塔、隕石與擊退。
 - **P3-尼德霍格**：可指定自己的麻將與箭頭；包含跳躍、分攤、內外圈、踩塔、引導槍、最後四塔、坦克接線、普攻與騰龍槍。
 - **P4-雙眼**：思念增益、紅藍換線、雙人黃球、單人藍球及四輪幻象俯衝。雙眼擊破自動推進，尚未包含救奧爾什方。
-- **P5-風槍（前半）**：獨立場地、Heavensward 配樂、繁中 BOSS／騎士／龍名稱；目前練習藍標跳躍、交叉衝鋒、白龍旋風衝及旋風。後半雷光鏈、綠標俯衝、八方劍與地火月環尚未加入，詳見 [DSR-P5.md](DSR-P5.md)。
+- **P5-風槍**：FFLogs 校時；包含交叉衝鋒、旋風、八方劍、綠標龍衝、連續地火、雷光鏈、月環與古代爆震。詳見 [DSR-P5.md](DSR-P5.md)。
 
 打法參考 tuuf／Elemental 的 [P2](https://ffxiv.tuufless.com/elemental/dsr/02_thordan/)、[P3](https://ffxiv.tuufless.com/elemental/dsr/03_nidhogg/) 與 [P4](https://ffxiv.tuufless.com/elemental/dsr/04_eyes/) 攻略。
 

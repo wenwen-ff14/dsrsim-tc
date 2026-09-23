@@ -9,6 +9,15 @@ internal sealed class DsrP5WrathAi : IScenarioAi
     public static Vector3 Destination(DsrP5WrathState state, int role)
     {
         if(!state.Assigned) return new(3*MathF.Sin(role*MathF.Tau/8),0,3*MathF.Cos(role*MathF.Tau/8));
+        if(state.FinaleResolved) return state.SafePosition(role);
+        if(state.MercyResolved)
+        {
+            if(role==state.Green && !state.DiveLocked) return state.SpreadPosition(role);
+            if(role==state.Liquid || role==state.Altar) return state.BaitDestination(role);
+            return state.SafePosition(role);
+        }
+        if(state.GreenAssigned && state.Time>=22.2f) return state.SpreadPosition(role);
+        if(state.GreenAssigned && state.Time>=20.2f) return Vector3.Normalize(state.SpreadPosition(role))*15;
         return state.ChargesResolved ? state.DodgePosition(role) : state.InitialPosition(role);
     }
     public static void Tick(DsrP5WrathState state, SimWorld world)

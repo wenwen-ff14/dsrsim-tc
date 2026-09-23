@@ -3,8 +3,8 @@
     "Author": "Anomek / wenwen-ff14",
     "Name": "dsrsim-tc｜絕龍詩模擬器",
     "InternalName": "dsrsim-tc",
-    "AssemblyVersion": "0.4.0.37",
-    "Description": "API 13 繁中版。依 tuuf／Elemental 分工模擬七名隊友，練習 P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍前半。P3 可指定自己的麻將與箭頭。P5 第一版包含藍標跳躍、交叉衝鋒、白龍旋風衝與旋風，後半機制尚未加入。使用 /dsrsim 或 /dsrsim-tc 開啟；視窗可收合。",
+    "AssemblyVersion": "0.4.0.38",
+    "Description": "API 13 繁中版。依 tuuf／Elemental 分工模擬七名隊友，練習 P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍。P3 可指定自己的麻將與箭頭。P5 包含旋風、八方劍、綠標龍衝、地火、雷光鏈與月環。使用 /dsrsim 或 /dsrsim-tc 開啟；視窗可收合。",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/wenwen-ff14/test",
     "Tags": [
@@ -21,14 +21,14 @@
     "CanUnloadAsync": false,
     "LoadPriority": 0,
     "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/test/main/images/dsrsim-tc.png",
-    "Punchline": "DSR P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍前半練習。",
+    "Punchline": "DSR P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍練習。",
     "AcceptsFeedback": true,
-    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.37.zip",
-    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.37.zip",
-    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.37.zip",
+    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.38.zip",
+    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.38.zip",
+    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.38.zip",
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": 1790136667,
-    "Changelog": "移除所有關卡的重新播放音樂按鈕，保留 BGM 開關。新增 P5-風槍前半：P5 場地、Heavensward 配樂、繁中托爾丹／騎士／龍名稱，以及藍標跳躍、交叉衝鋒、旋風衝與旋風判定。後半機制尚未加入；場地與特效待實機驗收。"
+    "LastUpdate": 1790138153,
+    "Changelog": "P5 依 FFLogs 補齊八方劍、綠標龍衝、地火、雷光鏈與月環；修正場地與 BGM，龍延後生成並於退場清除；移除 P4 時間軸驗證提示。"
   }
 ]

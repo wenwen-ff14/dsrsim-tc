@@ -7,7 +7,7 @@ public sealed partial class DsrP5WrathScenario
     public void DrawSettings()
     {
         ImGui.TextUnformatted("tuuf／白龍為北、連線交叉至南側");
-        ImGui.TextWrapped("第一版練習藍標跳躍、騎士交叉衝鋒、白龍旋風衝與旋風。後半雷光鏈、綠標俯衝、八方劍、連續地火及月環尚未加入。");
+        ImGui.TextWrapped("藍標與交叉連線 → 旋風 → 八方劍散開 → 綠標到持杖騎士背後引導龍衝 → 連續地火 → 持斧騎士月環與雷光鏈 → 古代爆震。");
         var music=!Plugin.Config.SuppressBgm;
         if(ImGui.Checkbox("背景音樂：Heavensward",ref music)){Plugin.Config.SuppressBgm=!music;Plugin.Config.Save();}
         ImGui.Checkbox("顯示站位提示",ref showHints);
@@ -17,11 +17,11 @@ public sealed partial class DsrP5WrathScenario
         if(fixedSeed) ImGui.InputInt("種子",ref seed);
         if(state==null || world==null) return;
         ImGui.TextUnformatted($"P5-風槍　{state.Time:F1} 秒　種子 {state.Seed}");
-        if(state.Complete) ImGui.TextUnformatted(state.Failed?"本輪有失誤，可重置重練。":"風槍前半練習完成。");
+        if(state.Complete) ImGui.TextUnformatted(state.Failed?"本輪有失誤，可重置重練。":"風槍練習完成。");
         else if(showHints)
         {
             var role=(int)world.Party.PlayerRole;
-            ImGui.TextWrapped(!state.Assigned?"等待白龍與騎士出現，白龍為相對北。":state.ChargesResolved?"離開原位躲旋風；不要走進其他人的旋風。":role==state.Blue?"藍標：到白龍左側西北，遠離其他人。":role==state.TetherRoles[0]||role==state.TetherRoles[1]?"連線：交叉拉至相對南側，勿讓直線掃到隊友。":"無點名：相對東側分散。");
+            ImGui.TextWrapped(state.MercyResolved ? "前往持斧騎士：雷點名站安全區外側；地火點名持續移動，勿將地火帶進集合點。" : state.GreenAssigned ? (role==state.Green ? "綠標：到持杖騎士背後場邊引導龍衝，鎖定後再離開。" : "躲旋風後八方散開，與隊友隔兩格，避免八方劍重疊。") : !state.Assigned?"等待白龍與騎士出現，白龍為相對北。":state.ChargesResolved?"離開原位躲旋風；不要走進其他人的旋風。":role==state.Blue?"藍標：到白龍左側西北，遠離其他人。":role==state.TetherRoles[0]||role==state.TetherRoles[1]?"連線：交叉拉至相對南側，勿讓直線掃到隊友。":"無點名：相對東側分散。");
         }
         if(showMap) DrawMap();
     }

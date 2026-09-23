@@ -14,6 +14,11 @@ internal sealed class DsrP5WrathState
     public readonly Vector3?[] Destinations = new Vector3?[8];
     public bool Assigned, ChargesResolved, TwistersActive, Failed, Complete;
     public float Time;
+    public int Green, Liquid = -1, Altar;
+    public int[] Thunder = [];
+    public bool GreenAssigned, MercyLocked, MercyResolved, DiveLocked, FinaleResolved;
+    public Vector3 DiveTarget;
+    public readonly Vector3[] MercyTargets = new Vector3[8];
     public DsrP5WrathState(int seed)
     {
         Seed = seed;
@@ -25,6 +30,59 @@ internal sealed class DsrP5WrathState
         Blue = roles[0];
         TetherRoles = [roles[1],roles[2]];
         EastRoles = roles.Skip(3).Order().ToArray();
+        Green = EastRoles[random.Next(5)];
+        Altar = new[]{Blue,TetherRoles[0],TetherRoles[1],Green}[random.Next(4)];
+        var candidates = roles.Where(r => r != Altar).ToArray();
+        random.Shuffle(candidates);
+        Thunder = candidates.Take(2).ToArray();
+        Liquid = EastRoles.Where(r => r != Green && !Thunder.Contains(r)).OrderByDescending(r => Vector3.Distance(SpreadPosition(r), Grinnaux)).First();
+    }
+    public Vector3 SpreadPosition(int role)
+    {
+        var farRole=GrinnauxNorth?TetherRoles[0]:Blue;
+        if(Altar!=Green)
+        {
+            if(role==Altar) role=farRole;
+            else if(role==farRole) role=Altar;
+        }
+        float angle;
+        if(role == Green) angle = GrinnauxNorth ? 180 : 0;
+        else if(role == Blue) angle = GrinnauxNorth ? 315 : 290;
+        else if(role == TetherRoles[0]) angle = GrinnauxNorth ? 225 : 210;
+        else if(role == TetherRoles[1]) angle = GrinnauxNorth ? 270 : 250;
+        else
+        {
+            var east=EastRoles.Where(r=>r!=Green).OrderBy(r=>r==Liquid?(GrinnauxNorth?1:-1):0).ToArray();
+            angle = (GrinnauxNorth ? 30 : 40) + 40 * Array.IndexOf(east,role);
+        }
+        return Rotate(new(19.5f*MathF.Sin(angle*MathF.PI/180),0,-19.5f*MathF.Cos(angle*MathF.PI/180)));
+    }
+    public Vector3 SafePosition(int role)
+    {
+        var index = Array.IndexOf(Thunder,role);
+        return Grinnaux + Rotate(index >= 0 ? new(index==0?-3.8f:3.8f,0,GrinnauxNorth?-2.8f:2.8f) : new(0,0,GrinnauxNorth?3: -3));
+    }
+    public Vector3 BaitDestination(int role)
+    {
+        var sign=GrinnauxNorth?1:-1;
+        if(role==Liquid)
+        {
+            if(Time>29.92f) return SafePosition(role);
+            var angle=(GrinnauxNorth?150:140)*MathF.PI/180-(MathF.Max(0,Time-25.176f)*6+.2f)/19.5f;
+            return Rotate(new(19.5f*MathF.Sin(angle),0,-19.5f*MathF.Cos(angle)*sign));
+        }
+        var side=role==Liquid?1:-1;
+        Vector3[] path=role==Green
+            ? [SpreadPosition(role),Rotate(new(-14,0,0)),SafePosition(role)]
+            : [SpreadPosition(role),Rotate(new(18*side,0,10*sign)),Rotate(new(15*side,0,-9*sign)),SafePosition(role)];
+        var distance=MathF.Max(0,Time-(role==Green?26.07f:25.176f))*6+.2f;
+        for(var i=1;i<path.Length;i++)
+        {
+            var length=Vector3.Distance(path[i-1],path[i]);
+            if(distance<length) return Vector3.Lerp(path[i-1],path[i],distance/length);
+            distance-=length;
+        }
+        return path[^1];
     }
     public Vector3 Rotate(Vector3 p) => new(p.X*MathF.Cos(Rotation)-p.Z*MathF.Sin(Rotation),p.Y,p.X*MathF.Sin(Rotation)+p.Z*MathF.Cos(Rotation));
     public Vector3 InitialPosition(int role)

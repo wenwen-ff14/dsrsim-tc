@@ -17,7 +17,7 @@ public sealed partial class DsrP4EyesScenario
         }
         ImGui.TextWrapped("集合取得思念 → 換成坦補紅／DPS 藍 → 黃球長大兩次後坦補雙人撞球 → 換線 → DPS 單人撞藍球 → 西側四輪幻象俯衝。");
         ImGui.TextWrapped("俯衝換線順序：補師 → 坦克 → 第一輪被點的 DPS。由北起逆時針／順時針分配，H1、MT、較小編號 DPS 優先逆時針。");
-        ImGui.TextWrapped("本關自動推進雙眼擊破，不需輸出；時間軸尚待實機校正。");
+        ImGui.TextWrapped("本關自動推進雙眼擊破，不需輸出。");
         ImGui.Checkbox("顯示站位提示", ref showHints);
         ImGui.SameLine();
         ImGui.Checkbox("顯示戰術圖", ref showMap);
