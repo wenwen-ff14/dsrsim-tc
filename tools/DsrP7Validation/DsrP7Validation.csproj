@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+<PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net9.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><NoWarn>CS0649</NoWarn></PropertyGroup>
+<ItemGroup>
+<Compile Include="../DsrValidation/Stubs.cs" Link="Stubs.cs" />
+<Compile Include="../../AnoMech/Core/Game/EventScheduler.cs" />
+<Compile Include="../../AnoMech/Scenarios/Dsr/DsrConstants.cs" />
+<Compile Include="../../AnoMech/Scenarios/Dsr/P7DragonKing/*.cs" Exclude="../../AnoMech/Scenarios/Dsr/P7DragonKing/*Settings.cs" />
+</ItemGroup>
+</Project>

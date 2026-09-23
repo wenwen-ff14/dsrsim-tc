@@ -13,7 +13,8 @@
 - **P5-風槍**：FFLogs 校時；包含交叉衝鋒、旋風、八方劍、綠標龍衝、連續地火、雷光鏈、月環與古代爆震。詳見 [DSR-P5.md](DSR-P5.md)。
 - **P5-死刻**：可指定隨機／死宣組／非死宣組；死亡宣告分組、沉重衝擊、百雷／衝鋒／旋風、PS 標記、雙視線、擊退斷鏈及白圈解死宣；包含八顆隕石與 D4 法系 LB2 自由練習（命中隕石消失、不判死、不自動結束，施放後補滿）；使用原生 LB 量表與熱鍵列極限爆發，地面瞄準北側隕石；亦可使用 LB2 按鈕或 `/dsrsim lb`，移動會中斷讀條。尚未包含後續坦克連擊。詳見 [DSR-P5-Death.md](DSR-P5-Death.md)。
 
-- **P6-雙龍**：整合冰火 1、兩次坦死刑、十字火及固定式冰火 2，可選開始／結束機制；場景沿用 P4，配樂 Dragonsong。十字火先提供固定配置，火球時間與座標仍待精校。支援範圍與 logs 核對資料見 [DSR-P6.md](DSR-P6.md)。
+- **P6-雙龍**：整合冰火 1、兩次坦死刑、十字火及固定式冰火 2，可選開始／結束機制；場景沿用 P4，配樂 Dragonsong。十字火提供 24 種配置與系統／手動頭標；雙龍俯衝期間可選取。火球時間與座標仍待精校，詳見 [DSR-P6.md](DSR-P6.md)。
+- **P7-龍威騎神托爾丹**：獨立場地與 Revenge Twofold 交響樂版 BGM；三輪百京火光、死亡輪迴、兩輪十億火光、冰火劍、三劍一體輪替、最後犧牲塔及狂暴。支援實際挑釁／退避的兩坦換坦練習。範圍、操作與驗證限制見 [DSR-P7.md](DSR-P7.md)。
 
 打法參考 tuuf／Elemental 的 [P2](https://ffxiv.tuufless.com/elemental/dsr/02_thordan/)、[P3](https://ffxiv.tuufless.com/elemental/dsr/03_nidhogg/) 、[P4](https://ffxiv.tuufless.com/elemental/dsr/04_eyes/) 與 [P5](https://ffxiv.tuufless.com/elemental/dsr/05_alternate_thordan/) 攻略。
 

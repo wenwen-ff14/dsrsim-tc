@@ -22,6 +22,12 @@ internal static unsafe class ActionEffects
     // (falling back to self if it's absent or not a registered BattleChara).
     public static void FireCombo(Character* caster, uint actionId, ushort sourceSequence, byte comboFlag,
         GameObjectId target = default)
+        => Fire(caster,actionId,sourceSequence,target,comboFlag);
+
+    public static void FireVisual(Character* caster,uint actionId,ushort sourceSequence,GameObjectId target)
+        => Fire(caster,actionId,sourceSequence,target,null);
+
+    private static void Fire(Character* caster,uint actionId,ushort sourceSequence,GameObjectId target,byte? comboFlag)
     {
         if (caster == null) return;
         var deliverTo = caster->GetGameObjectId();
@@ -37,7 +43,7 @@ internal static unsafe class ActionEffects
             AnimationTargetId = deliverTo,
             ActionId = actionId,
             GlobalSequence = globalSequence++,
-            AnimationLock = 0f,
+            AnimationLock = comboFlag.HasValue ? 0f : 0.6f,
             SourceSequence = sourceSequence,
             RotationInt = MathUtil.QuantizeRotation(caster->Rotation),
             SpellId = (ushort)actionId,
@@ -47,10 +53,10 @@ internal static unsafe class ActionEffects
             NumTargets = 1,
         };
         var effects = new ActionEffectHandler.TargetEffects();
-        effects.Effects[0] = new ActionEffectHandler.Effect
+        if(comboFlag is {} flag)effects.Effects[0] = new ActionEffectHandler.Effect
         {
             Type = 0x1B,
-            Param0 = comboFlag,
+            Param0 = flag,
             Param4 = 0x80,
             Value = (ushort)actionId,
         };

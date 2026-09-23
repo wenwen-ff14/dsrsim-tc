@@ -169,7 +169,7 @@ public sealed partial class DsrP6DragonsScenario
     }
     private void PrepareDoubleDive()
     {
-        nidhogg?.SetTargetable(false);hraesvelgr?.SetTargetable(false);
+        nidhogg?.SetTargetable(true);hraesvelgr?.SetTargetable(true);
         nidhogg?.SetPosition(new Vector3(-10,0,-34));nidhogg?.HoldFacing(0);
         hraesvelgr?.SetPosition(new Vector3(10,0,-34));hraesvelgr?.HoldFacing(0);
         state!.SetDoubleDive();

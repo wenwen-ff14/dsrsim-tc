@@ -6,6 +6,7 @@ using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility.Signatures;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.UI;
 using FFXIVClientStructs.FFXIV.Client.System.Input;
 
@@ -33,6 +34,8 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
     // subscribes to resolve effects the sim firewall blocks; nothing here depends
     // on a subscriber.
     public event Action<ActionType, uint>? ActionExecuted;
+    public event Action<ActionType,uint,ulong>? TargetedActionExecuted;
+    private ushort lastTargetedActionSequence;
     internal bool PracticeLimitBreakEnabled { get; set; }
     internal bool PracticeLimitBreakCasting { get; set; }
     internal Func<bool>? CanPracticeLimitBreak { get; set; }
@@ -189,7 +192,13 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
         if(PracticeLimitBreakEnabled&&IsLimitBreak(actionType,actionId))
             return CanPracticeLimitBreak?.Invoke()==true && useActionHook.Original(self,ActionType.Action,204,targetId,extraParam,mode,comboRouteId,outOptAreaTargeted);
         if(PracticeLimitBreakCasting&&!IsStopAutosAction(actionType,actionId))return false;
+        var resolvedTargetId=targetId;
+        if(targetId is 0 or 0xE0000000&&TargetSystem.Instance()!=null)
+            resolvedTargetId=TargetSystem.Instance()->GetTargetObjectId();
+        var previousSequence=self->LastUsedActionSequence;
         var result = useActionHook.Original(self, actionType, actionId, targetId, extraParam, mode, comboRouteId, outOptAreaTargeted);
+        if(result&&self->LastUsedActionSequence!=previousSequence)
+            NotifyTargetedAction(self,actionType,actionId,resolvedTargetId);
         // Record a real action use for Party.Player.IsActing — but ignore the auto-attack-cancel
         // general action that UpdateDetour issues while stunned.
         if (result && !IsStopAutosAction(actionType, actionId))
@@ -206,13 +215,25 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
         if(PracticeLimitBreakEnabled&&IsLimitBreak(actionType,actionId))
             return CanPracticeLimitBreak?.Invoke()==true && UsePracticeLimitBreak?.Invoke(location==null?null:*location)==true;
         if(PracticeLimitBreakCasting&&!IsStopAutosAction(actionType,actionId))return false;
+        var previousSequence=self->LastUsedActionSequence;
         var result = useActionLocationHook.Original(self, actionType, actionId, targetId, location, extraParam, a7);
+        if(result&&self->LastUsedActionSequence!=previousSequence)
+            NotifyTargetedAction(self,actionType,actionId,targetId);
         if (result)
         {
             actionUsedSincePoll = true;
             ActionExecuted?.Invoke(actionType, actionId);
         }
         return result;
+    }
+
+    private void NotifyTargetedAction(ActionManager* self,ActionType type,uint action,ulong target)
+    {
+        // UseAction can re-enter through UseActionLocation; only the actual execution advances the sequence.
+        var sequence=self->LastUsedActionSequence;
+        if(sequence==lastTargetedActionSequence)return;
+        lastTargetedActionSequence=sequence;
+        TargetedActionExecuted?.Invoke(type,action,target);
     }
 
     private uint GetActionStatusDetour(ActionManager* self,ActionType actionType,uint actionId,ulong targetId,bool checkRecastActive,bool checkCastingActive,uint* extraInfo)

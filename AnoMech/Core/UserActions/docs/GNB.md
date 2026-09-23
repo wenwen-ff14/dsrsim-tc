@@ -49,7 +49,9 @@ _✅ works · ⚠️ partial · ❌ not simulated · ➖ nothing to simulate (pu
 | Cartridge Charge II | ⚠️ | Baseline cartridge cap 3 modelled; Bloodfest's temporary →6 window is not. |
 
 ## Role actions
-Rampart, Low Blow, Provoke, Interject, Reprisal, Arm's Length, Shirk — all ➖.
+Rampart, Low Blow, Interject, Reprisal, Arm's Length — all ➖.
+
+Provoke (7533), Shirk (7537) — ⚠️ DSR P7 tank-swap practice only: executed actions validate their actual targets and change the simulated tank order; native hotbar/VFX integration requires in-game verification. No damage-based enmity or tank-stance multiplier simulation.
 
 ## Not simulated
 - **Bloodfest cartridge cap→6.** `GnbCartridge.Max` is fixed at 3; the 30s window that raises the cap to 6 isn't modelled. Bloodfest grants exactly +3, so only banking above 3 inside the window is lost.

@@ -49,7 +49,9 @@ _✅ works · ⚠️ partial · ❌ not simulated · ➖ nothing to simulate (pu
 No trait gaps — the enhancement traits (Enhanced Fight or Flight, Divine Magic Mastery, Enhanced Prominence, Sword Oath, Enhanced Requiescat, Enhanced Blade of Valor) fold into their action rows; the rest are potency or native upgrades (➖).
 
 ## Role actions
-Rampart, Low Blow, Provoke, Interject, Reprisal, Arm's Length, Shirk — all ➖.
+Rampart, Low Blow, Interject, Reprisal, Arm's Length — all ➖.
+
+Provoke (7533), Shirk (7537) — ⚠️ DSR P7 tank-swap practice only: executed actions validate their actual targets and change the simulated tank order; native hotbar/VFX integration requires in-game verification. No damage-based enmity or tank-stance multiplier simulation.
 
 ## Not simulated
 - **Holy Spirit / Holy Circle double-consume.** Each removes Divine Might (2673) and decrements a Requiescat (1368) stack in the same cast; in-game Divine Might is prioritized and spent alone, so a stack can be burned one cast early.

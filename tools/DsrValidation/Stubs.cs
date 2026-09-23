@@ -20,7 +20,7 @@ namespace AnoMech.Scenarios
 }
 namespace AnoMech.Scenarios.Dsr
 {
-    public static class DsrZone { public static IPhase P2 => null!; public static IPhase P3 => null!; public static IPhase P4 => null!; public static IPhase P5 => null!; public static IPhase P6 => null!; }
+    public static class DsrZone { public static IPhase P2 => null!; public static IPhase P3 => null!; public static IPhase P4 => null!; public static IPhase P5 => null!; public static IPhase P6 => null!; public static IPhase P7=>null!; }
 }
 namespace AnoMech.Core.Game.Ai
 {
@@ -34,7 +34,7 @@ namespace AnoMech.Core.SimObjects
 {
     public enum EnemyListMode { OnlyWhenVisible, ScenarioVisible, Never, Manual }
     public record struct EnemySpawnConfig(uint BNpcBaseId, byte Level, EnemyListMode EnemyList, bool IsVisible, Game.Placement Placement, bool DisableLookAt = false, bool WeaponDrawn = false, uint NameId = 0);
-    public interface ISimPartyMember { void Knockback(Vector3 source, float distance); }
+    public interface ISimPartyMember { void Knockback(Vector3 source, float distance); void OnKilled(); }
     public class SimCharacter : ISimPartyMember
     {
         public static readonly List<string> Failures = [];
@@ -77,6 +77,9 @@ namespace AnoMech.Core.SimObjects
         }
         public void Face(Vector3 p) => Rotation = MathF.Atan2(p.X - Position.X, p.Z - Position.Z);
         public void AddStatus(ushort status, float duration, bool playEffects = true) => statuses[status] = duration;
+        public void AddStatus(ushort status,float duration,int stacks,bool overrideStacks)=>statuses[status]=duration;
+        public void AddStatusParam(ushort status,int param,float duration)=>statuses[status]=duration;
+        public void OnKilled(){ Active=false; moving=false; }
         public bool HasStatus(ushort status) => statuses.GetValueOrDefault(status) > 0;
         public void RemoveStatus(ushort status) => statuses.Remove(status);
         public readonly List<(float Time,string Path)> Vfx = [];
@@ -119,6 +122,8 @@ namespace AnoMech.Core.SimObjects
         public bool WeaponsVisible = true;
         public void SetWeaponsVisible(bool b) => WeaponsVisible = b;
         public bool Targetable;
+        public SimCharacter? Target;
+        public void SetTarget(SimCharacter? target,bool follow=true)=>Target=target;
         public void SetTargetable(bool b) => Targetable = b;
         public bool Cast(uint action, Vector3? location = null, float? castSeconds = null, uint? targetId = null, float? fireDelay = null, float omenDelay = 0)
         {
@@ -130,7 +135,7 @@ namespace AnoMech.Core.SimObjects
     public class SimParty
     {
         public readonly SimCharacter[] Slots = Enumerable.Range(0, 8).Select(r => (SimCharacter)new SimPartyNpc { Role = r, Position = new(0, 0, 16) }).ToArray();
-        public int PlayerRole => 0;
+        public int PlayerRole => Array.FindIndex(Slots,m=>m is SimPlayer) is var index&&index>=0?index:0;
         public SimCharacter? Get(int role) => Slots[role];
         public IEnumerable<SimCharacter> ActiveMembers() => Slots;
         public IEnumerable<(int, SimCharacter)> FilledSlots() => Slots.Select((m, r) => (r, m));

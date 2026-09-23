@@ -44,7 +44,9 @@ _✅ works · ⚠️ partial · ❌ not simulated · ➖ nothing to simulate (pu
 | Enhanced Inner Release | ❌ | Burgeoning Fury (max 3)→Wrathful→Primal Wrath swap not modelled. |
 
 ## Role actions
-Rampart, Low Blow, Provoke, Interject, Reprisal, Arm's Length, Shirk — all ➖.
+Rampart, Low Blow, Interject, Reprisal, Arm's Length — all ➖.
+
+Provoke (7533), Shirk (7537) — ⚠️ DSR P7 tank-swap practice only: executed actions validate their actual targets and change the simulated tank order; native hotbar/VFX integration requires in-game verification. No damage-based enmity or tank-stance multiplier simulation.
 
 ## Not simulated
 - **Primal Wrath chain (Lv96+).** Inner Release doesn't grant Burgeoning Fury (3833), so Wrathful (3901) never sets and the Inner Release→Primal Wrath (36924) swap never fires. Needs a conditional per-hit grant on Fell Cleave/Decimate while Inner Release is active — not expressible in the per-cast table.

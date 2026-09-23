@@ -47,7 +47,9 @@ _✅ works · ⚠️ partial · ❌ not simulated · ➖ nothing to simulate (pu
 | Enhanced Blackblood | ❌ | +10 Blood per weaponskill/spell while Blood Weapon (742) is up — never generated in-sim. |
 
 ## Role actions
-Rampart, Low Blow, Provoke, Interject, Reprisal, Arm's Length, Shirk — all ➖.
+Rampart, Low Blow, Interject, Reprisal, Arm's Length — all ➖.
+
+Provoke (7533), Shirk (7537) — ⚠️ DSR P7 tank-swap practice only: executed actions validate their actual targets and change the simulated tank order; native hotbar/VFX integration requires in-game verification. No damage-based enmity or tank-stance multiplier simulation.
 
 ## Not simulated
 - **Blood Weapon blood generation.** While Blood Weapon (742) is up, each weaponskill/spell should add +10 Blood (Enhanced Blackblood); only the stack is decremented, so ~30 Blood per Delirium window is never generated.

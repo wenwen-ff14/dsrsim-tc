@@ -14,6 +14,17 @@ Check(fired.SequenceEqual(new[]{5}),"selected window start must fire at current 
 scheduler.Tick(1.9f);Check(fired.Count==1,"window must preserve relative delay");
 scheduler.Tick(.11f);Check(fired.SequenceEqual(new[]{5,7,70})&&scheduler.IsEmpty,"inclusive end, stable event order, excluded handlers");
 Console.WriteLine("PASS: scheduler windows preserve order and boundaries after a nonzero clock origin.");
+{
+ var scenario=new DsrP6DragonsScenario(DsrP6Section.Breath2);var world=new SimWorld();scenario.Run(world,0);
+ for(var frame=1;frame<=30*60;frame++)
+ {
+  var time=frame/60f;SimCharacter.Time=time;world.Events.Tick(1f/60);
+  foreach(var member in world.Party.Slots)member.Advance(1f/60);
+  scenario.Tick(1f/60,time);
+  if(time>=11&&time<=28)Check(world.Enemies.Where(e=>e.BNpcBaseId is 0x3144 or 0x3145).All(e=>e.Targetable),"both dragons must remain targetable through double dive");
+ }
+}
+Console.WriteLine("PASS: both dragons stay targetable during double dive and touchdown.");
 for(var role=0;role<8;role++)for(var preference=1;preference<=2;preference++)for(var seed=0;seed<100;seed++)
 {
  var s=new DsrP5DeathState(seed,role,preference);

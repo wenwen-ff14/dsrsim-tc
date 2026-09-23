@@ -3,8 +3,8 @@
     "Author": "Anomek / wenwen-ff14",
     "Name": "dsrsim-tc｜絕龍詩模擬器",
     "InternalName": "dsrsim-tc",
-    "AssemblyVersion": "0.4.0.57",
-    "Description": "API 13 繁中版。依 tuuf／Elemental 分工模擬七名隊友，練習 P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍與死刻。P3 可指定自己的麻將與箭頭。P5 包含旋風、八方劍、綠標龍衝、地火、雷光鏈與月環；死刻包含死亡宣告、PS 標記、擊退斷鏈、白圈解除及 D4 隕石 LB2 練習。使用 /dsrsim 或 /dsrsim-tc 開啟；視窗可收合。",
+    "AssemblyVersion": "0.4.0.58",
+    "Description": "API 13 繁中版，參考 AnoMech 與 tuuf／Elemental，模擬七名隊友。提供 P2 聖仗、P3 尼德霍格、P4 雙眼、P5 風槍／死刻、P6 雙龍與 P7 龍威騎神。P6 可選機制範圍及十字火頭標方式；P7 包含冰火劍、三劍一體、地火、踩塔、十億火光、最後犧牲塔及挑釁／退避換坦練習。使用 /dsrsim 或 /dsrsim-tc 開啟；視窗可收合。各階段支援範圍見專案攻略文件。",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/wenwen-ff14/test",
     "Tags": [
@@ -21,14 +21,14 @@
     "CanUnloadAsync": false,
     "LoadPriority": 0,
     "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/test/main/images/dsrsim-tc.png",
-    "Punchline": "DSR P2 聖仗、P3 尼德霍格、P4 雙眼與 P5 風槍／死刻練習。",
+    "Punchline": "DSR P2～P7 機制練習，包含雙龍與龍威騎神換坦。",
     "AcceptsFeedback": true,
-    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.57.zip",
-    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.57.zip",
-    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.57.zip",
+    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.58.zip",
+    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.58.zip",
+    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/test/main/packages/dsrsim-tc/0.4.0.58.zip",
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": 1790162578,
-    "Changelog": "依本機場景方形幾何將 P6 邊界修正為半寬 22，移除先前 21.1 的猜測容差；十字火原版十字提示改為判定前 0.5 秒顯示，爆炸時間不變。"
+    "LastUpdate": 1790164940,
+    "Changelog": "P6 雙龍俯衝保持可選取；新增 P7 龍威騎神全機制練習、原版冰火劍／地火／踩塔特效、獨立場地與 BGM，以及挑釁／退避換坦。新增 P7 攻略與離線驗證。"
   }
 ]

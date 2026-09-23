@@ -83,10 +83,26 @@ public sealed unsafe class UserActions : IDisposable
     {
         this.hooks = hooks;
         hooks.ActionExecuted += OnActionExecuted;
+        hooks.TargetedActionExecuted += OnTargetedActionExecuted;
     }
 
     public void Enable() => Enabled = true;
     public void Disable() => Enabled = false;
+
+    public void ResetTankPracticeCooldowns()
+    {
+        if(!SimActive)return;
+        var manager=ActionManager.Instance();
+        if(manager==null)return;
+        foreach(var action in new uint[]{7533,7537})
+        {
+            var group=manager->GetRecastGroup((int)ActionType.Action,action);
+            if(group<0)continue;
+            var detail=manager->GetRecastGroupDetail(group);
+            if(detail==null)continue;
+            detail->IsActive=false;detail->Elapsed=0;
+        }
+    }
 
     // Called by Game at scenario start.
     public void OnScenarioStart()
@@ -197,5 +213,20 @@ public sealed unsafe class UserActions : IDisposable
         pendingMax = 0;
     }
 
-    public void Dispose() => hooks.ActionExecuted -= OnActionExecuted;
+    private void OnTargetedActionExecuted(ActionType type,uint actionId,ulong targetId)
+    {
+        if(SimActive&&type==ActionType.Action&&actionId is 7533 or 7537)
+            if(Plugin.GameInstance?.PracticeTankAction(actionId,targetId)==true)
+            {
+                var player=(Character*)(Plugin.ObjectTable.LocalPlayer?.Address??0);
+                var manager=ActionManager.Instance();
+                if(player!=null&&manager!=null)ActionEffects.FireVisual(player,actionId,manager->LastUsedActionSequence,targetId);
+            }
+    }
+
+    public void Dispose()
+    {
+        hooks.ActionExecuted -= OnActionExecuted;
+        hooks.TargetedActionExecuted -= OnTargetedActionExecuted;
+    }
 }

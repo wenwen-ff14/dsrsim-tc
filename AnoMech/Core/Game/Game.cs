@@ -13,6 +13,7 @@ using AnoMech.Scenarios.Dsr.P4Eyes;
 using AnoMech.Scenarios.Dsr.P5Wrath;
 using AnoMech.Scenarios.Dsr.P5Death;
 using AnoMech.Scenarios.Dsr.P6Dragons;
+using AnoMech.Scenarios.Dsr.P7DragonKing;
 using AnoMech.Scenarios.Top.P2PartySynergy;
 using AnoMech.Scenarios.Top.P5Delta;
 using AnoMech.Scenarios.Top.P5Omega;
@@ -99,6 +100,8 @@ public sealed class Game : IDisposable
     private bool deathOccurredThisRun;
 
     private IScenario? activeScenario;
+    public bool PracticeTankAction(uint actionId,ulong targetId)
+        => !Paused&&activeScenario is DsrP7DragonKingScenario dragonKing&&dragonKing.OnTankAction(actionId,targetId);
     private readonly PracticeLimitBreakSession practiceLimitBreak=new();
     public void PracticeLimitBreak()
     {
@@ -121,6 +124,7 @@ public sealed class Game : IDisposable
             new DsrP5WrathScenario(),
             new DsrP5DeathScenario(),
             new DsrP6DragonsScenario(),
+            new DsrP7DragonKingScenario(),
             new UmadP2ForsakenScenario(),
             new UmadP3BlackHoleScenario(),
             new UmadP4KefkaSaysScenario(),
@@ -135,7 +139,7 @@ public sealed class Game : IDisposable
             new UltimatePredationScenario(),
             new UltimateSuppressionScenario(),
             new UcobP5ExaflaresScenario()
-        }.Where(scenario => scenario is DsrP2SanctityScenario or DsrP3WyrmholeScenario or DsrP4EyesScenario or DsrP5WrathScenario or DsrP5DeathScenario or DsrP6DragonsScenario).ToArray();
+        }.Where(scenario => scenario is DsrP2SanctityScenario or DsrP3WyrmholeScenario or DsrP4EyesScenario or DsrP5WrathScenario or DsrP5DeathScenario or DsrP6DragonsScenario or DsrP7DragonKingScenario).ToArray();
 
         // Derive the zone tree from the flat registry (first-appearance order).
         var zoneOrder = new List<IZone>();
@@ -241,6 +245,7 @@ public sealed class Game : IDisposable
         if (previousScenario != scenario)
             MechanicStreak = 0;
         Plugin.UserActions.OnScenarioStart();
+        if(scenario is DsrP7DragonKingScenario)Plugin.UserActions.ResetTankPracticeCooldowns();
         activeScenario = scenario;
         scenarioElapsed = 0f;
 
