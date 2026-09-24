@@ -3,7 +3,7 @@
     "Author": "Anomek / wenwen-ff14",
     "Name": "dsrsim-tc｜絕龍詩模擬器",
     "InternalName": "dsrsim-tc",
-    "AssemblyVersion": "1.0.0.2",
+    "AssemblyVersion": "1.0.0.3",
     "Description": "API 13 繁中版，參考 AnoMech 與 tuuf／Elemental，模擬七名隊友。提供 P2 聖仗、P3 尼德霍格、P4 雙眼、P5 風槍／死刻、P6 雙龍與 P7 龍威騎神。P6 可選機制範圍及十字火頭標方式；P7 包含冰火劍、三劍一體、地火、踩塔、十億火光、最後犧牲塔及挑釁／退避換坦練習。使用 /dsrsim 或 /dsrsim-tc 開啟；視窗可收合。各階段支援範圍見專案攻略文件。",
     "ApplicableVersion": "any",
     "RepoUrl": "https://github.com/wenwen-ff14/dsrsim-tc",
@@ -23,12 +23,12 @@
     "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/dsrsim-tc/main/images/dsrsim-tc.png",
     "Punchline": "DSR P2～P7 機制練習，包含雙龍與龍威騎神換坦。",
     "AcceptsFeedback": true,
-    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/dsrsim-tc/main/packages/dsrsim-tc/1.0.0.2.zip",
-    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/dsrsim-tc/main/packages/dsrsim-tc/1.0.0.2.zip",
-    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/dsrsim-tc/main/packages/dsrsim-tc/1.0.0.2.zip",
+    "DownloadLinkInstall": "https://raw.githubusercontent.com/wenwen-ff14/dsrsim-tc/main/packages/dsrsim-tc/1.0.0.3.zip",
+    "DownloadLinkUpdate": "https://raw.githubusercontent.com/wenwen-ff14/dsrsim-tc/main/packages/dsrsim-tc/1.0.0.3.zip",
+    "DownloadLinkTesting": "https://raw.githubusercontent.com/wenwen-ff14/dsrsim-tc/main/packages/dsrsim-tc/1.0.0.3.zip",
     "IsHide": false,
     "IsTestingExclusive": false,
-    "LastUpdate": 1790210126,
-    "Changelog": "專案倉庫更名為 wenwen-ff14/dsrsim-tc，同步更新安裝、更新、圖示與專案連結。"
+    "LastUpdate": 1790252003,
+    "Changelog": "修正 P3 最後四塔位置；P5 死刻支援 D3/D4 職業原版 LB2 與讀條、調整非死宣走位及中央騎士登場；P6 修正冰火2站位、冰結移動鎖定，加入兩次坦克死刑多種組合。"
   }
 ]

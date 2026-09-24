@@ -110,8 +110,8 @@ internal sealed class DsrP3WyrmholeState
 
     public static Vector3 FinalTowerPosition(int tower) => tower switch
     {
-        0 => new(-10, 0, -10), 1 => new(10, 0, -10),
-        2 => new(10, 0, 10), _ => new(-10, 0, 10)
+        0 => new(-8, 0, -8), 1 => new(8, 0, -8),
+        2 => new(8, 0, 8), _ => new(-8, 0, 8)
     };
 
     public int FinalTowerAssignment(int role)

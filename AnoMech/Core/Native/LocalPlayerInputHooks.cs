@@ -18,7 +18,7 @@ namespace AnoMech.Core.Native;
 // real lockout is two booleans this class exposes — the detours read them every
 // frame and short-circuit the original calls. Owned by Plugin (session-lifetime);
 // SimPlayer is the sole writer of the two flags, reconciling them each tick from
-// its own Dead / Movement.IsMoving state.
+// its own KO, Deep Freeze and forced-movement state.
 //
 // Signatures and detour shapes lifted from FFXIV-RaidsRewritten's
 // PlayerMovementOverride.cs / ActionManagerEx.cs (which themselves credit
@@ -37,6 +37,7 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
     public event Action<ActionType,uint,ulong>? TargetedActionExecuted;
     private ushort lastTargetedActionSequence;
     internal bool PracticeLimitBreakEnabled { get; set; }
+    internal uint PracticeLimitBreakAction { get; set; }
     internal bool PracticeLimitBreakCasting { get; set; }
     internal Func<bool>? CanPracticeLimitBreak { get; set; }
     internal Func<Vector3?,bool>? UsePracticeLimitBreak { get; set; }
@@ -190,7 +191,11 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
     {
         if (DisableAllActions && !IsStopAutosAction(actionType, actionId)) return false;
         if(PracticeLimitBreakEnabled&&IsLimitBreak(actionType,actionId))
-            return CanPracticeLimitBreak?.Invoke()==true && useActionHook.Original(self,ActionType.Action,204,targetId,extraParam,mode,comboRouteId,outOptAreaTargeted);
+        {
+            if(CanPracticeLimitBreak?.Invoke()!=true)return false;
+            if(PracticeLimitBreakAction==4239)return UsePracticeLimitBreak?.Invoke(null)==true;
+            return useActionHook.Original(self,ActionType.Action,PracticeLimitBreakAction,targetId,extraParam,mode,comboRouteId,outOptAreaTargeted);
+        }
         if(PracticeLimitBreakCasting&&!IsStopAutosAction(actionType,actionId))return false;
         var resolvedTargetId=targetId;
         if(targetId is 0 or 0xE0000000&&TargetSystem.Instance()!=null)
@@ -243,7 +248,7 @@ public sealed unsafe class LocalPlayerInputHooks : IDisposable
         return actionStatusHook.Original(self,actionType,actionId,targetId,checkRecastActive,checkCastingActive,extraInfo);
     }
 
-    private static bool IsLimitBreak(ActionType type,uint id)=>type==ActionType.GeneralAction&&id==3||type==ActionType.Action&&id is 203 or 204 or 205 or 209;
+    private static bool IsLimitBreak(ActionType type,uint id)=>type==ActionType.GeneralAction&&id==3||type==ActionType.Action&&id is 203 or 204 or 205 or 209 or 4238 or 4239;
 
     // Lets the auto-cancel UseAction from UpdateDetour through; everything else
     // bounces while autos are still firing.

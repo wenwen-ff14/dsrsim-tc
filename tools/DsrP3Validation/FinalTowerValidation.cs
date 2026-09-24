@@ -6,6 +6,12 @@ internal static class FinalTowerValidation
 {
     public static void Run()
     {
+        // FFLogs V4F6z9GCthdf2Ppq, fight 42, replay position=260704: final dive actors.
+        Vector3[] loggedPositions = [new(92, 0, 92), new(108, 0, 92), new(108, 0, 108), new(92, 0, 108)];
+        var arenaCenter = new Vector3(100, 0, 100);
+        for (var tower = 0; tower < 4; tower++)
+            if (Vector3.Distance(DsrP3WyrmholeState.FinalTowerPosition(tower), loggedPositions[tower] - arenaCenter) > .001f)
+                throw new Exception($"Final tower {tower} does not match logged landing coordinates");
         // Tuuf's starting-position diagram: NW MT/D3, NE ST/D4, SE D2/H2, SW D1/H1.
         int[] homes = [0, 1, 3, 2, 3, 2, 0, 1];
         for (var role = 0; role < 8; role++)
@@ -47,6 +53,9 @@ internal static class FinalTowerValidation
                 var actors = world.Enemies.Where(e => e.BNpcBaseId == DsrP3WyrmholeConstants.Drake).ToArray();
                 if (actors.Length != 12 || actors.Any(e => e.Visible || e.Casts.Count != 0))
                     throw new Exception("Dive actors must preload hidden, without firing actions at spawn");
+                for (var tower = 0; tower < 4; tower++)
+                    if (Vector3.Distance(actors[tower + 8].Position, loggedPositions[tower] - arenaCenter) > .001f)
+                        throw new Exception($"Final tower actor {tower} spawned away from its logged position");
                 int[] counts = [a, b, c, d];
                 counts.CopyTo(scenario.State.FinalTowerCounts, 0);
                 for (var tower = 0; tower < 4; tower++)

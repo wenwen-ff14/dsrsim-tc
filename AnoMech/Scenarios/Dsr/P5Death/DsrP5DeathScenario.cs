@@ -53,19 +53,20 @@ public sealed partial class DsrP5DeathScenario : IScenario
         world.Events.Add(24.100f,()=>ResolveRing(1));
         world.Events.Add(24.145f,SnapshotCleanses);
         world.Events.Add(24.234f,ResolveSpreads);
+        world.Events.Add(24.4f,()=>grinnaux=Spawn(DsrConstants.Npc.Grinnaux,3639,Vector3.Zero,true));
         world.Events.Add(25.250f,ShowTwisters);
         world.Events.Add(25.978f,()=>ResolveRing(2));
         world.Events.Add(27.350f,()=>twistersActive=false);
         world.Events.Add(27.860f,()=>ResolveRing(3));
         world.Events.Add(29.738f,()=>ResolveRing(4));
         world.Events.Add(30.2f,()=>{white?.Despawn();dark?.Despawn();spear?.Despawn();hammer?.Despawn();});
-        world.Events.Add(31f,()=>{charibert=Spawn(DsrConstants.Npc.Charibert,3642,state.Rotate(new(0,0,24)),true);grinnaux=Spawn(DsrConstants.Npc.Grinnaux,3639,Vector3.Zero,true);});
+        world.Events.Add(31f,()=>charibert=Spawn(DsrConstants.Npc.Charibert,3642,state.Rotate(new(0,0,24)),true));
         world.Events.Add(32.139f,AssignSymbols);
         world.Events.Add(32.239f,()=>
         {
-            charibert?.Cast(25310,castSeconds:6.7f,fireDelay:.275f);
+            BeginKnightCast(charibert,25310,6.7f,.275f);
         });
-        world.Events.Add(33.357f,()=>grinnaux?.Cast(25308,castSeconds:3.7f,fireDelay:.280f));
+        world.Events.Add(33.357f,()=>BeginKnightCast(grinnaux,DsrConstants.Action.Knockback,3.7f,.280f));
         world.Events.Add(34.117f,ShowCleanses);
         world.Events.Add(36.175f,AttachChains);
         world.Events.Add(37.381f,ResolveGazes);
@@ -75,6 +76,12 @@ public sealed partial class DsrP5DeathScenario : IScenario
         world.Events.Add(41.3f,CheckDooms);
         world.Events.Add(42.24f,SpawnMeteors);
         DsrP5DeathAi.Tick(state,world);
+    }
+    private static void BeginKnightCast(SimEnemy? knight,uint action,float castSeconds,float fireDelay)
+    {
+        if(knight==null)return;
+        knight.AddVfx("vfx/common/eff/mon_eisyo03t.avfx",castSeconds+fireDelay);
+        knight.Cast(action,castSeconds:castSeconds,targetId:knight.GameObjectId,fireDelay:fireDelay);
     }
     private SimEnemy? Spawn(uint npc,uint name,Vector3 position,bool visible)
     {

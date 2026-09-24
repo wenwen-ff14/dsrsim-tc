@@ -19,6 +19,8 @@ internal sealed class DsrP5DeathState
     public readonly Vector3[] MeteorPositions=Enumerable.Range(0,8).Select(i=>Polar(i*45,13)).ToArray();
     public readonly bool[] MeteorDestroyed=new bool[8];
     public bool MeteorsActive, LimitBreakUsed, LimitBreakCasting;
+    public int LimitBreakRole=7;
+    public uint LimitBreakAction=204;
     public float LimitBreakElapsed;
     public float LimitBreakRefill;
     public Vector3 LimitBreakOrigin, LimitBreakTarget;

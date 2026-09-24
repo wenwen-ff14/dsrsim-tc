@@ -32,18 +32,22 @@ public sealed partial class DsrP5DeathScenario
     internal bool TryLimitBreak(Vector3 target)
     {
         if(state==null||world==null||state.Complete||state.LimitBreakUsed||state.LimitBreakCasting)return false;
-        var caster=world.Party.Get(7);
+        var role=(int)world.Party.PlayerRole;
+        if(role is not (6 or 7)||state.LimitBreakAction==0)return false;
+        var caster=world.Party.Get(role);
         if(!caster.IsAlive())return false;
-        if(Vector3.Distance(caster!.Position,target)>25)
+        var range=state.LimitBreakAction==4239?30:25;
+        if(Vector3.Distance(caster!.Position,target)>range || state.LimitBreakAction==4239&&Vector3.DistanceSquared(caster.Position,target)<.01f)
         {
-            state.LimitBreakMessage="目標超出 LB2 的 25 公尺施放距離。";
+            state.LimitBreakMessage=$"請選擇 {range} 公尺內的有效 LB2 目標。";
             return false;
         }
         state.LimitBreakTarget=target;
+        state.LimitBreakRole=role;
         state.LimitBreakOrigin=caster.Position;
         state.LimitBreakElapsed=0;
         state.LimitBreakCasting=true;
-        state.LimitBreakMessage="小型隕石讀條中，移動會中斷。";
+        state.LimitBreakMessage="LB2 原版讀條中，移動會中斷。";
         return true;
     }
 
@@ -59,7 +63,7 @@ public sealed partial class DsrP5DeathScenario
             }
         }
         if(!state!.LimitBreakCasting)return;
-        var caster=world!.Party.Get(7);
+        var caster=world!.Party.Get(state.LimitBreakRole);
         if(!caster.IsAlive()||Vector3.DistanceSquared(caster!.Position,state.LimitBreakOrigin)>.04f)
         {
             state.LimitBreakCasting=false;
@@ -73,11 +77,11 @@ public sealed partial class DsrP5DeathScenario
         state.LimitBreakUsed=true;
         state.LimitBreakRefill=0;
         if(caster is not SimPlayer)
-            Spawn(DsrConstants.Npc.Helper,3632,state.LimitBreakTarget,false)?.Cast(204,state.LimitBreakTarget,0);
+            Spawn(DsrConstants.Npc.Helper,3632,caster!.Position,false)?.Cast(state.LimitBreakAction,state.LimitBreakTarget,0);
         var destroyed=0;
         if(state.MeteorsActive)
             for(var i=0;i<meteors.Length;i++)
-                if(!state.MeteorDestroyed[i]&&Vector3.DistanceSquared(state.MeteorPositions[i],state.LimitBreakTarget)<=100)
+                if(!state.MeteorDestroyed[i]&&LimitBreakHits(state.MeteorPositions[i]))
                 {
                     state.MeteorDestroyed[i]=true;
                     meteors[i]?.Despawn();
@@ -85,6 +89,16 @@ public sealed partial class DsrP5DeathScenario
                 }
         state.LimitBreakMessage=$"LB2 擊破 {destroyed} 顆隕石；1 秒後補滿，可繼續練習。";
         Array.Clear(state.Destinations);
+    }
+
+    private bool LimitBreakHits(Vector3 position)
+    {
+        if(state!.LimitBreakAction!=4239)return Vector3.DistanceSquared(position,state.LimitBreakTarget)<=100;
+        var direction=state.LimitBreakTarget-state.LimitBreakOrigin;direction.Y=0;
+        direction=Vector3.Normalize(direction);
+        var offset=position-state.LimitBreakOrigin;offset.Y=0;
+        var forward=Vector3.Dot(offset,direction);
+        return forward>=0&&forward<=30&&MathF.Abs(offset.X*direction.Z-offset.Z*direction.X)<=2.5f;
     }
 
 }

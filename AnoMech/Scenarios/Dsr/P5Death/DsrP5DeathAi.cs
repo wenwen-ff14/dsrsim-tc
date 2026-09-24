@@ -15,6 +15,9 @@ internal sealed class DsrP5DeathAi : IScenarioAi
             :s.FinalDirection(role)*19.2f;
         if(s.SymbolsAssigned)return s.FinalDirection(role)*2.5f;
         if(s.Time>=27.4f)return s.SymbolBait(role);
+        var cleanIndex=Array.IndexOf(s.Clean,role);
+        if(cleanIndex is 0 or 3&&s.SpreadsResolved)
+            return s.Time>=26.1f?s.Rotate(new(cleanIndex==0?-12:12,0,5)):s.Spread(role)+s.Rotate(new(0,0,2.2f));
         if(s.Time>=26.1f&&!s.HasDoom(role))return s.Rotate(new(Array.IndexOf(s.Clean,role)<2?-9:9,0,7));
         if(s.SpreadsResolved)
         {
@@ -30,7 +33,7 @@ internal sealed class DsrP5DeathAi : IScenarioAi
         for(var role=0;role<8;role++)
             if(world.Party.Get(role) is SimPartyNpc npc && npc.IsAlive())
             {
-                if(role==7&&s.LimitBreakCasting)continue;
+                if(role==s.LimitBreakRole&&s.LimitBreakCasting)continue;
                 var target=Destination(s,role);
                 if(s.Destinations[role]==target)continue;
                 s.Destinations[role]=target;

@@ -10,10 +10,11 @@ public sealed partial class DsrP5DeathScenario
         ImGui.Combo("我的死宣分組",ref doomPreference,"隨機\0死宣組\0非死宣組\0");
         ImGui.TextDisabled("開始或重置後生效。");
         ImGui.TextWrapped("以持錘騎士為北，MT ST H1 H2 D1 D2 D3 D4 由西向東排隊。死宣往北、無死宣往南，組內依左右順序散開。");
+        ImGui.TextWrapped("非死宣第一／最後順位：百雷後先往相對南側小移躲旋風；第三環炸完後從南側繞入，等旋風消失再往北集合，避免切過兩側死宣旋風。");
         var music=!Plugin.Config.SuppressBgm;
         if(ImGui.Checkbox("背景音樂：Heavensward",ref music)){Plugin.Config.SuppressBgm=!music;Plugin.Config.Save();}
         ImGui.Checkbox("顯示站位提示",ref showHints);ImGui.SameLine();ImGui.Checkbox("顯示戰術圖",ref showMap);
-        ImGui.TextWrapped("包含死刻與隕石 LB 自由練習；D4 使用熱鍵列的極限爆發，瞄準北側隕石放置 LB2。也可選取隕石後使用 /dsrsim lb。讀條中移動會中斷。");
+        ImGui.TextWrapped("包含死刻與隕石 LB 自由練習；D3／D4 使用熱鍵列的極限爆發。物理遠程選取隕石施放原版直線 LB2，法系放置小型隕石圓形 LB2。也可選取隕石後使用 /dsrsim lb。原版讀條 3 秒，移動或取消會中斷。");
         if(state==null||world==null)return;
         ImGui.TextUnformatted($"P5-死刻　{state.Time:F1} 秒");
         if(state.Complete)ImGui.TextUnformatted(state.Failed?"本輪有失誤，可重置重練。":"死刻練習完成。");
@@ -26,8 +27,7 @@ public sealed partial class DsrP5DeathScenario
         {
             ImGui.TextWrapped(state.LimitBreakMessage);
             ImGui.TextUnformatted("LB 自由練習：命中隕石會消失，不判死、不自動結束；重置或離開以結束。");
-            if(state.LimitBreakCasting)ImGui.ProgressBar(state.LimitBreakElapsed/3f,new Vector2(-1,0),$"小型隕石 {state.LimitBreakElapsed:F1} / 3.0 秒");
-            ImGui.BeginDisabled((int)world.Party.PlayerRole!=7||state.LimitBreakUsed||state.LimitBreakCasting);
+            ImGui.BeginDisabled((int)world.Party.PlayerRole is not (6 or 7)||state.LimitBreakAction==0||state.LimitBreakUsed||state.LimitBreakCasting);
             if(ImGui.Button("模擬 LB2（目前目標）"))RequestLimitBreak();
             ImGui.EndDisabled();
         }

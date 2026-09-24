@@ -77,9 +77,9 @@ public sealed partial class DsrP6DragonsScenario(DsrP6Section section=DsrP6Secti
         world.Events.Add(25.207f,BeginStacks);
         world.Events.Add(33.393f,ResolveStacks);
         world.Events.Add(37f,()=>PrepareWings(false));
-        world.Events.Add(39.023f,()=>{hraesvelgr?.Cast(27940,castSeconds:7.2f,fireDelay:.270f);state.SetWings(false);});
-        world.Events.Add(42.600f,()=>nidhogg?.Cast(27966,new Vector3(11,0,40),4.7f,fireDelay:.267f));
-        world.Events.Add(47.567f,()=>ResolveLine(new(11,0,-34),new(11,0,40),11,"邪炎俯衝"));
+        world.Events.Add(39.023f,()=>{hraesvelgr?.Cast(state.FirstWings.CastAction,castSeconds:7.2f,fireDelay:.270f);state.SetWings(false);});
+        world.Events.Add(42.600f,()=>nidhogg?.Cast(27966,state.FirstWings.DiveTarget,4.7f,fireDelay:.267f));
+        world.Events.Add(47.567f,()=>ResolveLine(state.FirstWings.DiveOrigin,state.FirstWings.DiveTarget,11,"邪炎俯衝"));
         world.Events.Add(47.656f,()=>ResolveWings(false));
         world.Events.Add(50f,()=>{nidhogg?.QueueEntrance(DsrConstants.Timeline.KnightEntrance,.65f);RestoreDragons();state.SetVowPass(0);});
         world.Events.Add(56.109f,()=>PassVow(0));
@@ -125,10 +125,10 @@ public sealed partial class DsrP6DragonsScenario(DsrP6Section section=DsrP6Secti
         world.Events.Add(94.532f,BeginStacks);
         world.Events.Add(102.714f,ResolveStacks);
         world.Events.Add(105f,()=>PrepareWings(true));
-        world.Events.Add(107.228f,()=>{hraesvelgr?.Cast(27943,castSeconds:7.2f,fireDelay:.269f);state.SetWings(true);});
-        world.Events.Add(109.239f,()=>nidhogg?.Cast(27947,castSeconds:5.2f,fireDelay:.258f));
+        world.Events.Add(107.228f,()=>{hraesvelgr?.Cast(state.SecondWings.CastAction,castSeconds:7.2f,fireDelay:.269f);state.SetWings(true,false);});
+        world.Events.Add(109.239f,()=>{nidhogg?.Cast(state.SecondWings.HotWing?27947u:27949u,castSeconds:5.2f,fireDelay:.258f);state.SetWings(true);});
         world.Events.Add(115.501f,()=>ResolveWings(true));
-        world.Events.Add(115.725f,()=>ResolveHot(true));
+        world.Events.Add(115.725f,()=>ResolveHot(state.SecondWings.HotWing));
         world.Events.Add(116f,()=>state.SetVowPass(state.FirstVow==4?5:4));
         world.Events.Add(124.264f,()=>PassVow(state.FirstVow==4?5:4));
         world.Events.Add(126f,RestoreDragons);

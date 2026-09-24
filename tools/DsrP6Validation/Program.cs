@@ -159,6 +159,7 @@ foreach(var z in new[]{2f,3.8f,4.2f,6f,-2f})
  var s=new DsrP6DragonsScenario(DsrP6Section.Wings2);var w=new SimWorld();
  w.Party.Slots[2]=new SimPlayer{Role=2,Position=new(15,0,z)};
  SimCharacter.Failures.Clear();s.Run(w,0);
+ s.State.SecondWings=new(false,true,false,false,true);
  for(var frame=1;frame<=11.8f*60;frame++)
  {
   var time=frame/60f;SimCharacter.Time=time;
@@ -329,6 +330,7 @@ foreach(var relative in new[]{false,true})foreach(var manual in new[]{false,true
  Check(Markings.Values.Count==0,"clear phase marks after resolution");
 }
 Console.WriteLine("PASS: all 192 Wroth variant/wing-tail/strategy/marker combinations, manual reordering, 123412 positions and cleanup.");
+P6PatternValidation.Run(Check);
 namespace AnoMech.Scenarios.Dsr.P6Dragons
 {
  public sealed partial class DsrP6DragonsScenario

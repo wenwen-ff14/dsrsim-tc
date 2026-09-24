@@ -12,7 +12,23 @@ for(var seed=0;seed<100;seed++)
         var before=w.Party.Slots.Select(m=>m.Position).ToArray();
         w.Events.Tick(1f/fps);foreach(var m in w.Party.Slots)m.Advance(1f/fps);s.Tick(1f/fps,t);
         if(t<11.6f)for(var r=0;r<8;r++)Check(before[r]==w.Party.Slots[r].Position,"NPC moved before knights appeared");
+        if(t>=24.5f&&t<42.2f)
+        {
+            var knight=w.Enemies.Single(e=>e.BNpcBaseId==0x313A);
+            Check(knight.Active&&knight.Visible&&knight.Position==Vector3.Zero,"Grinnaux enters center immediately after charges and stays until meteor cleanup");
+            if(t<33.357f)Check(!knight.Casts.Any(c=>c.Action==25308),"early arrival must not shorten PS preparation");
+        }
         if(t<37.95f||t>38.8f)for(var r=0;r<8;r++)Check(Vector3.Distance(before[r],w.Party.Slots[r].Position)<=6f/fps+.001f,"NPC teleport");
+        if(t>=25.3f&&t<27.35f)
+            foreach(var role in new[]{s.State.Clean[0],s.State.Clean[3]})
+                foreach(var doom in s.State.Dooms)
+                {
+                    var start=before[role];var end=w.Party.Slots[role].Position;
+                    var segment=end-start;var length=segment.LengthSquared();
+                    var point=s.State.SpreadSnapshots[doom];
+                    var fraction=length<.000001f?0:Math.Clamp(Vector3.Dot(point-start,segment)/length,0,1);
+                    Check(Vector3.Distance(start+segment*fraction,point)>=4,$"outer non-doom route needs clearance from doom twister: seed={seed}, role={role}, time={t:F3}");
+                }
     }
     Check(SimCharacter.Failures.Count==0,$"seed={seed} fps={fps}: {string.Join(";",SimCharacter.Failures.Take(10))}");
     Check(!s.State.Complete&&s.State.MeteorsActive&&w.Events.IsEmpty,"incomplete timeline");
@@ -29,9 +45,29 @@ for(var seed=0;seed<100;seed++)
     Check(s.State.Dooms.All(r=>s.State.Cleansed[r]),"uncleansed doom");
     Check(w.Party.Slots.All(m=>!m.HasStatus(2976)&&!m.HasStatus(769)),"status cleanup");
     Check(w.Enemies.Count(e=>e.Active)==8&&w.EventObjects.Count==12&&w.EventObjects.All(o=>!o.Active),"actor cleanup");
+    var hammer=w.Enemies.Single(e=>e.BNpcBaseId==0x315D);
+    Check(!hammer.Casts.Any(c=>c.Action==25557)&&hammer.Vfx.Count==0,"additional hammer presentation removed");
+    Check(hammer.Casts.Select(c=>c.Action).SequenceEqual(new uint[]{25558,25559,25560,25561,25562}),"original five ring actions preserved");
+    float[] impactTimes=[22.179f,24.100f,25.978f,27.860f,29.738f];
+    for(var ring=0;ring<5;ring++)
+    {
+        var cast=hammer.Casts[ring];
+        var release=cast.Time+(cast.Duration??0)+cast.FireDelay;
+        Check(MathF.Abs(release-impactTimes[ring])<=1f/fps+.002f,"wave release matches ring damage time");
+    }
+    foreach(var entry in new[]{(Npc:0x313Au,Action:25308u,Start:33.357f,Duration:3.7f),(Npc:0x313Bu,Action:25310u,Start:32.239f,Duration:6.7f)})
+    {
+        var knight=w.Enemies.Single(e=>e.BNpcBaseId==entry.Npc);
+        var cast=knight.Casts.Single(c=>c.Action==entry.Action);
+        Check(MathF.Abs(cast.Time-entry.Start)<=1f/fps+.001f&&cast.Duration==entry.Duration,"native knight cast timing preserved");
+        Check(knight.CastTargets.Single(c=>c.Action==entry.Action).Target==knight.GameObjectId,"knight native release has a valid self target");
+        Check(knight.Vfx.Count(v=>v.Path=="vfx/common/eff/mon_eisyo03t.avfx")==1,"knight charging VFX added once");
+        Check(knight.Entrances.Count==1&&!knight.Active,"knight entrance and cleanup");
+    }
     Check(Enumerable.Range(281,4).All(id=>s.State.Symbols.Count(v=>v==id)==2),"PS pairs");
 }
 Console.WriteLine("PASS: Death of the Heavens 100 seeds at 30/60/144 FPS; NPC routes, rings, dives, spreads, twisters, gaze, knockback, chains, doom cleanse and cleanup.");
+Console.WriteLine("PASS: first/last non-doom paths keep at least 4y from doom twister snapshots, including between-frame movement segments.");
 for(var role=0;role<8;role++)
 {
     var s=new DsrP5DeathScenario();s.UseSeed(role*11);var w=new SimWorld();w.Party.Slots[role]=new SimPlayer{Role=role,Position=new(0,0,16)};SimCharacter.Failures.Clear();s.Run(w,0);
@@ -140,6 +176,38 @@ foreach(var expected in new[]{0,1,2,3})
     Check(s.TryLimitBreak(Vector3.Zero),"practice LB did not refill");
 }
 Console.WriteLine("PASS: full LB available before meteors; three-second cast; zero/one/two/three meteor hits despawn only hit targets; empty gauge rejected and refilled.");
+foreach(var role in new[]{6,7})foreach(var action in new[]{204u,4239u})foreach(var angle in new[]{0f,1.1f,3.4f})
+{
+    Vector3 Rotate(Vector3 p)=>Vector3.Transform(p,Quaternion.CreateFromAxisAngle(Vector3.UnitY,angle));
+    var s=new DsrP5DeathScenario();var w=new SimWorld();
+    var player=new SimPlayer{Role=role,Position=Vector3.Zero};w.Party.Slots[role]=player;s.Run(w,0);
+    s.State.LimitBreakAction=action;s.State.MeteorsActive=true;
+    Vector3[] points=[new(0,0,10.5f),new(2.4f,0,29),new(2.6f,0,10),new(0,0,-10),new(0,0,31),new(0,0,20),new(9.5f,0,20),new(-2.4f,0,1)];
+    for(var i=0;i<8;i++)s.State.MeteorPositions[i]=Rotate(points[i]);
+    Check(!s.TryLimitBreak(Rotate(new(0,0,31))),"LB range gate");
+    if(action==4239)Check(!s.TryLimitBreak(Vector3.Zero),"zero-direction line rejected");
+    Check(s.TryLimitBreak(Rotate(new(0,0,20))),"both roles can use either supported job family");
+    w.Party.Slots[role==6?7:6].Position=new(12,0,12);
+    s.AdvanceLimitBreak(2.9f);
+    Check(s.State.LimitBreakCasting&&!s.State.MeteorDestroyed.Any(x=>x),"other ranged moving must not interrupt caster");
+    s.AdvanceLimitBreak(.11f);
+    var expected=action==4239?new[]{0,1,5,7}:new[]{0,1,5,6};
+    Check(Enumerable.Range(0,8).Where(i=>s.State.MeteorDestroyed[i]).SequenceEqual(expected),$"line/circle hit geometry role {role}, action {action}, rotation {angle}");
+    s.AdvanceLimitBreak(1.01f);
+    Check(s.TryLimitBreak(Rotate(new(0,0,20))),"LB refills for both roles");
+    player.Position+=new Vector3(1,0,0);s.AdvanceLimitBreak(.1f);
+    Check(!s.State.LimitBreakCasting&&!s.State.LimitBreakUsed,"active caster movement interrupts without consuming gauge");
+    Check(s.TryLimitBreak(Rotate(new(0,0,20))),"retry after movement interruption");
+    player.Active=false;s.AdvanceLimitBreak(.1f);
+    Check(!s.State.LimitBreakCasting&&!s.State.LimitBreakUsed,"caster death interrupts");
+}
+for(var role=0;role<6;role++)
+{
+    var s=new DsrP5DeathScenario();var w=new SimWorld();
+    w.Party.Slots[role]=new SimPlayer{Role=role};s.Run(w,0);
+    Check(!s.TryLimitBreak(new(0,0,10)),"non-ranged practice role rejected");
+}
+Console.WriteLine("PASS: D3/D4 caster and physical-ranged LB2, rotated circle/line hit geometry, cast timing, range, correct caster interruption, death, refill and role restrictions.");
 namespace AnoMech.Scenarios.Dsr.P5Death
 {
     public sealed partial class DsrP5DeathScenario

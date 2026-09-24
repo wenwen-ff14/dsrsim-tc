@@ -25,7 +25,7 @@ internal sealed unsafe class PracticeLimitBreakSession : IDisposable
         Plugin.PlayerInputHooks.CastCancelled+=Cancel;
     }
 
-    private bool CanUse()=>scenario?.PracticeReady==true&&caster.IsAlive()&&!Plugin.GameInstance.Paused;
+    private bool CanUse()=>scenario?.PracticeReady==true&&scenario.PracticeAction!=0&&caster.IsAlive()&&!Plugin.GameInstance.Paused;
 
     private bool Use(Vector3? target)
     {
@@ -48,7 +48,11 @@ internal sealed unsafe class PracticeLimitBreakSession : IDisposable
     {
         if(current?.PracticeActive!=true||!simWorld.Map.IsInInstance){Reset();return;}
         if(scenario!=null&&scenario!=current)Reset();
-        scenario=current;world=simWorld;caster=world.Party.Get(7) as SimPlayer;
+        scenario=current;world=simWorld;
+        var role=(int)world.Party.PlayerRole;
+        caster=role is 6 or 7?world.Party.Get(role) as SimPlayer:null;
+        current.ConfigurePracticeLimitBreak(Plugin.ObjectTable.LocalPlayer?.ClassJob.RowId??0);
+        Plugin.PlayerInputHooks.PracticeLimitBreakAction=current.PracticeAction;
         var gauge=LimitBreakController.Instance();
         if(gauge==null)return;
         if(!captured)
@@ -69,7 +73,7 @@ internal sealed unsafe class PracticeLimitBreakSession : IDisposable
         if(caster==null)return;
         if(current.PracticeCasting&&!casting)
         {
-            caster.BeginPracticeLimitBreak(current.PracticeTarget);
+            caster.BeginPracticeLimitBreak(current.PracticeTarget,current.PracticeAction,current.PracticeAction==4239?current.PracticeTargetActor?.GameObjectId:null);
             casting=true;
         }
         if(casting&&!current.PracticeCasting)
@@ -96,6 +100,7 @@ internal sealed unsafe class PracticeLimitBreakSession : IDisposable
             actions->AreaTargetingExecuteAtCursor=false;
         }
         Plugin.PlayerInputHooks.PracticeLimitBreakEnabled=false;
+        Plugin.PlayerInputHooks.PracticeLimitBreakAction=0;
         Plugin.PlayerInputHooks.PracticeLimitBreakCasting=false;
         if(captured)
         {

@@ -13,15 +13,16 @@ internal sealed class DsrP6DragonsState
     private static readonly Vector3[] FixedBreathPositions=
     [
         new(-14.8f,0,-12.7f),new(14.8f,0,12.7f),
-        new(0,0,-19.7f),new(0,0,19.7f),
+        new(-1.4f,0,-19.6f),new(1.4f,0,19.6f),
         new(-3.8f,0,9.6f),new(3.8f,0,-9.6f),
-        new(-7.8f,0,18.3f),new(7.8f,0,-18.3f),
+        new(-7.4f,0,18.1f),new(7.4f,0,-18.1f),
     ];
     public readonly Vector3[] Destinations=new Vector3[8];
     public readonly Vector3?[] LastDestinations=new Vector3?[8];
     public readonly bool[] Fire=new bool[8];
     public readonly bool[] SecondFire=new bool[8];
     public DsrP6Glow SecondGlow;
+    public DsrP6WingsPattern FirstWings, SecondWings;
     public readonly int[] Flames;
     public readonly int FirstVow;
     public readonly int AkhMornTarget;
@@ -44,6 +45,8 @@ internal sealed class DsrP6DragonsState
         AkhMornTarget=random.Next(8);
         Wroth=new(random.Next(24));
         WrothHotWing=random.Next(2)==0;
+        FirstWings=new(random.Next(2)==0,random.Next(2)==0,random.Next(2)==0,random.Next(2)==0,true);
+        SecondWings=new(random.Next(2)==0,random.Next(2)==0,false,false,random.Next(2)==0);
         SetIdle();
     }
     public void SetIdle()
@@ -71,7 +74,7 @@ internal sealed class DsrP6DragonsState
             FixedBreathPositions.CopyTo(Destinations,0);
             if(SecondGlow==DsrP6Glow.Both)Destinations[0]=Destinations[1]=Vector3.Zero;
         }
-        Hint=second?"固定式冰火：H1 北／H2 南，D2／D4 東北，D1／D3 西南；雙龍發光時雙坦場中分攤，否則 MT 西北、ST 東南。":"冰火一：兩人一組，讓每人同時受到冰與火；ST 遠離人群承受單坦死刑。";
+        Hint=second?"固定式冰火：H1 北略偏西／H2 南略偏東，D2／D4 東北，D1／D3 西南；D3／D4 在直列地磚外側、暴雪環內。雙龍發光時雙坦場中分攤，否則 MT 西北、ST 東南。":"冰火一：兩人一組，讓每人同時受到冰與火；ST 遠離人群承受單坦死刑。";
     }
     public void SetStacks()
     {
@@ -83,19 +86,14 @@ internal sealed class DsrP6DragonsState
         for(var r=0;r<8;r++)Destinations[r]=new(r%2==0?-10:10,0,-12+r/2*8);
         Hint="DPS 分散，等待滅殺的誓言點名後再集合分攤。";
     }
-    public void SetWings(bool second)
+    public void SetWings(bool second,bool hotKnown=true)
     {
-        if(!second)
-        {
-            Destinations[0]=new(-18,0,-18);Destinations[1]=new(-18,0,-5);
-            for(var r=2;r<8;r++)Destinations[r]=new(-2,0,-9);
-        }
-        else
-        {
-            Destinations[0]=new(-18,0,2);Destinations[1]=new(-4,0,2);
-            for(var r=2;r<8;r++)Destinations[r]=new(15,0,2);
-        }
-        Hint=second?"第二次坦死刑：貼近中央東西線的南側窄帶；雙坦保持最遠並彼此拉開，人群靠白龍。":"第一次坦死刑：躲南半場與東半場俯衝；雙坦保持最遠並彼此拉開。";
+        var pattern=second?SecondWings:FirstWings;
+        for(var r=0;r<8;r++)Destinations[r]=pattern.Position(r,second,hotKnown);
+        Hint=(pattern.SouthCleave?"北半安全；":"南半安全；")+
+            (pattern.Far?"抬頭：雙坦最遠，人群靠白龍。":"低頭：雙坦最近，人群遠離白龍。")+
+            (second?(hotKnown?(pattern.HotWing?"翼：中央窄帶。":"尾：遠離中央線。") :"等待黑龍翼／尾讀條。")+
+                "MT 靠東／西場邊、ST 靠場中。":(pattern.DiveWest?"避開西半俯衝。":"避開東半俯衝。")+"MT 靠南／北場邊、ST 靠場中。");
     }
     public void SetVowPass(int receiver,bool preserveOthers=false)
     {

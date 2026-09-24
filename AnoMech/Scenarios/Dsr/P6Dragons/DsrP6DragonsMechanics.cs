@@ -113,23 +113,31 @@ public sealed partial class DsrP6DragonsScenario
     private void PrepareWings(bool second)
     {
         RestoreDragons();
-        if(!second){nidhogg?.SetTargetable(false);nidhogg?.SetPosition(new Vector3(11,0,-34));nidhogg?.HoldFacing(0);}
+        if(!second)
+        {
+            nidhogg?.SetTargetable(false);
+            nidhogg?.SetPosition(state!.FirstWings.DiveOrigin);
+            nidhogg?.HoldFacing(state!.FirstWings.DiveFromSouth?MathF.PI:0);
+        }
     }
     private void ResolveWings(bool second)
     {
-        var targets=world!.Party.ActiveMembers().OrderByDescending(m=>Vector3.DistanceSquared(m.Position,DsrP6DragonsState.Hraesvelgr)).Take(2).ToArray();
+        var pattern=second?state!.SecondWings:state!.FirstWings;
+        var ordered=world!.Party.ActiveMembers().OrderBy(m=>Vector3.DistanceSquared(m.Position,DsrP6DragonsState.Hraesvelgr));
+        var targets=(pattern.Far?ordered.Reverse():ordered).Take(2).ToArray();
         for(var i=0;i<targets.Length;i++)
         {
             plumeTargets[i]=targets[i].Position;
             plumeRoles[i]=Enumerable.Range(0,8).First(r=>world.Party.Get(r)==targets[i]);
         }
-        Effect(second?27944u:27941u,new(22,0,second?-11:11),new(-30,0,second?-11:11));
+        var cleaveZ=pattern.SouthCleave?11:-11;
+        Effect(pattern.CleaveAction,new(22,0,cleaveZ),new(-30,0,cleaveZ));
         foreach(var member in world.Party.ActiveMembers())
-            if(second?member.Position.Z<=0:member.Position.Z>=0)Hit(member,"神聖之翼：前往未發光翅膀側");
+            if(pattern.SouthCleave?member.Position.Z>=0:member.Position.Z<=0)Hit(member,"神聖之翼：前往未發光翅膀側");
         for(var i=0;i<targets.Length;i++)
         {
             Effect(27945,DsrP6DragonsState.Hraesvelgr,plumeTargets[i],targets[i]);
-            if(plumeRoles[i]>=2)Hit(targets[i],"神聖之羽：雙坦必須誘導最遠目標");
+            if(plumeRoles[i]>=2)Hit(targets[i],pattern.Far?"神聖之羽：雙坦必須誘導最遠目標":"神聖之羽：雙坦必須誘導最近目標");
             foreach(var member in world.Party.ActiveMembers())
                 if(member!=targets[i]&&Vector3.Distance(member.Position,plumeTargets[i])<10)Hit(member,"神聖之羽：遠離坦克死刑範圍");
         }

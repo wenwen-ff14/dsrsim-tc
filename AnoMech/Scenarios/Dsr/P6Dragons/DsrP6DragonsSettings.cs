@@ -17,7 +17,9 @@ public sealed partial class DsrP6DragonsScenario
         ImGui.TextWrapped("散開：攻擊 1～4；分攤：鎖鏈 1～2；無點名：禁止 1～2。同號鎖鏈與禁止配對，依 123412 排列。設定下次開始生效。");
         ImGui.TextWrapped("十字火：中央先出、後兩組對角隨機；白龍西／中／東及南／北隨機。等命中特效後走 L 型，黑龍側可繞目標圈。火球時間與位置仍待原始 ACT／影片精校。");
         ImGui.TextWrapped("結尾隨機翼／尾：翼躲中央窄帶，尾避開中央；玩家手標時，NPC 等待八個正確標記後就位。");
-        ImGui.TextWrapped("冰火 2 使用中文攻略固定式：冰火連線隨機，職責站位固定；單龍發光為另一側坦克單吃，雙龍發光為雙坦場中分攤。冰火 1 與翅膀死刑仍使用指定紀錄分支。坦克減傷與雙龍血量差尚未模擬。");
+        ImGui.TextWrapped("第一次坦死刑：黑龍南／北進場、東／西半場俯衝；白龍左右翼及抬頭遠／低頭近隨機。MT 靠南北場邊、ST 靠場中。");
+        ImGui.TextWrapped("第二次坦死刑：白龍左右翼、近／遠死刑與黑龍翼／尾隨機。MT 靠東西場邊、ST 靠場中；等黑龍讀條再收中或離開中央線。");
+        ImGui.TextWrapped("冰火 2 使用中文攻略固定式：冰火連線隨機，職責站位固定；H1 北略偏西、H2 南略偏東，與外側 D3／D4 拉開。單龍發光為另一側坦克單吃，雙龍發光為雙坦場中分攤。冰火 1 仍使用指定紀錄分支。坦克減傷與雙龍血量差尚未模擬。");
         var music=!Plugin.Config.SuppressBgm;
         if(ImGui.Checkbox("背景音樂：Dragonsong",ref music)){Plugin.Config.SuppressBgm=!music;Plugin.Config.Save();}
         if(state==null)return;
