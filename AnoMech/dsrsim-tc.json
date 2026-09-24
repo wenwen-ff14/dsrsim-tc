@@ -3,8 +3,8 @@
   "Name": "dsrsim-tc｜絕龍詩模擬器",
   "Punchline": "DSR P2～P7 機制練習，包含雙龍與龍威騎神換坦。",
   "Description": "API 13 繁中版，參考 AnoMech 與 tuuf／Elemental，模擬七名隊友。提供 P2 聖仗、P3 尼德霍格、P4 雙眼、P5 風槍／死刻、P6 雙龍與 P7 龍威騎神。P6 可選機制範圍及十字火頭標方式；P7 包含冰火劍、三劍一體、地火、踩塔、十億火光、最後犧牲塔及挑釁／退避換坦練習。使用 /dsrsim 或 /dsrsim-tc 開啟；視窗可收合。各階段支援範圍見專案攻略文件。",
-  "RepoUrl": "https://github.com/wenwen-ff14/test",
-  "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/test/main/images/dsrsim-tc.png",
+  "RepoUrl": "https://github.com/wenwen-ff14/dsrsim-tc",
+  "IconUrl": "https://raw.githubusercontent.com/wenwen-ff14/dsrsim-tc/main/images/dsrsim-tc.png",
   "Tags": [
     "dsr",
     "thordan",

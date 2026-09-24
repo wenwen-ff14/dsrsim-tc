@@ -11,7 +11,7 @@
 2. 新增以下網址，啟用並儲存設定：
 
 ```text
-https://raw.githubusercontent.com/wenwen-ff14/test/main/pluginmaster.json
+https://raw.githubusercontent.com/wenwen-ff14/dsrsim-tc/main/pluginmaster.json
 ```
 
 3. 開啟插件安裝器，搜尋 **dsrsim-tc**。

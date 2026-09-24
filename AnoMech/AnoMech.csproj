@@ -7,12 +7,12 @@
     <DalamudLibPath Condition="'$(DALAMUD_HOME)' == '' And Exists('$(APPDATA)/FFXIVSimpleLauncher/Dalamud/Injector/Dalamud.dll')">$(APPDATA)/FFXIVSimpleLauncher/Dalamud/Injector/</DalamudLibPath>
     <AssemblySearchPaths>$(DalamudLibPath);{CandidateAssemblyFiles};{HintPathFromItem};{TargetFrameworkDirectory};{RawFileName}</AssemblySearchPaths>
     <Authors>Anomek</Authors>
-    <Version>1.0.0.1</Version>
+    <Version>1.0.0.2</Version>
     <Description>Simulate ultimate raid mechanics solo client-side</Description>
     <RootNamespace>AnoMech</RootNamespace>
     <AssemblyName>dsrsim-tc</AssemblyName>
     <PackageId>dsrsim-tc</PackageId>
-    <PackageProjectUrl>https://github.com/wenwen-ff14/test</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/wenwen-ff14/dsrsim-tc</PackageProjectUrl>
     <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
     <IsPackable>false</IsPackable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

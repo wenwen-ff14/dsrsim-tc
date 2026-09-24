@@ -41,7 +41,7 @@ try {
     }
 } finally { $zip.Dispose() }
 
-$downloadUrl = "https://raw.githubusercontent.com/wenwen-ff14/test/main/$packageRelativePath"
+$downloadUrl = "https://raw.githubusercontent.com/wenwen-ff14/dsrsim-tc/main/$packageRelativePath"
 $manifest.DownloadLinkInstall = $downloadUrl
 $manifest.DownloadLinkUpdate = $downloadUrl
 $manifest.DownloadLinkTesting = $downloadUrl
