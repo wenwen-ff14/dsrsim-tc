@@ -18,6 +18,10 @@ public unsafe class SimNpc : SimCharacter
 
     private int index;
     private bool pendingDraw;
+    private bool drawRequested;
+    private float drawRetryRemaining;
+    private float drawWaitElapsed;
+    private bool drawWaitLogged;
 
     private Movement? movement;
     private protected override Movement Movement => movement ??= new Movement(this);
@@ -58,19 +62,18 @@ public unsafe class SimNpc : SimCharacter
         ReloadModel();
     }
 
-    // Forces a model rebuild via DisableDraw -> EnableDraw so the engine re-reads
-    // ModeAttributeFlags and rebuilds the sub-meshes. The re-enable is deferred through the
-    // pendingDraw path (the rebuild is async, gated on IsReadyToDraw). Only cycles draw when
-    // the model is currently drawn: a hidden NPC keeps the written flags and applies them on
-    // its next EnableDraw from the visibility system, so we never force it visible.
+    // Model rebuilds are asynchronous; SimEnemy reapplies its requested visibility after this tick.
     private void ReloadModel()
     {
         var obj = BattleCharaPtr;
         if (obj == null) return;
         var draw = obj->DrawObject;
-        if (draw == null) return; //|| !draw->IsVisible) return;
+        if (draw == null) return;
         obj->DisableDraw();
         pendingDraw = true;
+        drawRequested = false;
+        drawRetryRemaining = drawWaitElapsed = 0;
+        drawWaitLogged = false;
     }
 
     public override void Tick(float deltaSeconds)
@@ -81,10 +84,24 @@ public unsafe class SimNpc : SimCharacter
         {
             var obj = BattleCharaPtr;
             if (obj == null) { pendingDraw = false; }
-            else if (obj->IsReadyToDraw())
+            else
             {
-                obj->EnableDraw();
-                pendingDraw = false;
+                drawWaitElapsed += deltaSeconds;
+                drawRetryRemaining = MathF.Max(0, drawRetryRemaining - deltaSeconds);
+                var ready = obj->IsReadyToDraw();
+                if (drawRequested && ready && obj->DrawObject != null)
+                    pendingDraw = false;
+                else if (ready && drawRetryRemaining <= 0)
+                {
+                    obj->EnableDraw();
+                    drawRequested = true;
+                    drawRetryRemaining = .5f;
+                }
+                if (pendingDraw && !drawWaitLogged && drawWaitElapsed >= 5f)
+                {
+                    drawWaitLogged = true;
+                    Plugin.Log.Warning($"SimNpc: model still pending at index {index}, ready={ready}, draw={(nint)obj->DrawObject:X}, model={obj->ModelContainer.ModelCharaId}, skeleton={obj->ModelContainer.ModelSkeletonId}");
+                }
             }
         }
     }

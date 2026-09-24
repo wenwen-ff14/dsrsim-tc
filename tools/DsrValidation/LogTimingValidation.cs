@@ -17,21 +17,33 @@ internal static class LogTimingValidation
             SimCharacter.Time = 0;
             scenario.Run(world, 0);
             var impacts = new List<float>();
+            var flareImpacts = new List<float>();
             var gaze = 0f;
             for (var frame = 0; frame < 62 * frameRate; frame++)
             {
                 SimCharacter.Time = (frame + 1f) / frameRate;
                 var before = scenario.CurrentState.Stage;
                 var meteorCount = scenario.CurrentState.MeteorCount;
+                var explosions = scenario.CurrentState.Explosions;
                 world.Events.Tick(1f / frameRate);
                 if (scenario.CurrentState.Stage == SanctityStage.Charges && before != SanctityStage.Charges)
                     gaze = SimCharacter.Time;
                 if (scenario.CurrentState.MeteorCount != meteorCount) impacts.Add(SimCharacter.Time);
+                if (scenario.CurrentState.Explosions != explosions) flareImpacts.Add(SimCharacter.Time);
                 foreach (var member in world.Party.ActiveMembers()) member.Advance(1f / frameRate);
                 scenario.Tick(1f / frameRate, SimCharacter.Time);
             }
             var tolerance = 1f / frameRate + .003f;
             var casts = world.Enemies.SelectMany(e => e.Casts).ToArray();
+            float[] flareWarnings = [20.75f,21.45f,22.15f,22.85f,23.55f,24.25f,24.95f,25.65f,26.35f];
+            var flares=casts.Where(c=>c.Action==25295).OrderBy(c=>c.Time).ToArray();
+            if(flares.Length!=18||flareImpacts.Count!=9)throw new Exception("Missing white-sphere warning or impact");
+            for(var i=0;i<9;i++)
+            {
+                if(MathF.Abs(flareImpacts[i]-flareWarnings[i]-1f)>tolerance||
+                    flares.Skip(i*2).Take(2).Any(c=>MathF.Abs(c.Time-flareWarnings[i])>tolerance||c.Duration!=1f))
+                    throw new Exception("Earlier white-sphere native warnings and damage must stay aligned");
+            }
             foreach (var expected in data.GetProperty("casts").EnumerateArray())
             {
                 var id = expected.GetProperty("action").GetUInt32();

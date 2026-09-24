@@ -103,13 +103,18 @@ namespace AnoMech.Core.SimObjects
         public void SetTankEnmity(SimParty party,int mainTank)=>EnmityTank=mainTank;
         public readonly List<(float Time,ushort Id)> ActionTimelines=[];
         public void PlayActionTimeline(ushort id,ushort loopId=0,ushort baseOverride=0)=>ActionTimelines.Add((Time,id));
+        public (ushort Start, ushort Loop) BattleIdle = (34, 34);
+        public void SetBattleIdle(ushort start, ushort loop) => BattleIdle = (start, loop);
         public float Scale = 1;
         public void SetScale(float scale) => Scale = scale;
         public uint BNpcBaseId;
         public readonly List<(ushort Timeline, float Duration)> Entrances = [];
         public readonly List<(float Time, ushort Timeline)> Departures = [];
         public void PlayDeparture(ushort id) => Departures.Add((Time, id));
-        public void QueueEntrance(ushort id, float duration) => Entrances.Add((id, duration));
+        public bool IsReadyForEntrance = true;
+        public bool IsEntrancePending;
+        public Func<bool>? EntranceReady;
+        public void QueueEntrance(ushort id, float duration, Func<bool>? ready = null) { Entrances.Add((id, duration)); EntranceReady=ready; }
         public uint NameId;
         public EnemyListMode ListMode;
         public bool Visible;
@@ -128,8 +133,10 @@ namespace AnoMech.Core.SimObjects
         public SimCharacter? Target;
         public void SetTarget(SimCharacter? target,bool follow=true)=>Target=target;
         public void SetTargetable(bool b) => Targetable = b;
-        public bool Cast(uint action, Vector3? location = null, float? castSeconds = null, uint? targetId = null, float? fireDelay = null, float omenDelay = 0)
+        public readonly List<(uint Action,float Duration)> AnimationLocks = [];
+        public bool Cast(uint action, Vector3? location = null, float? castSeconds = null, uint? targetId = null, float? fireDelay = null, float omenDelay = 0, float animationLock = .6f)
         {
+            AnimationLocks.Add((action,animationLock));
             Casts.Add((Time, action, castSeconds, fireDelay ?? 0));
             Omens.Add((action,omenDelay));
             CastTargets.Add((action,targetId));

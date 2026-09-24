@@ -6,6 +6,29 @@ var failures = new List<string>();
 LogTimingValidation.Run();
 MeteorSnapshotValidation.Run();
 TowerPriorityValidation.Run();
+{
+    var scenario=new DsrP2SanctityScenario();var world=new SimWorld();scenario.Run(world,0);
+    world.Events.Tick(2.5f);
+    var landing=world.Enemies.Where(e=>e.BNpcBaseId is 0x3130 or 0x3139 or 0x3158).ToArray();
+    landing[0].IsReadyForEntrance=false;
+    world.Events.Tick(9f);
+    scenario.Tick(0,11.5f);
+    if(landing.Length!=3||landing.Any(e=>e.EntranceReady==null||e.EntranceReady()))
+        throw new Exception("Landing must wait for every returning knight");
+    landing[0].IsReadyForEntrance=true;
+    landing[0].IsEntrancePending=true;
+    scenario.Tick(0,11.5f);
+    if(landing.Any(e=>!e.EntranceReady!()))throw new Exception("Landing must release all three knights together");
+    if(world.Party.ActiveMembers().Any(m=>m.LockonVfx.Contains(50)||m.LockonVfx.Contains(51)))
+        throw new Exception("Sword markers must wait for landing animation completion");
+    landing[0].IsEntrancePending=false;
+    scenario.Tick(0,12.6f);
+    scenario.Tick(0,12.7f);
+    for(var k=0;k<2;k++)
+        if(world.Party.Get(scenario.CurrentState.Swords[k])!.LockonVfx.Count(id=>id==50+k)!=1)
+            throw new Exception("Sword markers must appear exactly once after all knights land");
+}
+Console.WriteLine("P2 landing: delayed knight readiness holds all three entrances, then releases them together.");
 var peak = 0;
 for (var seed = 0; seed < 1000; seed++)
 {
@@ -41,15 +64,18 @@ for (var seed = 0; seed < 1000; seed++)
         world.Events.Tick(1f / 60);
         foreach (var member in world.Party.ActiveMembers()) member.Advance(1f / 60);
         scenario.Tick(1f / 60, time);
-        if (frame == 7 * 60 + 30)
+        if (frame == 9 * 60 + 30)
         {
             var opening = world.Enemies.Where(e => e.NameId is >= 3633 and <= 3644).ToArray();
             Check(opening.Length == 8 && opening.All(e => e.Active && e.Departures.Count == 1 &&
-                e.Departures[0].Timeline == 0x1E39 && MathF.Abs(e.Departures[0].Time - 7.1f) < .05f),
-                "all opening knights take off after Sanctity cast and remain alive for animation");
+                e.Departures[0].Timeline == 0x1E39 && MathF.Abs(e.Departures[0].Time - 9.2f) < .05f),
+                "all opening knights take off with Thordan and remain alive for animation");
         }
-        if (frame == 9 * 60)
-            Check(world.Enemies.Where(e => e.NameId is >= 3633 and <= 3644).All(e => !e.Active), "opening knights retired after takeoff");
+        if (frame == 11 * 60)
+        {
+            var opening=world.Enemies.Where(e=>e.NameId is >=3633 and <=3644).ToArray();
+            Check(opening.Count(e=>e.Active)==3&&opening.Where(e=>e.Active).All(e=>!e.Visible),"three returning knights retained hidden after takeoff");
+        }
         if (frame is 720 or 840)
         {
             var positions = world.Party.ActiveMembers().Select(m => m.Position).ToArray();
@@ -72,8 +98,8 @@ for (var seed = 0; seed < 1000; seed++)
             foreach (var enemy in world.Enemies.Where(e => e.Active && e.BNpcBaseId is 0x3139 or 0x3158))
             {
                 var south = (enemy.Position.X > 0) == s.Clockwise;
-                Check(enemy.Entrances.Count == 1 && enemy.Entrances[0].Timeline == 0x1E43 &&
-                    enemy.Entrances[0].Duration < 1.1f, "knight has one bounded entrance");
+                Check(enemy.Entrances.Count == 2 && enemy.Entrances[1].Timeline == 0x1E43 &&
+                    enemy.Entrances.All(e=>MathF.Abs(e.Duration-32f/30f)<.001f), "P2 landing finishes before looping battle idle");
                 Check(MathF.Abs(MathF.Cos(enemy.Rotation) - (south ? 1 : -1)) < .001f, "knight facing follows rotation direction");
             }
             foreach (var enemy in world.Enemies.Where(e => e.Active && e.BNpcBaseId is 0x313C or 0x3130))
@@ -87,7 +113,8 @@ for (var seed = 0; seed < 1000; seed++)
     Check(world.Events.IsEmpty, "scenario timeline completes");
     Check(thordan.Targetable, "Thordan targetable again after mechanics");
     foreach (var enemy in world.Enemies.Where(e => e.NameId is >= 3633 and <= 3644))
-        Check(enemy.Entrances.Count == 1, "each named knight receives one entrance");
+        Check(enemy.Entrances.Count == (enemy.BNpcBaseId is 0x3130 or 0x3139 or 0x3158 ? 2 : 1), "returning knights receive opening and synchronized landing entrances");
+    Check(world.Enemies.SelectMany(e=>e.AnimationLocks).Where(a=>a.Action==25570).All(a=>a.Duration==0),"charges start without post-action movement lock");
     if (SimCharacter.Failures.Count > 0)
         failures.Add($"Seed {seed}: {string.Join("; ", SimCharacter.Failures.Distinct().Take(4))}");
 }

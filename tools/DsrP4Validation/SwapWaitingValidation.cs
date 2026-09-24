@@ -6,13 +6,26 @@ internal static class SwapWaitingValidation
     static void Check(bool value, string message) { if (!value) throw new Exception(message); }
     public static void Run()
     {
+        foreach(var mask in Enumerable.Range(0,256).Where(m=>int.PopCount(m)==4))
+        {
+            var opening=new DsrP4EyesState(0){BuffsApplied=true,ColorsAssigned=true};
+            for(var r=0;r<8;r++){opening.Red[r]=(mask&(1<<r))!=0;opening.Positions[r]=DsrP4EyesState.Opening(r);}
+            for(var r=0;r<8;r++)
+                if(opening.Red[r]!=(r<4))Check(DsrP4EyesAi.Destination(opening,r)==Vector3.Zero,"opening mismatched colours must meet at center, including red DPS");
+        }
         foreach(var fps in new[]{30,60,144})
         {
             var s = new DsrP4EyesScenario(); var w = new SimWorld(); s.Run(w,0); s.PrepareColors();
             s.State.BuffsApplied=true; s.State.OrbsPopped[0]=s.State.OrbsPopped[1]=true;
             for(var r=0;r<8;r++) { s.State.Red[r]=r<4; w.Party.Slots[r].Position=r<4?DsrP4EyesState.YellowWait(r,1):DsrP4EyesState.Opening(r); }
             w.Party.Slots[4]=new SimPlayer{Role=4,Position=new(0,0,16)};
-            for(var f=0;f<fps;f++) { s.Tick(1f/fps,41); foreach(var m in w.Party.Slots)m.Advance(1f/fps); }
+            for(var f=0;f<fps;f++)
+            {
+                s.Tick(1f/fps,41);
+                var redWaiters=Enumerable.Range(0,8).Where(r=>s.State.Red[r]).Select(r=>(Role:r,Position:w.Party.Slots[r].Position)).ToArray();
+                foreach(var m in w.Party.Slots)m.Advance(1f/fps);
+                foreach(var waiter in redWaiters)Check(w.Party.Slots[waiter.Role].Position==waiter.Position,"all current red holders must wait for the delayed orb exchange");
+            }
             Check(w.Party.Slots[0].Position==DsrP4EyesState.YellowWait(0,1),"MT left before player exchanged");
             Check(!s.State.OrbExchangeDone[0],"exchange marked before contact");
             w.Party.Slots[4].Position=w.Party.Slots[0].Position;
@@ -33,6 +46,11 @@ internal static class SwapWaitingValidation
             Check(v.Party.Slots[target].Position==wait,"dive target left while player delayed");
             v.Party.Slots[2].Position=wait; d.Tick(0,62);
             Check(d.State.SwapWaitPosition[target]==null&&d.State.SwapTarget[2]==-1,"successful swap did not release waiter");
+            var newRed=Enumerable.Range(0,8).First(r=>r!=2&&d.State.Red[r]&&d.State.SwapWaitPosition[r]==null);
+            v.Party.Slots[newRed].Position+=new Vector3(.5f,0,0);
+            d.Tick(0,62);
+            Check(DsrP4EyesAi.Destination(d.State,newRed)==v.Party.Slots[newRed].Position,"unselected red holder must also wait for the remaining blue player");
+            Check(DsrP4EyesAi.Destination(d.State,2)==wait,"new red holder must wait until the whole dive exchange finishes");
             v.Party.Slots[2].Position=new(0,0,18);
             d.Tick(2.999f,64.999f);
             Check(v.Party.Slots[2].HasStatus(DsrP4EyesConstants.SwapLock),"debuff expired before three seconds");

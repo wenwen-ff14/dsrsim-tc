@@ -52,7 +52,7 @@ public sealed partial class DsrP6DragonsScenario
     }
     private void BeginFireballs(int wave)
     {
-        for(var i=0;i<3;i++)fireballs[wave,i]?.Cast(26409,castSeconds:5,omenDelay:4.5f);
+        for(var i=0;i<3;i++)fireballs[wave,i]?.Cast(26409,castSeconds:5,omenDelay:3f);
     }
     private void ResolveFireballs(int wave)
     {
@@ -63,6 +63,7 @@ public sealed partial class DsrP6DragonsScenario
                 if(MathF.Abs(offset.X)<=3&&MathF.Abs(offset.Z)<=44||MathF.Abs(offset.Z)<=3&&MathF.Abs(offset.X)<=44)
                     Hit(member,$"第 {wave+1} 組烈焰十字爆：離開火球的橫列與直行");
             }
+        if(wave==0)for(var r=0;r<8;r++)state.Destinations[r]=state.Wroth.AfterFirstFireballs;
     }
     private void ClearFireballs()
     {

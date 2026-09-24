@@ -185,7 +185,7 @@ for(var first=1;first<=5;first++)for(var last=first;last<=5;last++)
  foreach(var enemy in w.Enemies)
  {
   foreach(var cast in enemy.Casts.Where(c=>c.Action==26409))Check(cast.Duration==5,"cross explosion timing stays unchanged");
-  foreach(var omen in enemy.Omens.Where(o=>o.Action==26409))Check(omen.Delay==4.5f,"native cross omen appears only in the final half-second");
+  foreach(var omen in enemy.Omens.Where(o=>o.Action==26409))Check(omen.Delay==3f,"native cross omen appears in the final two seconds");
  }
  Check(w.Party.Slots.All(m=>!m.LockonVfx.Contains(62)),"no stack markers in any P6 range");
 }
@@ -273,6 +273,13 @@ for(var variant=0;variant<24;variant++)foreach(var fps in new[]{30,60,144})
  var s=new DsrP6DragonsScenario(DsrP6Section.Wroth);s.UseSeed(variant);var w=new SimWorld();
  SimCharacter.Failures.Clear();s.Run(w,0);s.State.Wroth=new(variant);
  var pattern=s.State.Wroth;var before=new Vector3[8];
+ for(var wave=0;wave<3;wave++)
+ {
+  var balls=pattern.Fireballs(wave);
+  Check(balls.All(p=>MathF.Abs(p.X)<22&&MathF.Abs(p.Z)<22),"fireball centers stay inside the arena");
+  for(var i=0;i<balls.Length;i++)for(var j=i+1;j<balls.Length;j++)
+   Check(MathF.Abs(balls[i].X-balls[j].X)==6*(j-i)&&MathF.Abs(balls[i].Z-balls[j].Z)==6*(j-i),"adjacent parallel cross arms meet without gaps or overlap");
+ }
  for(var frame=1;frame<=46*fps;frame++)
  {
   var time=frame/(float)fps;SimCharacter.Time=time;
@@ -282,6 +289,8 @@ for(var variant=0;variant<24;variant++)foreach(var fps in new[]{30,60,144})
    Check(MathF.Abs(member.Position.X)<=21&&MathF.Abs(member.Position.Z)<=21,"all Wroth routes stay in square arena, including corners");
   if(time>14.5f&&time<15.3f)
    for(var r=0;r<8;r++)Check(Vector3.Distance(before[r],w.Party.Slots[r].Position)<.001f,"wait for native Akh Morn impact before stepping");
+  if(time>17.3f&&time<17.7f)
+   foreach(var member in w.Party.Slots)Check(MathF.Abs(member.Position.X)>9.5f,"wait outside the wider central group until its explosion");
  }
  Check(SimCharacter.Failures.Count==0,$"Wroth variant {variant}/{fps}: {string.Join(";",SimCharacter.Failures.Take(4))}");
  Check(w.EventObjects.Count==4,"four native puddles per configuration");

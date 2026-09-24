@@ -92,6 +92,8 @@ internal static unsafe class PartyCreator
 
         WriteCustomize(chara);
         WriteEquipment(chara, preset, itemSheet);
+        // Commit DrawData through the same native setup path used by spawned enemies.
+        chara->CharacterSetup.CopyFromCharacter((Character*)chara, CharacterSetupContainer.CopyFlags.None);
         GameObjectHelper.WriteName(gameObj, preset.Name);
         obj->RenderFlags = 0;
 

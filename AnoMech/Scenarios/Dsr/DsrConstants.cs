@@ -54,6 +54,10 @@ internal static class DsrConstants
         public const ushort KnightEntrance = 0x1E43;
         public const ushort KnightDeparture = 0x1E39;
         public const ushort BattleIdle = 34;
+        public const ushort KnightSpecialAStart = 130;
+        public const ushort KnightSpecialALoop = 131;
+        public const ushort KnightSpecialBStart = 132;
+        public const ushort KnightSpecialBLoop = 133;
     }
 
     public static class Action

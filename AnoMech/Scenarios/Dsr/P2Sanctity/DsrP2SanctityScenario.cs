@@ -35,6 +35,8 @@ public sealed partial class DsrP2SanctityScenario : IScenario
     private int? validationSeed = null;
     private int direction, meteorPreference, meteorAngleSelection;
     private float time, puddleGrace, iceGrace;
+    private bool swordLandingReady;
+    private bool swordsMarked;
 
     public void Run(SimWorld simWorld, int? selectedAi)
     {
@@ -45,6 +47,8 @@ public sealed partial class DsrP2SanctityScenario : IScenario
             if (world.Party.Get(role) is SimPartyNpc npc)
                 npc.SetPosition(DsrP2SanctityState.OpeningPosition(role));
         time = puddleGrace = iceGrace = 0;
+        swordLandingReady = false;
+        swordsMarked = false;
         ice.Clear(); meteors.Clear(); puddleHits.Clear(); towerCasters.Clear();
         openingKnights.Clear(); landedMeteors.Clear();
         meteorSnapshotCount = 0;
@@ -60,50 +64,52 @@ public sealed partial class DsrP2SanctityScenario : IScenario
         });
         world.Events.Add(2.5f, SummonOpeningKnights);
         world.Events.Add(3f, () => boss?.Cast(DsrConstants.Action.Sanctity, castSeconds: 3.7f, targetId: boss.GameObjectId, fireDelay: .280f));
-        world.Events.Add(7.1f, () =>
+        world.Events.Add(9.2f, () =>
         {
+            BossAction(DsrConstants.Action.Teleport);
             foreach (var knight in openingKnights) knight.PlayDeparture(DsrConstants.Timeline.KnightDeparture);
         });
-        world.Events.Add(8.5f, () =>
-        {
-            foreach (var knight in openingKnights) knight.Despawn();
-            openingKnights.Clear();
-        });
-        world.Events.Add(9.2f, () => BossAction(DsrConstants.Action.Teleport));
         world.Events.Add(10.1f, () =>
         {
             boss?.SetTargetable(false);
             boss?.SetVisible(false);
+        });
+        world.Events.Add(10.6f, () =>
+        {
+            foreach (var knight in openingKnights)
+                if (knight == darkKnight || knights.Contains(knight)) knight.SetVisible(false);
+                else knight.Despawn();
+            openingKnights.Clear();
         });
         world.Events.Add(11.5f, RevealSwords);
         world.Events.Add(14.5f, () => state!.SwordGroupsMoving = true);
         world.Events.Add(15.656f, () => boss?.Cast(DsrConstants.Action.Gaze, castSeconds: 3.7f, targetId: boss.GameObjectId, fireDelay: .280f));
         world.Events.Add(20.574f, () => Sever(0));
         world.Events.Add(20.709f, () => { ResolveGaze(); Charge(0); });
-        world.Events.Add(21.2f, () => WarnFlare(0));
-        world.Events.Add(21.9f, () => WarnFlare(1));
-        world.Events.Add(22.2f, () => Explode(0));
+        world.Events.Add(20.75f, () => WarnFlare(0));
+        world.Events.Add(21.45f, () => WarnFlare(1));
+        world.Events.Add(21.75f, () => Explode(0));
+        world.Events.Add(22.15f, () => WarnFlare(2));
         world.Events.Add(22.275f, () => Charge(1));
         world.Events.Add(22.365f, () => Sever(1));
-        world.Events.Add(22.6f, () => WarnFlare(2));
-        world.Events.Add(22.9f, () => Explode(1));
-        world.Events.Add(23.3f, () => WarnFlare(3));
-        world.Events.Add(23.6f, () => Explode(2));
+        world.Events.Add(22.45f, () => Explode(1));
+        world.Events.Add(22.85f, () => WarnFlare(3));
+        world.Events.Add(23.15f, () => Explode(2));
+        world.Events.Add(23.55f, () => WarnFlare(4));
         world.Events.Add(23.844f, () => Charge(2));
-        world.Events.Add(24f, () => WarnFlare(4));
+        world.Events.Add(23.85f, () => Explode(3));
         world.Events.Add(24.158f, () => Sever(0));
-        world.Events.Add(24.3f, () => Explode(3));
-        world.Events.Add(24.7f, () => WarnFlare(5));
-        world.Events.Add(25f, () => Explode(4));
-        world.Events.Add(25.4f, () => WarnFlare(6));
-        world.Events.Add(25.7f, () => Explode(5));
+        world.Events.Add(24.25f, () => WarnFlare(5));
+        world.Events.Add(24.55f, () => Explode(4));
+        world.Events.Add(24.95f, () => WarnFlare(6));
+        world.Events.Add(25.25f, () => Explode(5));
+        world.Events.Add(25.65f, () => WarnFlare(7));
         world.Events.Add(25.946f, () => Sever(1));
-        world.Events.Add(26.1f, () => WarnFlare(7));
-        world.Events.Add(26.4f, () => Explode(6));
+        world.Events.Add(25.95f, () => Explode(6));
+        world.Events.Add(26.35f, () => WarnFlare(8));
+        world.Events.Add(26.65f, () => Explode(7));
         world.Events.Add(26.797f, () => BossAction(DsrConstants.Action.Teleport));
-        world.Events.Add(26.8f, () => WarnFlare(8));
-        world.Events.Add(27.1f, () => Explode(7));
-        world.Events.Add(27.8f, () => Explode(8));
+        world.Events.Add(27.35f, () => Explode(8));
         world.Events.Add(28f, RevealMeteors);
         world.Events.Add(29.5f, () =>
         {
@@ -183,6 +189,10 @@ public sealed partial class DsrP2SanctityScenario : IScenario
                 DsrConstants.Npc.Adelphel or DsrConstants.Npc.Janlenoux or DsrConstants.Npc.Grinnaux or
                 DsrConstants.Npc.Charibert or DsrConstants.Npc.Hermenost or DsrConstants.Npc.Haumeric or DsrConstants.Npc.Noudenet));
         enemy?.HoldFacing(rotation);
+        if (id is DsrConstants.Npc.Adelphel or DsrConstants.Npc.Janlenoux)
+            enemy?.SetBattleIdle(DsrConstants.Timeline.KnightSpecialBStart, DsrConstants.Timeline.KnightSpecialBLoop);
+        else if (id == DsrConstants.Npc.Zephirin)
+            enemy?.SetBattleIdle(DsrConstants.Timeline.KnightSpecialAStart, DsrConstants.Timeline.KnightSpecialALoop);
         if (visible && id is DsrConstants.Npc.Zephirin or DsrConstants.Npc.Adelphel or
             DsrConstants.Npc.Janlenoux or DsrConstants.Npc.Grinnaux or DsrConstants.Npc.Charibert or
             DsrConstants.Npc.Hermenost or DsrConstants.Npc.Haumeric or DsrConstants.Npc.Noudenet)
@@ -198,12 +208,18 @@ public sealed partial class DsrP2SanctityScenario : IScenario
         boss?.HoldFacing(MathF.Atan2(-s.BossPosition.X, -s.BossPosition.Z));
         boss?.SetVisible(true);
         BossAction(DsrConstants.Action.Reappear);
-        darkKnight = Spawn(DsrConstants.Npc.Zephirin, s.DarkKnightPosition);
+        darkKnight?.SetPosition(s.DarkKnightPosition);
+        darkKnight?.HoldFacing(MathF.Atan2(-s.DarkKnightPosition.X, -s.DarkKnightPosition.Z));
         for (var k = 0; k < 2; k++)
         {
-            knights[k] = Spawn(k == 0 ? DsrConstants.Npc.Adelphel : DsrConstants.Npc.Janlenoux, s.ChargePoints[k][0]);
+            knights[k]?.SetPosition(s.ChargePoints[k][0]);
             knights[k]?.HoldFacing((k == 0) == s.Clockwise ? 0 : MathF.PI);
-            world!.Party.Get(s.Swords[k])?.AttachLockonVfx((uint)(50 + k), 15.5f);
+        }
+        SimEnemy?[] landingKnights = [darkKnight, knights[0], knights[1]];
+        foreach (var knight in landingKnights)
+        {
+            knight?.QueueEntrance(DsrConstants.Timeline.KnightEntrance, 32f / 30f, () => swordLandingReady);
+            knight?.SetVisible(true);
         }
         world!.Map.AddEffect(0x00020001, (byte)s.EyeIndex, resetFlags: 0x00080004);
     }
@@ -215,7 +231,12 @@ public sealed partial class DsrP2SanctityScenario : IScenario
             DsrConstants.Npc.Charibert, DsrConstants.Npc.Haumeric, DsrConstants.Npc.Noudenet];
         for (var i = 0; i < ids.Length; i++)
             if (Spawn(ids[i], DsrP2SanctityState.Polar(i * 45, 10)) is { } knight)
+            {
                 openingKnights.Add(knight);
+                if (ids[i] == DsrConstants.Npc.Zephirin) darkKnight = knight;
+                else if (ids[i] == DsrConstants.Npc.Adelphel) knights[0] = knight;
+                else if (ids[i] == DsrConstants.Npc.Janlenoux) knights[1] = knight;
+            }
     }
 
     private void ResolveGaze()
@@ -255,8 +276,8 @@ public sealed partial class DsrP2SanctityScenario : IScenario
             knights[k]?.HoldFacing(null);
             knights[k]?.SetPosition(from);
             knights[k]?.Face(to);
-            knights[k]?.Cast(DsrConstants.Action.Blade, to, 0);
-            knights[k]?.MoveTo(to, 50);
+            knights[k]?.Cast(DsrConstants.Action.Blade, to, 0, animationLock: 0);
+            knights[k]?.MoveTo(to, 100);
             foreach (var member in world!.Party.ActiveMembers())
                 if (DistanceToSegment(member.Position, from, to) < 3)
                     Fail(member, "碰到騎士衝鋒");
@@ -278,8 +299,6 @@ public sealed partial class DsrP2SanctityScenario : IScenario
         for (var k = 0; k < 2; k++)
         {
             spheres[k, index]?.Cast(DsrConstants.Action.Flare, castSeconds: 1);
-            world!.SpawnOmen("vfx/omen/eff/general01f.avfx",
-                new(state!.SpherePoints[k][index], 0), new(9, 1, 9), 1);
         }
     }
 
@@ -451,6 +470,16 @@ public sealed partial class DsrP2SanctityScenario : IScenario
     {
         if (state == null || world == null || state.Stage == SanctityStage.Complete) return;
         time = elapsed;
+        if (!swordLandingReady && state.Stage == SanctityStage.Swords)
+            swordLandingReady = (darkKnight?.IsReadyForEntrance ?? true) &&
+                knights.All(knight => knight?.IsReadyForEntrance ?? true);
+        if (!swordsMarked && swordLandingReady && state.Stage == SanctityStage.Swords &&
+            !(darkKnight?.IsEntrancePending ?? false) && knights.All(knight => !(knight?.IsEntrancePending ?? false)))
+        {
+            swordsMarked = true;
+            for (var k = 0; k < 2; k++)
+                world.Party.Get(state.Swords[k])?.AttachLockonVfx((uint)(50 + k), Math.Max(.1f, 27f - elapsed));
+        }
         if (state.Stage == SanctityStage.Meteors) state.MeteorElapsed += delta;
         if (state.KnockbackResolved) state.KnockbackElapsed += delta;
         DsrP2SanctityAi.Tick(state, world);

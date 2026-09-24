@@ -82,6 +82,8 @@ public sealed unsafe class SimEnemy : SimNpc
     private bool hiddenWeaponsRemoved;
     private bool departurePlaying;
     private bool battleIdleActive;
+    private ushort battleIdleStart = 34;
+    private ushort battleIdleLoop = 34;
     private bool battleStanceInitialized;
     private nint poseDrawObject;
     private float poseRetryRemaining;
@@ -90,27 +92,58 @@ public sealed unsafe class SimEnemy : SimNpc
     private float entranceRemaining;
     private bool entrancePlaying;
     private float entranceRevealRemaining;
+    private System.Func<bool>? entranceReady;
     private bool weaponsVisible = true;
     private bool? appliedWeaponVisibility;
     private readonly nint[] weaponDrawObjects = new nint[3];
 
-    public void QueueEntrance(ushort timelineId, float duration)
+    public bool IsReadyForEntrance => BattleCharaPtr != null && BattleCharaPtr->IsReadyToDraw() &&
+        BattleCharaPtr->Timeline.TimelineSequencer.Parent != null &&
+        (!weaponDrawn || weaponsInitialized && battleStanceInitialized && poseRetryRemaining <= 0);
+
+    public bool IsEntrancePending => entranceTimeline != 0 || entrancePlaying;
+
+    public void QueueEntrance(ushort timelineId, float duration, System.Func<bool>? ready = null)
     {
         entranceTimeline = timelineId;
         entranceDuration = duration;
+        entranceReady = ready;
         ReconcileVisibility();
+    }
+
+    public void SetBattleIdle(ushort startTimeline, ushort loopTimeline)
+    {
+        battleIdleStart = startTimeline;
+        battleIdleLoop = loopTimeline;
+        battleIdleActive = false;
     }
 
     public void PlayDeparture(ushort timelineId)
     {
         StopEntrance();
+        StopBattleIdle();
         departurePlaying = true;
         battleIdleActive = false;
         PlayActionTimeline(timelineId);
     }
 
+    private void StopBattleIdle()
+    {
+        var chara = BattleCharaPtr;
+        if (chara == null) return;
+        chara->Timeline.BaseOverride = 0;
+        if (battleIdleActive && chara->Timeline.TimelineSequencer.Parent != null)
+        {
+            var current = chara->Timeline.TimelineSequencer.TimelineIds[0];
+            if (current == battleIdleStart || current == battleIdleLoop)
+                chara->Timeline.TimelineSequencer.SetSlotTimeline(0, 0);
+        }
+        battleIdleActive = false;
+    }
+
     private void StopEntrance()
     {
+        entranceReady = null;
         entranceTimeline = 0;
         entranceRevealRemaining = 0;
         if (!entrancePlaying) return;
@@ -498,11 +531,7 @@ public sealed unsafe class SimEnemy : SimNpc
     public bool Cast(uint actionId, Vector3? targetLocation = null, float? castSeconds = null, GameObjectId? targetId = null, float omenDelay = 0f, float omenRotate = 0f, byte animationVariation = 0, float animationLock = 0.6f, float? fireDelay = null)
     {
         StopEntrance();
-        if (weaponDrawn && BattleCharaPtr != null)
-        {
-            BattleCharaPtr->Timeline.BaseOverride = 0;
-            battleIdleActive = false;
-        }
+        if (weaponDrawn) StopBattleIdle();
         // targetLocation stays scenario-local; SimCast lifts to world at native boundaries.
         return cast.Start(actionId, targetLocation, castSeconds, targetId, omenDelay, omenRotate, animationVariation, animationLock, fireDelay);
     }
@@ -533,7 +562,8 @@ public sealed unsafe class SimEnemy : SimNpc
         poseRetryRemaining = System.Math.Max(0, poseRetryRemaining - deltaSeconds);
         if (weaponDrawn) ReconcileBattlePose();
         else if (desiredVisible && entranceTimeline != 0 && BattleCharaPtr != null &&
-                 BattleCharaPtr->IsReadyToDraw() && BattleCharaPtr->Timeline.TimelineSequencer.Parent != null)
+                 BattleCharaPtr->IsReadyToDraw() && BattleCharaPtr->Timeline.TimelineSequencer.Parent != null &&
+                 (entranceReady?.Invoke() ?? true))
         {
             PlayActionTimeline(entranceTimeline);
             entranceTimeline = 0;
@@ -592,7 +622,7 @@ public sealed unsafe class SimEnemy : SimNpc
         if (Movement.IsMoving || cast.IsBusy || !desiredVisible ||
             (entranceTimeline == 0 && !IsEngineVisible()))
         {
-            if (chara->Timeline.BaseOverride == BattleIdle) chara->Timeline.BaseOverride = 0;
+            if (chara->Timeline.BaseOverride == battleIdleLoop) chara->Timeline.BaseOverride = 0;
             battleIdleActive = false;
         }
         else if (poseRetryRemaining <= 0 && !battleStanceInitialized)
@@ -604,6 +634,7 @@ public sealed unsafe class SimEnemy : SimNpc
         }
         else if (poseRetryRemaining <= 0 && entranceTimeline != 0)
         {
+            if (!(entranceReady?.Invoke() ?? true)) return;
             PlayActionTimeline(entranceTimeline);
             entranceTimeline = 0;
             entranceRemaining = entranceDuration;
@@ -617,12 +648,13 @@ public sealed unsafe class SimEnemy : SimNpc
             // The server animation lock can end before the body/upper-body action.
             // Do not replace a still-selected native skill with forced idle.
             var slots = chara->Timeline.TimelineSequencer.TimelineIds;
-            if (slots[0] is not (0 or 1 or BattleIdle) || slots[1] != 0) return;
-            PlayActionTimeline(BattleIdle, loopId: BattleIdle, baseOverride: BattleIdle);
+            if ((slots[0] is not (0 or 1 or BattleIdle) &&
+                 slots[0] != battleIdleStart && slots[0] != battleIdleLoop) || slots[1] != 0) return;
+            PlayActionTimeline(battleIdleStart, loopId: battleIdleLoop, baseOverride: battleIdleLoop);
             battleIdleActive = true;
         }
         else if (poseRetryRemaining <= 0 && battleIdleActive)
-            chara->Timeline.BaseOverride = BattleIdle;
+            chara->Timeline.BaseOverride = battleIdleLoop;
     }
 
     private void ClearLookAt()

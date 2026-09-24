@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Numerics;
 using AnoMech.Core.Game.Ai;
 using AnoMech.Core.SimObjects;
@@ -16,22 +17,27 @@ internal sealed class DsrP4EyesAi : IScenarioAi
         if (s.BlueDone || s.MirageStarted)
         {
             if (s.SwapTarget[role] >= 0) return s.Positions[s.SwapTarget[role]];
+            if (s.Red[role] && s.SwapTarget.Any(target => target >= 0)) return s.Positions[role];
             return s.Red[role] && s.DiveLane[role] >= 0 ? DsrP4EyesState.DivePosition(s.DiveLane[role]) : DsrP4EyesState.BlueEye;
         }
         if (!s.YellowDone)
         {
             if (s.Red[role] != (role < 4)) return Vector3.Zero;
+            if (s.Red[role] && Enumerable.Range(0, 4).Any(r => !s.Red[r])) return s.Positions[role];
+            if (role < 4 && MathF.Abs(s.Positions[role].Z) > 3)
+                return new(s.Positions[role].X, 0, DsrP4EyesState.Opening(role).Z);
             return role < 4 ? DsrP4EyesState.YellowWait(role, s.YellowReady ? 1 : 3) : DsrP4EyesState.Opening(role);
         }
-        if (role < 4) return s.OrbExchangeDone[role] ? DsrP4EyesState.Opening(role) : DsrP4EyesState.YellowWait(role, 1);
+        if (role < 4) return s.OrbExchangeDone[role] ? DsrP4EyesState.Opening(role) : s.Positions[role];
         if (!s.OrbExchangeDone[role])
         {
             var partner = DsrP4EyesState.Partner(role);
-            var target = DsrP4EyesState.YellowWait(partner, 1);
+            var target = s.Positions[partner];
             if (MathF.Abs(s.Positions[role].Z - target.Z) > .1f)
                 return new(s.Positions[role].X, 0, target.Z);
             return target;
         }
+        if (s.Red[role] && !s.OrbExchangeDone.All(done => done)) return s.Positions[role];
         var orb = DsrP4EyesState.OrbPosition(role - 2);
         return s.BlueReady ? orb : orb + new Vector3(0, 0, MathF.Sign(orb.Z) * 3);
     }

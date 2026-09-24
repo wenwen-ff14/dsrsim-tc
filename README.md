@@ -1,7 +1,5 @@
 # dsrsim-tc｜絕龍詩模擬器
 
-![dsrsim-tc 圖示](images/dsrsim-tc.png)
-
 繁中版 FF14 絕龍詩戰爭練習外掛，提供 P2～P7 機制與七名模擬隊友。
 參考並衍生自 **AnoMech**，由 wenwen-ff14 維護。
 
